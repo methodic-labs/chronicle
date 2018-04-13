@@ -4,11 +4,19 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/participantId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textPersonName"
+        android:inputType="text"
+        android:text="@string/prompt_participant_id" />
+
+    <EditText
+        android:id="@+id/studyId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
         android:text="@string/prompt_study_id" />
 
     <Button
