@@ -3,25 +3,58 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/participantId"
+    <ProgressBar
+        android:id="@+id/login_progress"
+        style="@android:style/Widget.ProgressBar.Large"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="@string/prompt_participant_id" />
+        android:visibility="gone" />
 
-    <EditText
-        android:id="@+id/studyId"
+    <ScrollView
+        android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="@string/prompt_study_id" />
+        android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/start_collection_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/action_start_collection" />
+        <LinearLayout
+            android:id="@+id/id_login_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/participantId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:text="@string/prompt_participant_id" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/studyId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:text="@string/prompt_study_id" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <Button
+                android:id="@+id/start_collection_button"
+                style="@style/?android:textAppearanceSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/action_start_collection" />
+        </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>
