@@ -50,7 +50,7 @@
 
             <Button
                 android:id="@+id/start_collection_button"
-                style="@style/?android:textAppearanceSmall"
+                style="@android:style/Widget.Button.Small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/action_start_collection" />
