@@ -29,10 +29,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-//    implementation 'com.esotericsoftware:kryo-shaded:4.0.0'
-//    implementation 'com.esotericsoftware:minlog:1.3.0'
-//    implementation 'com.esotericsoftware:reflectasm:1.11.3'
-//    implementation 'org.objenesis:objenesis:2.4'
     implementation 'de.javakaffee:kryo-serializers:0.42'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"

@@ -14,5 +14,6 @@
         completions."
     </string>
     <string name="prompt_study_id">Enter your Study ID</string>
-    <string name="action_start_collection">Start Application Usage Logging</string>
+    <string name="prompt_participant_id">Enter your Participant ID</string>
+    <string name="action_start_collection">Enroll Device</string>
 </resources>
