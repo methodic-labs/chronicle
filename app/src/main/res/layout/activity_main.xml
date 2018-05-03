@@ -1,27 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/studyIdText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
         android:text="@string/prompt_study_id" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/participantIdText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
         android:text="@string/prompt_participant_id" />
+
+    <ProgressBar
+        android:id="@+id/enrollmentProgress"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:visibility="invisible" />
 
     <Button
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="enrollDevice"
         android:text="@string/action_start_collection" />
+
+    <EditText
+        android:id="@+id/errorMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:selectAllOnFocus="false"
+        android:singleLine="true"
+        android:text="Name"
+        android:textColor="?attr/colorError"
+        android:visibility="invisible" />
+
 </LinearLayout>

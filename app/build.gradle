@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply from: "https://raw.githubusercontent.com/openlattice/gradles/master/repos.gradle"
 
 android {
     compileSdkVersion 27
@@ -12,7 +13,7 @@ android {
     }
     defaultConfig {
         applicationId "com.openlattice.chronicle"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -24,16 +25,29 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
+
+ext.jackson_version = '2.6.5'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'de.javakaffee:kryo-serializers:0.42'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation ('com.openlattice:chronicle-api:0.0.4-SNAPSHOT') {
+        exclude module: 'guava'
+    }
+    compile ("com.fasterxml.jackson.datatype:jackson-datatype-guava:${jackson_version}") {
+        exclude module: 'guava'
+    }
+    implementation 'org.slf4j:slf4j-android:1.7.25'
     implementation 'com.google.guava:guava:22.0-android'
 
     implementation "android.arch.persistence.room:runtime:1.0.0"

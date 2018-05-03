@@ -3,8 +3,6 @@ package com.openlattice.chronicle.storage
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.Index
-import android.arch.persistence.room.PrimaryKey
-import java.sql.Timestamp
 import java.util.*
 
 @Entity(tableName = "dataQueue",
@@ -33,4 +31,10 @@ class QueueEntry(
         result = 31 * result + Arrays.hashCode(data)
         return result
     }
+
+    override fun toString(): String {
+        return "QueueEntry(writeTimestamp=$writeTimestamp, id=$id, data=${Arrays.toString(data)})"
+    }
+
+
 }
