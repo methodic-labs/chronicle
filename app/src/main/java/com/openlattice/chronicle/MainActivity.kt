@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
@@ -17,6 +16,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import com.google.common.base.Optional
+import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.receivers.lifecycle.REQUEST_CODE
@@ -80,20 +80,27 @@ class MainActivity : AppCompatActivity() {
         if (studyIdText.text.isNotBlank() && participantIdText.text.isNotBlank()) {
             try {
                 val id = UUID.fromString(studyIdText.text.toString())
+                val participantId = participantIdText.text.toString()
                 val deviceId = getDeviceId(applicationContext)
+
                 submitBtn.visibility = INVISIBLE
                 progressBar.visibility = VISIBLE
-                executor.execute {
 
+                executor.execute {
                     val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
                     val chronicleId = chronicleStudyApi.enrollSource(
                             id,
-                            participantIdText.text.toString(),
+                            participantId,
                             deviceId,
                             Optional.of(getDevice(deviceId)))
                     if (chronicleId != null) {
                         Log.i(javaClass.canonicalName, "Chronicle id: " + chronicleId.toString())
                         mHandler.post {
+                            val enrollmentSettings = EnrollmentSettings(applicationContext)
+                            enrollmentSettings.setStudyId(id)
+                            enrollmentSettings.setParticipantId(participantId)
+
+                            progressBar.visibility = INVISIBLE
                             studyIdText.visibility = INVISIBLE
                             participantIdText.visibility = INVISIBLE
                             errorMessageText.visibility = VISIBLE
