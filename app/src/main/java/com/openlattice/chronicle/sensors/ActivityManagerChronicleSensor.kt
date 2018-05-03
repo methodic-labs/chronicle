@@ -11,11 +11,12 @@ import java.util.*
 
 
 class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
-    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
     override fun poll(propertyTypeIds: Map<String, UUID>): SetMultimap<UUID, Object> {
         val data: SetMultimap<UUID, Object> = HashMultimap.create()
         activityManager.runningAppProcesses.forEach {
+            data.put(propertyTypeIds[ID], UUID.randomUUID() as Object )
             data.put(propertyTypeIds[NAME], it.processName as Object)
             data.put(propertyTypeIds[IMPORTANCE], mapImportance(it.importance) as Object)
             data.put(propertyTypeIds[TIMESTAMP], DateTime().toString() as Object)

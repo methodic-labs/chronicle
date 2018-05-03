@@ -1,4 +1,4 @@
-package com.openlattice.chronicle.storage;
+package com.openlattice.chronicle.serialization;
 
 import android.util.Log;
 
@@ -7,18 +7,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
+import com.openlattice.chronicle.storage.QueueEntry;
+import com.openlattice.chronicle.util.RetrofitBuilders;
 
 import java.io.IOException;
 import java.util.UUID;
 
 public class JsonSerializer {
-    public static final ObjectMapper mapper = new ObjectMapper();
-
-    static {
-//        mapper.registerModule( new GuavaModule() );
-//        mapper.registerModule( new JodaModule() );
-//        mapper.registerModule( new AfterburnerModule() );
-    }
+    public static final ObjectMapper mapper = RetrofitBuilders.getMapper();
 
     public static final byte[] serializeQueueEntry(QueueEntry queueEntry) {
         try {

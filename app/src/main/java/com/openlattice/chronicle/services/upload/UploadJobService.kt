@@ -9,7 +9,7 @@ import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.sinks.BrokerDataSink
 import com.openlattice.chronicle.services.sinks.OpenLatticeSink
 import com.openlattice.chronicle.storage.ChronicleDb
-import com.openlattice.chronicle.storage.JsonSerializer
+import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.util.RetrofitBuilders.*
 import retrofit2.Retrofit
 import java.util.concurrent.Executors
