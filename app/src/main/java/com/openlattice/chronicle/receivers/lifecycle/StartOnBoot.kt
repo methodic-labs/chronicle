@@ -30,13 +30,13 @@ class StartOnBoot : BroadcastReceiver() {
     fun startUsageService(context: Context) {
         context.startService(Intent(context, UsageService::class.java))
     }
+}
 
-    fun scheduleUploadJob(context: Context) {
-        val serviceComponent = ComponentName(context, UploadJobService::class.java);
-        val jobBuilder = JobInfo.Builder(0, serviceComponent);
-        jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-        jobBuilder.setPeriodic(PERIOD_MILLIS);
-        val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-        jobScheduler.schedule(jobBuilder.build())
-    }
+fun scheduleUploadJob(context: Context) {
+    val serviceComponent = ComponentName(context, UploadJobService::class.java)
+    val jobBuilder = JobInfo.Builder(0, serviceComponent)
+    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
+    jobBuilder.setPeriodic(PERIOD_MILLIS)
+    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+    jobScheduler.schedule(jobBuilder.build())
 }

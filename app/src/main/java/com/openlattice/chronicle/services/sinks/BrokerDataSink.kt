@@ -12,6 +12,6 @@ class BrokerDataSink(private val dataSinks: MutableSet<DataSink>) : DataSink {
     }
 
     override fun submit(data: List<SetMultimap<UUID, Any>>) {
-        dataSinks.forEach({ dataSink -> dataSink.submit(data) })
+        dataSinks.forEach { it.submit(data) }
     }
 }

@@ -38,16 +38,14 @@
         android:onClick="enrollDevice"
         android:text="@string/action_start_collection" />
 
-    <EditText
+    <TextView
         android:id="@+id/errorMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:selectAllOnFocus="false"
-        android:singleLine="true"
-        android:text="Name"
+        android:lines="3"
+        android:textAlignment="center"
         android:textColor="?attr/colorError"
+        android:textSize="18sp"
         android:visibility="invisible" />
 
 </LinearLayout>

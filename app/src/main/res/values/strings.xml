@@ -17,4 +17,5 @@
     <string name="prompt_participant_id">Enter your Participant ID</string>
     <string name="action_start_collection">Enroll Device</string>
     <string name="enrollment_configuration">enrollment</string>
+    <string name="already_enrolled">Device already enrolled</string>
 </resources>

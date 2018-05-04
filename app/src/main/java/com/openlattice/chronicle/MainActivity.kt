@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
@@ -15,12 +16,14 @@ import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.TextView
 import com.google.common.base.Optional
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.receivers.lifecycle.REQUEST_CODE
 import com.openlattice.chronicle.receivers.lifecycle.UsageCollectionAlarmReceiver
+import com.openlattice.chronicle.receivers.lifecycle.scheduleUploadJob
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import java.lang.IllegalArgumentException
@@ -30,15 +33,30 @@ import java.util.concurrent.Executors
 class MainActivity : AppCompatActivity() {
 
     val executor = Executors.newSingleThreadExecutor()
+    val mHandler = object : Handler(Looper.getMainLooper()) {}
 
-    val mHandler = object : Handler(Looper.getMainLooper()) {
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main)
-        handleIntent(intent)
         scheduleAlarm()
+        scheduleUploadJob(this)
+        handleIntent(intent)
+        val enrollment = EnrollmentSettings(this)
+        if (enrollment.enrolled) {
+            val errorMessageText = findViewById<TextView>(R.id.errorMessage)
+            val studyIdText = findViewById<EditText>(R.id.studyIdText)
+            val participantIdText = findViewById<EditText>(R.id.participantIdText)
+            val submitBtn = findViewById<Button>(R.id.button)
+
+
+            studyIdText.visibility = INVISIBLE
+            participantIdText.visibility = INVISIBLE
+            submitBtn.visibility = INVISIBLE
+
+            errorMessageText.setText(getString(R.string.already_enrolled) + "\nStudy = ${enrollment.getStudyId().toString()}\nParticipant = ${enrollment.getParticipantId()}\nDevice = ${getDeviceId(this)}")
+            errorMessageText.visibility = VISIBLE
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -50,11 +68,13 @@ class MainActivity : AppCompatActivity() {
         val appLinkIntent = intent
         val appLinkAction = appLinkIntent.action
         val appLinkData = appLinkIntent.data
+
         if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null) {
             val studyIdText = findViewById<EditText>(R.id.studyIdText)
             val participantIdText = findViewById<EditText>(R.id.participantIdText)
             val studyId = appLinkData.getQueryParameter("studyId")
             val participantId = appLinkData.getQueryParameter("participantId")
+            doEnrollment()
         }
     }
 
@@ -67,11 +87,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun enrollDevice(view: View) {
+        doEnrollment()
+    }
+
+    fun doEnrollment() {
         val studyIdText = findViewById<EditText>(R.id.studyIdText)
         val participantIdText = findViewById<EditText>(R.id.participantIdText)
-        val errorMessageText = findViewById<EditText>(R.id.errorMessage)
-        val progressBar = findViewById<ProgressBar>( R.id.enrollmentProgress )
-        val submitBtn = findViewById<Button>( R.id.button )
+        val errorMessageText = findViewById<TextView>(R.id.errorMessage)
+        val progressBar = findViewById<ProgressBar>(R.id.enrollmentProgress)
+        val submitBtn = findViewById<Button>(R.id.button)
 
         if (participantIdText.text.isBlank()) {
             errorMessageText.setText("Invalid study or participant id.")

@@ -12,11 +12,24 @@ import java.util.*
 val PARTICIPANT_ID = "participantId";
 val STUDTY_ID = "studyId";
 
-class EnrollmentSettings(val context: Context) {
-    val settings = PreferenceManager.getDefaultSharedPreferences(context)
+class EnrollmentSettings(private val context: Context) {
+    private val settings = PreferenceManager.getDefaultSharedPreferences(context)
 
-    private var participantId = settings.getString(PARTICIPANT_ID, "")
-    private var studyId = UUID.fromString(settings.getString(STUDTY_ID, ""))
+    private var participantId: String
+    private var studyId: UUID
+    var enrolled: Boolean = true
+
+    init {
+        val studyIdString = settings.getString(STUDTY_ID, "")
+        participantId = settings.getString(PARTICIPANT_ID, "")
+        if (studyIdString.isNotBlank() && participantId.isNotBlank()) {
+            studyId = UUID.fromString(studyIdString)
+            enrolled = true
+        } else {
+            studyId = UUID(0, 0)
+            enrolled = false
+        }
+    }
 
     fun getParticipantId(): String {
         return participantId
@@ -30,14 +43,14 @@ class EnrollmentSettings(val context: Context) {
         participantId = _participantId
         settings.edit()
                 .putString(PARTICIPANT_ID, _participantId)
-                .commit()
+                .apply()
     }
 
     fun setStudyId(_studyId: UUID) {
         studyId = _studyId
         settings.edit()
                 .putString(STUDTY_ID, _studyId.toString())
-                .commit()
+                .apply()
     }
 }
 

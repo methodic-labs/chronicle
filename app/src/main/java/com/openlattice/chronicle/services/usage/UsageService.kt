@@ -21,10 +21,6 @@ val USAGE_SERVICE = "UsageService"
 class UsageService() : IntentService(USAGE_SERVICE) {
     private val chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java!!, "chronicle").build()
     private val storageQueue = chronicleDb.queueEntryData()
-    private val settings = EnrollmentSettings(applicationContext)
-    private val mapper = RetrofitBuilders.mapper
-    val studyId = settings.getStudyId()
-    val participantId = settings.getParticipantId()
     val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
     val propertyTypeIds = chronicleApi.getPropertyTypeIds(FQNS)
     val sensors = mutableSetOf<ChronicleSensor>(ActivityManagerChronicleSensor(applicationContext))

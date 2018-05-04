@@ -21,6 +21,7 @@ class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
             data.put(propertyTypeIds[IMPORTANCE], mapImportance(it.importance) as Object)
             data.put(propertyTypeIds[TIMESTAMP], DateTime().toString() as Object)
         }
+
         return data
     }
 
