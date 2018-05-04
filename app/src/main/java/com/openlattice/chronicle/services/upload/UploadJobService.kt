@@ -63,7 +63,7 @@ class UploadJobService : JobService() {
                 Log.d(javaClass.name, "Loading $BATCH_SIZE items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
                 w.reset()
                 w.start()
-                dataSink.submit(data)
+                 dataSink.submit(data)
 
                 Log.d(javaClass.name, "Uploading ${data.size} to OpenLattice items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
                 queue.deleteEntries(nextEntries)

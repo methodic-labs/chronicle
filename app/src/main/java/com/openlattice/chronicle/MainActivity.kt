@@ -72,6 +72,8 @@ class MainActivity : AppCompatActivity() {
             val participantIdText = findViewById<EditText>(R.id.participantIdText)
             val studyId = appLinkData.getQueryParameter("studyId")
             val participantId = appLinkData.getQueryParameter("participantId")
+            studyIdText.setText(studyId)
+            participantIdText.setText(participantId)
             doEnrollment()
         }
     }
