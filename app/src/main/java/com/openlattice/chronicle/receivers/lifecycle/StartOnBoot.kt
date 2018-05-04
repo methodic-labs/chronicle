@@ -12,8 +12,8 @@ import android.util.Log
 import com.openlattice.chronicle.services.upload.UploadJobService
 import com.openlattice.chronicle.services.usage.UsageService
 
-const val UPLOAD_PERIOD_MILLIS = 10 * 1000L
-const val USAGE_PERIOD_MILLIS = 60 * 1000L
+const val UPLOAD_PERIOD_MILLIS =  30 * 1000L
+const val USAGE_PERIOD_MILLIS = 15 * 1000L
 
 class StartOnBoot : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -33,7 +33,7 @@ class StartOnBoot : BroadcastReceiver() {
 fun scheduleUploadJob(context: Context) {
     val serviceComponent = ComponentName(context, UploadJobService::class.java)
     val jobBuilder = JobInfo.Builder(0, serviceComponent)
-    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
+    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
     jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
     jobBuilder.setPersisted(true)
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler

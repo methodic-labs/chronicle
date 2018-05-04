@@ -18,7 +18,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 const val PRODUCTION = "https://api.openlattice.com/"
-const val BATCH_SIZE = 10 // 24 * 60 * 60 / 5 //17280
+const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()

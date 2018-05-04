@@ -88,7 +88,7 @@ class UsageService : JobService() {
 
             Log.i(javaClass.name, "Collecting Usage Information. This service has been running for ${sw.elapsed(TimeUnit.SECONDS)} seconds.")
 
-            handler.postDelayed(this::doWork, 5 * 1000)
+            handler.postDelayed(this::doWork,  1000)
         } else {
             shutdownLatch.countDown()
         }
