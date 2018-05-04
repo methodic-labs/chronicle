@@ -1,13 +1,9 @@
 package com.openlattice.chronicle
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
@@ -21,9 +17,8 @@ import com.google.common.base.Optional
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
-import com.openlattice.chronicle.receivers.lifecycle.REQUEST_CODE
-import com.openlattice.chronicle.receivers.lifecycle.UsageCollectionAlarmReceiver
 import com.openlattice.chronicle.receivers.lifecycle.scheduleUploadJob
+import com.openlattice.chronicle.receivers.lifecycle.scheduleUsageJob
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import java.lang.IllegalArgumentException
@@ -31,16 +26,15 @@ import java.util.*
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
-
-    val executor = Executors.newSingleThreadExecutor()
-    val mHandler = object : Handler(Looper.getMainLooper()) {}
+    private val executor = Executors.newSingleThreadExecutor()
+    private val mHandler = object : Handler(Looper.getMainLooper()) {}
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main)
-        scheduleAlarm()
         scheduleUploadJob(this)
+        scheduleUsageJob(this)
         handleIntent(intent)
         val enrollment = EnrollmentSettings(this)
         if (enrollment.enrolled) {
@@ -54,7 +48,11 @@ class MainActivity : AppCompatActivity() {
             participantIdText.visibility = INVISIBLE
             submitBtn.visibility = INVISIBLE
 
-            errorMessageText.setText(getString(R.string.already_enrolled) + "\nStudy = ${enrollment.getStudyId().toString()}\nParticipant = ${enrollment.getParticipantId()}\nDevice = ${getDeviceId(this)}")
+            errorMessageText.text =
+                    getString(R.string.already_enrolled) +
+                    "\nStudy = ${enrollment.getStudyId().toString()}" +
+                    "\nParticipant = ${enrollment.getParticipantId()}" +
+                    "\nDevice = ${getDeviceId(this)}"
             errorMessageText.visibility = VISIBLE
         }
     }
@@ -78,13 +76,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun scheduleAlarm() {
-        val intent = Intent(applicationContext, UsageCollectionAlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val firstMillis = System.currentTimeMillis()
-        val alarm = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarm.setRepeating(AlarmManager.ELAPSED_REALTIME, firstMillis, 60 * 1000, pendingIntent)
-    }
+//    fun scheduleAlarm() {
+//        val intent = Intent(applicationContext, UsageCollectionAlarmReceiver::class.java)
+//        val pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+//        val firstMillis = System.currentTimeMillis() + 10000
+//        val alarm = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        alarm.setRepeating(AlarmManager.ELAPSED_REALTIME, firstMillis, 60 * 1000, pendingIntent)
+//    }
 
     fun enrollDevice(view: View) {
         doEnrollment()
@@ -97,9 +95,16 @@ class MainActivity : AppCompatActivity() {
         val progressBar = findViewById<ProgressBar>(R.id.enrollmentProgress)
         val submitBtn = findViewById<Button>(R.id.button)
 
-        if (participantIdText.text.isBlank()) {
-            errorMessageText.setText("Invalid study or participant id.")
+        if (studyIdText.text.isBlank()) {
+            errorMessageText.text = getString(R.string.invalid_study_id_blank)
+            errorMessageText.visibility = VISIBLE
         }
+
+        if (participantIdText.text.isBlank()) {
+            errorMessageText.text = getString(R.string.invalid_participant)
+            errorMessageText.visibility = VISIBLE
+        }
+
 
         if (studyIdText.text.isNotBlank() && participantIdText.text.isNotBlank()) {
             try {
@@ -128,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                             studyIdText.visibility = INVISIBLE
                             participantIdText.visibility = INVISIBLE
                             errorMessageText.visibility = VISIBLE
-                            errorMessageText.setText("SUCCESSFULLY ENROLLED")
+                            errorMessageText.setText(getString(R.string.device_enroll_success))
                         }
                     } else {
                         Log.e(javaClass.canonicalName, "Unable to enroll device.")
@@ -136,7 +141,7 @@ class MainActivity : AppCompatActivity() {
                             progressBar.visibility = INVISIBLE
                             submitBtn.visibility = VISIBLE
                             errorMessageText.visibility = VISIBLE
-                            errorMessageText.setText("Unable to enroll device!")
+                            errorMessageText.setText(getString(R.string.device_enroll_failure))
                         }
                     }
 
@@ -144,7 +149,8 @@ class MainActivity : AppCompatActivity() {
 
 
             } catch (e: IllegalArgumentException) {
-                errorMessageText.setText("Invalid study or participant id.")
+                errorMessageText.text = getString(R.string.invalid_study_id_format)
+                errorMessageText.visibility = VISIBLE
                 Log.e(javaClass.canonicalName, "Unable to parse UUID.");
             }
         }

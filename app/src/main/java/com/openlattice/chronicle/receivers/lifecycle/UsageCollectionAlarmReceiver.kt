@@ -10,7 +10,7 @@ val REQUEST_CODE = 0
 
 class UsageCollectionAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.i(javaClass.name, "")
+        Log.i(javaClass.name, "Usage collection alarm trigger.")
         context?.startService(Intent( context, UsageService::class.java ))
     }
 }

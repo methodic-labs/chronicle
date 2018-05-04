@@ -5,6 +5,7 @@
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 
     <application
@@ -52,7 +53,8 @@
             android:exported="true"/>
         <service
             android:name=".services.usage.UsageService"
-            android:exported="false" />
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true" />
 
     </application>
 
