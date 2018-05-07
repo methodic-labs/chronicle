@@ -7,12 +7,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_BOOT_COMPLETED
-import android.support.v4.content.WakefulBroadcastReceiver
 import android.util.Log
 import com.openlattice.chronicle.services.upload.UploadJobService
-import com.openlattice.chronicle.services.usage.UsageService
+import com.openlattice.chronicle.services.usage.scheduleUsageJob
 
-const val UPLOAD_PERIOD_MILLIS =  30 * 1000L
+const val UPLOAD_PERIOD_MILLIS =  15 * 60 * 1000L
 const val USAGE_PERIOD_MILLIS = 15 * 1000L
 
 class StartOnBoot : BroadcastReceiver() {
@@ -40,13 +39,13 @@ fun scheduleUploadJob(context: Context) {
     jobScheduler.schedule(jobBuilder.build())
 }
 
-fun scheduleUsageJob(context: Context) {
-    val serviceComponent = ComponentName(context, UsageService::class.java)
-    val jobBuilder = JobInfo.Builder(1, serviceComponent)
-    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
-    jobBuilder.setPeriodic(USAGE_PERIOD_MILLIS)
-    jobBuilder.setPersisted(true)
-    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-    jobScheduler.schedule(jobBuilder.build())
-}
+//fun scheduleUsageJob(context: Context) {
+//    val serviceComponent = ComponentName(context, UsageService::class.java)
+//    val jobBuilder = JobInfo.Builder(1, serviceComponent)
+//    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
+//    jobBuilder.setPeriodic(USAGE_PERIOD_MILLIS)
+//    jobBuilder.setPersisted(true)
+//    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+//    jobScheduler.schedule(jobBuilder.build())
+//}
 

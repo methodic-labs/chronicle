@@ -23,4 +23,5 @@
     <string name="device_enroll_failure">Failed to enroll device. Please contact your study administrator.</string>
     <string name="device_enroll_success">Successfully enrolled device!</string>
     <string name="invalid_study_id_blank">Invalid study id.</string>
+    <string name="manual_usage_settings_permission">Your model phone requires manually granting of Usage Settings permissions. Please go to settings and grant this application usage settings.</string>
 </resources>

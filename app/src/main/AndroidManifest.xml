@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
     <application
         android:allowBackup="true"
@@ -20,9 +20,12 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".Enrollment"
+            android:parentActivityName=".MainActivity">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -31,10 +34,13 @@
 
                 <data
                     android:host="openlattice.com"
-                    android:scheme="https"
-                    android:pathPattern="/chronicle/login" />
+                    android:pathPattern="/chronicle/login"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".PermissionActivity"
+            android:parentActivityName=".MainActivity" />
 
         <receiver
             android:name=".receivers.lifecycle.StartOnBoot"
@@ -49,12 +55,12 @@
 
         <service
             android:name=".services.upload.UploadJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true" />
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".services.usage.UsageService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true" />
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
     </application>
 

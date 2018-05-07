@@ -1,8 +1,11 @@
 package com.openlattice.chronicle.services.usage
 
+import android.app.job.JobInfo
 import android.app.job.JobParameters
+import android.app.job.JobScheduler
 import android.app.job.JobService
 import android.arch.persistence.room.Room
+import android.content.ComponentName
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -26,9 +29,13 @@ import java.util.concurrent.TimeUnit
 import android.view.Display
 import android.content.Context.DISPLAY_SERVICE
 import android.hardware.display.DisplayManager
+import android.os.Build
+import com.openlattice.chronicle.receivers.lifecycle.USAGE_PERIOD_MILLIS
+import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
 
 
 const val LIFETIME = 60 * 1000
+const val USAGE_SERVICE_JOB_ID = 1
 
 class UsageService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -53,9 +60,9 @@ class UsageService : JobService() {
 
         executor.execute {
             propertyTypeIds = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java).getPropertyTypeIds(FQNS)
-            chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java!!, "chronicle").build()
+            chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle").build()
             storageQueue = chronicleDb.queueEntryData()
-            sensors = mutableSetOf<ChronicleSensor>(ActivityManagerChronicleSensor(applicationContext))
+            sensors = mutableSetOf<ChronicleSensor>(UsageStatsChronicleSensor(applicationContext))
             Log.i(javaClass.name, "Usage service is initialized")
             latch.countDown()
         }
@@ -63,6 +70,7 @@ class UsageService : JobService() {
         Log.i(javaClass.name, "Usage service is running.")
         running = true
         handler.post(this::doWork)
+        jobFinished(params,false)
         return true
     }
 
@@ -84,6 +92,7 @@ class UsageService : JobService() {
         executor.shutdown()
         executor.awaitTermination(1, TimeUnit.MINUTES)
         Log.i(javaClass.name, "Usage collection gracefully shutdown.")
+        scheduleUsageJob(applicationContext)
         return true
     }
 
@@ -113,3 +122,17 @@ class UsageService : JobService() {
     }
 }
 
+fun scheduleUsageJob(context: Context) {
+    val serviceComponent = ComponentName(context, UsageService::class.java)
+    val jobBuilder = JobInfo.Builder(USAGE_SERVICE_JOB_ID, serviceComponent)
+    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
+    jobBuilder.setPersisted(true)
+    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        jobBuilder.setOverrideDeadline(1000)
+    } else {
+        jobBuilder.setPeriodic(USAGE_PERIOD_MILLIS)
+    }
+
+    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+    jobScheduler.schedule(jobBuilder.build())
+}
