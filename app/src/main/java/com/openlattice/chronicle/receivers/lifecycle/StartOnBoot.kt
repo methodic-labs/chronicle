@@ -9,7 +9,7 @@ import android.content.Intent
 import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.util.Log
 import com.openlattice.chronicle.services.upload.UploadJobService
-import com.openlattice.chronicle.services.usage.scheduleUsageJob
+import com.openlattice.chronicle.services.usage.scheduleUsageEventsJob
 
 const val UPLOAD_PERIOD_MILLIS =  15 * 60 * 1000L
 const val USAGE_PERIOD_MILLIS = 15 * 1000L
@@ -18,7 +18,7 @@ class StartOnBoot : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && intent != null) {
             if (intent.action.equals(ACTION_BOOT_COMPLETED)) {
-                scheduleUsageJob(context)
+                scheduleUsageEventsJob(context)
                 Log.i(javaClass.canonicalName, "Started usage service at boot.")
                 scheduleUploadJob(context)
                 Log.i(javaClass.canonicalName, "Scheduled upload job at boot.")
@@ -40,7 +40,7 @@ fun scheduleUploadJob(context: Context) {
 }
 
 //fun scheduleUsageJob(context: Context) {
-//    val serviceComponent = ComponentName(context, UsageService::class.java)
+//    val serviceComponent = ComponentName(context, UsageEventsService::class.java)
 //    val jobBuilder = JobInfo.Builder(1, serviceComponent)
 //    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
 //    jobBuilder.setPeriodic(USAGE_PERIOD_MILLIS)

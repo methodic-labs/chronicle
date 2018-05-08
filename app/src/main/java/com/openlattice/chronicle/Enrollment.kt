@@ -18,7 +18,7 @@ import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.receivers.lifecycle.scheduleUploadJob
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
-import com.openlattice.chronicle.services.usage.scheduleUsageJob
+import com.openlattice.chronicle.services.usage.scheduleUsageEventsJob
 import java.lang.IllegalArgumentException
 import java.util.*
 import java.util.concurrent.Executors
@@ -114,7 +114,7 @@ class Enrollment : AppCompatActivity() {
                             errorMessageText.setText(getString(R.string.device_enroll_success))
                             doMainActivity(this)
                             scheduleUploadJob(this)
-                            scheduleUsageJob(this)
+                            scheduleUsageEventsJob(this)
                         }
                     } else {
                         Log.e(javaClass.canonicalName, "Unable to enroll device.")

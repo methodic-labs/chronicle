@@ -9,12 +9,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Study Id: "
-        android:textAlignment="viewStart" />
+        android:textAlignment="viewStart"
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/mainParticipantId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Participant Id:" />
+        android:text="Participant Id:"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/lastUploadText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Last Upload:"
+        android:textSize="24sp" />
 
 </LinearLayout>

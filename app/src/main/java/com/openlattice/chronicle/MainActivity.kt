@@ -2,27 +2,36 @@ package com.openlattice.chronicle
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.receivers.lifecycle.scheduleUploadJob
-import com.openlattice.chronicle.services.usage.scheduleUsageJob
+import com.openlattice.chronicle.services.upload.getLastUpload
+import com.openlattice.chronicle.services.usage.scheduleUsageEventsJob
 
+
+const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
 
 class MainActivity : AppCompatActivity() {
-
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main)
+
+        handler.post(this::updateLastUpload)
+
         if (hasUsageSettingPermission(this)) {
             val enrollment = EnrollmentSettings(this)
-
             if (enrollment.enrolled) {
                 val studyIdText = findViewById<TextView>(R.id.mainStudyId)
                 val participantIdText = findViewById<TextView>(R.id.mainParticipantId)
                 studyIdText.text = "Study Id: ${enrollment.getStudyId()}"
                 participantIdText.text = "Participant Id: ${enrollment.getParticipantId()}"
+                scheduleUploadJob(this)
+                scheduleUsageEventsJob(this)
             } else {
                 startActivity(Intent(this, Enrollment::class.java))
             }
@@ -54,14 +63,9 @@ class MainActivity : AppCompatActivity() {
 //        }
     }
 
-
-//    fun scheduleAlarm() {
-//        val intent = Intent(applicationContext, UsageCollectionAlarmReceiver::class.java)
-//        val pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-//        val firstMillis = System.currentTimeMillis() + 10000
-//        val alarm = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//        alarm.setRepeating(AlarmManager.ELAPSED_REALTIME, firstMillis, 60 * 1000, pendingIntent)
-//    }
-
-
+    private fun updateLastUpload() {
+        val lastUploadText = findViewById<TextView>(R.id.lastUploadText)
+        lastUploadText.text = "Last Upload: ${getLastUpload(this)}"
+        handler.postDelayed(this::updateLastUpload, LAST_UPLOAD_REFRESH_INTERVAL)
+    }
 }

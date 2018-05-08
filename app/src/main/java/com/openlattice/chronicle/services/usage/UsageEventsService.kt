@@ -8,36 +8,31 @@ import android.arch.persistence.room.Room
 import android.content.ComponentName
 import android.content.Context
 import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.ChronicleApi
-import com.openlattice.chronicle.sensors.ActivityManagerChronicleSensor
-import com.openlattice.chronicle.sensors.ChronicleSensor
-import com.openlattice.chronicle.sensors.FQNS
 import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
-import com.openlattice.chronicle.util.RetrofitBuilders
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import android.view.Display
-import android.content.Context.DISPLAY_SERVICE
 import android.hardware.display.DisplayManager
 import android.os.Build
 import com.openlattice.chronicle.receivers.lifecycle.USAGE_PERIOD_MILLIS
-import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
+import com.openlattice.chronicle.sensors.*
 
 
-const val LIFETIME = 60 * 1000
+const val LIFETIME = 60 * 1000L
 const val USAGE_SERVICE_JOB_ID = 1
+const val POLL_INTERVAL = 5*1000L
 
-class UsageService : JobService() {
+class UsageEventsService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
     private val sw = Stopwatch.createStarted()
     private val handler = Handler()
@@ -51,18 +46,22 @@ class UsageService : JobService() {
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
 
-    lateinit var sensors: Set<ChronicleSensor>
+    private lateinit var sensors: Set<ChronicleSensor>
 
     override fun onStartJob(params: JobParameters?): Boolean {
         if (isScreenOff()) {
+            jobFinished(params, false)
             return true
         }
 
         executor.execute {
-            propertyTypeIds = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java).getPropertyTypeIds(FQNS)
+            propertyTypeIds = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java).getPropertyTypeIds(PROPERTY_TYPES)
             chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle").build()
             storageQueue = chronicleDb.queueEntryData()
-            sensors = mutableSetOf<ChronicleSensor>(UsageStatsChronicleSensor(applicationContext))
+            sensors = mutableSetOf<ChronicleSensor>(
+                    UsageStatsChronicleSensor(applicationContext),
+                    UsageEventsChronicleSensor(applicationContext)
+            )
             Log.i(javaClass.name, "Usage service is initialized")
             latch.countDown()
         }
@@ -70,11 +69,11 @@ class UsageService : JobService() {
         Log.i(javaClass.name, "Usage service is running.")
         running = true
         handler.post(this::doWork)
-        jobFinished(params,false)
+        jobFinished(params, false)
         return true
     }
 
-    fun isScreenOff(): Boolean {
+    private fun isScreenOff(): Boolean {
         val dm = applicationContext.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
         for (display in dm.displays) {
             if (display.state == Display.STATE_ON) {
@@ -92,7 +91,7 @@ class UsageService : JobService() {
         executor.shutdown()
         executor.awaitTermination(1, TimeUnit.MINUTES)
         Log.i(javaClass.name, "Usage collection gracefully shutdown.")
-        scheduleUsageJob(applicationContext)
+        scheduleUsageEventsJob(applicationContext)
         return true
     }
 
@@ -113,17 +112,17 @@ class UsageService : JobService() {
                 Log.d(javaClass.name, "Persisting usage information took . Sampling a single entry took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
             }
 
-            Log.i(javaClass.name, "Collecting Usage Information. This service has been running for ${sw.elapsed(TimeUnit.SECONDS)} seconds.")
+            Log.d(javaClass.name, "Collecting Usage Information. This service has been running for ${sw.elapsed(TimeUnit.SECONDS)} seconds.")
 
-            handler.postDelayed(this::doWork, 1000)
+            handler.postDelayed(this::doWork, POLL_INTERVAL)
         } else {
             shutdownLatch.countDown()
         }
     }
 }
 
-fun scheduleUsageJob(context: Context) {
-    val serviceComponent = ComponentName(context, UsageService::class.java)
+fun scheduleUsageEventsJob(context: Context) {
+    val serviceComponent = ComponentName(context, UsageEventsService::class.java)
     val jobBuilder = JobInfo.Builder(USAGE_SERVICE_JOB_ID, serviceComponent)
     jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
     jobBuilder.setPersisted(true)

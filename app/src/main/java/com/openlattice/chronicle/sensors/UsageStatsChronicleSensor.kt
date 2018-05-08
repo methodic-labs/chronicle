@@ -1,31 +1,53 @@
 package com.openlattice.chronicle.sensors
 
-import android.app.ActivityManager
-import android.app.ActivityManager.RunningAppProcessInfo.*
+import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.app.usage.UsageStatsManager.INTERVAL_BEST
 import android.content.Context
-import com.google.common.collect.HashMultimap
+import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
-import org.joda.time.DateTime
 import java.util.*
-import kotlin.collections.ArrayList
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 
+const val USAGE_STATS_POLL_INTERVAL = 60 * 1000L
 
 class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+    private var previousPollTimestamp = System.currentTimeMillis() - 5 * 1000
+    private val currentPollTimestamp = System.currentTimeMillis()
+    private val lock: Lock = ReentrantLock();
 
     override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
-        return usageStatsManager
-                .queryUsageStats(INTERVAL_BEST, System.currentTimeMillis() - 1000, System.currentTimeMillis())
-                .map {
-                    ImmutableSetMultimap.of(
-                            propertyTypeIds[ID]!!, UUID.randomUUID() as Object,
-                            propertyTypeIds[NAME]!!, it.packageName as Object,
-                            propertyTypeIds[IMPORTANCE]!!, it.totalTimeInForeground.toString() as Object,
-                            propertyTypeIds[TIMESTAMP]!!, DateTime().toString() as Object)
-                }
-    }
+        if (lock.tryLock() && ((currentPollTimestamp - previousPollTimestamp) >= USAGE_STATS_POLL_INTERVAL)) {
+            val usageStats: List<UsageStats>
 
+            //critical section is to only allow one thread to query usage stats.
+            try {
+                usageStats = usageStatsManager
+                        .queryUsageStats(INTERVAL_BEST, System.currentTimeMillis() - USAGE_STATS_POLL_INTERVAL, System.currentTimeMillis())
+                previousPollTimestamp = currentPollTimestamp
+            } finally {
+                lock.unlock()
+            }
+
+            return usageStats
+                    .map {
+                        ImmutableSetMultimap.Builder<UUID, Object>()
+                                .put(propertyTypeIds[ID]!!, UUID.randomUUID() as Object)
+                                .put(propertyTypeIds[NAME]!!, it.packageName as Object)
+                                .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" as Object)
+                                .put(propertyTypeIds[START_TIME]!!, it.firstTimeStamp as Object)
+                                .put(propertyTypeIds[END_TIME]!!, it.lastTimeStamp as Object)
+                                .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground as Object)
+                                .put(propertyTypeIds[TIMESTAMP]!!, it.lastTimeUsed as Object)
+                                .build()
+
+                    }
+        } else {
+            return ImmutableList.of()
+        }
+    }
 }
+
