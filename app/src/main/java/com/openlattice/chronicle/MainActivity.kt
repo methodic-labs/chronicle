@@ -6,10 +6,12 @@ import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
+import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.receivers.lifecycle.scheduleUploadJob
+import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.upload.getLastUpload
 import com.openlattice.chronicle.services.usage.scheduleUsageEventsJob
+import io.fabric.sdk.android.Fabric
 
 
 const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
@@ -18,7 +20,8 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState)
+        Fabric.with(this,  Crashlytics())
         setContentView(R.layout.activity_main)
 
         handler.post(this::updateLastUpload)

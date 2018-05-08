@@ -5,6 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply from: "https://raw.githubusercontent.com/openlattice/gradles/master/repos.gradle"
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 27
@@ -36,7 +37,9 @@ ext.jackson_version = '2.6.5'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.2@aar') {
+        transitive = true;
+    }
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'

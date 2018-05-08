@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.preference.PreferenceManager
 import android.provider.Settings
+import com.crashlytics.android.Crashlytics
 import com.google.common.base.Optional
 import com.openlattice.chronicle.sources.AndroidDevice
 import java.security.AccessController.getContext
@@ -24,6 +25,7 @@ class EnrollmentSettings(private val context: Context) {
         participantId = settings.getString(PARTICIPANT_ID, "")
         if (studyIdString.isNotBlank() && participantId.isNotBlank()) {
             studyId = UUID.fromString(studyIdString)
+            setCrashlyticsUser(studyId, participantId, getDeviceId(context))
             enrolled = true
         } else {
             studyId = UUID(0, 0)
@@ -60,4 +62,10 @@ fun getDeviceId(context: Context): String {
 
 fun getDevice(deviceId: String): AndroidDevice {
     return AndroidDevice(deviceId, Build.MODEL, Build.VERSION.CODENAME, Build.BRAND, Build.DISPLAY, Build.VERSION.SDK_INT.toString(), Build.PRODUCT, deviceId, Optional.absent())
+}
+
+fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {
+    Crashlytics.setUserIdentifier(participantId)
+    Crashlytics.setUserEmail("$participantId@$studyId")
+    Crashlytics.setUserName(deviceId)
 }

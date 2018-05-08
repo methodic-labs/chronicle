@@ -11,14 +11,16 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.crashlytics.android.Crashlytics
 import com.google.common.base.Optional
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
-import com.openlattice.chronicle.receivers.lifecycle.scheduleUploadJob
+import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.services.usage.scheduleUsageEventsJob
+import io.fabric.sdk.android.Fabric
 import java.lang.IllegalArgumentException
 import java.util.*
 import java.util.concurrent.Executors
@@ -29,6 +31,7 @@ class Enrollment : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Fabric.with(this, Crashlytics())
         setContentView(R.layout.activity_enrollment)
         handleIntent(intent)
     }
@@ -105,7 +108,6 @@ class Enrollment : AppCompatActivity() {
                             val enrollmentSettings = EnrollmentSettings(applicationContext)
                             enrollmentSettings.setStudyId(id)
                             enrollmentSettings.setParticipantId(participantId)
-
                             progressBar.visibility = View.INVISIBLE
                             submitBtn.visibility = View.VISIBLE
                             //studyIdText.visibility = View.INVISIBLE
@@ -136,3 +138,4 @@ class Enrollment : AppCompatActivity() {
         }
     }
 }
+

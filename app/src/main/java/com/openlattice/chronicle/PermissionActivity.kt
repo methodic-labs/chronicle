@@ -14,12 +14,15 @@ import android.content.pm.ApplicationInfo
 import android.support.v4.content.ContextCompat.startActivity
 import android.util.Log
 import android.widget.TextView
+import com.crashlytics.android.Crashlytics
+import io.fabric.sdk.android.Fabric
 
 
 class PermissionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Fabric.with(this,  Crashlytics())
         setContentView(R.layout.activity_permission)
         if (hasUsageSettingPermission(this)) {
             doMainActivity(this)

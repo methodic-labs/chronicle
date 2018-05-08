@@ -1,8 +1,11 @@
 package com.openlattice.chronicle.services.upload
 
+import android.app.job.JobInfo
 import android.app.job.JobParameters
+import android.app.job.JobScheduler
 import android.app.job.JobService
 import android.arch.persistence.room.Room
+import android.content.ComponentName
 import android.content.Context
 import android.preference.PreferenceManager
 import android.provider.Settings
@@ -22,7 +25,7 @@ import java.util.concurrent.TimeUnit
 
 const val PRODUCTION = "https://api.openlattice.com/"
 const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
-const val LAST_UPDATED_SETTTING = "com.openlattice.chronicle.upload.LastUpdated"
+const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -58,7 +61,8 @@ class UploadJobService : JobService() {
         executor.execute({
             val queue = chronicleDb.queueEntryData()
             var nextEntries = queue.getNextEntries(BATCH_SIZE)
-            while (nextEntries.size >= BATCH_SIZE) {
+            var notEmptied = nextEntries.isNotEmpty()
+            while (notEmptied) {
                 val w = Stopwatch.createStarted()
                 val data = nextEntries
                         .map { qe -> qe.data }
@@ -72,6 +76,7 @@ class UploadJobService : JobService() {
                 Log.d(javaClass.name, "Uploading ${data.size} to OpenLattice items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
                 queue.deleteEntries(nextEntries)
                 nextEntries = queue.getNextEntries(BATCH_SIZE)
+                notEmptied = nextEntries.size == BATCH_SIZE
             }
             jobFinished(params, false)
         })
@@ -83,7 +88,7 @@ class UploadJobService : JobService() {
 fun setLastUpload(context: Context) {
     val settings = PreferenceManager.getDefaultSharedPreferences(context)
     with(settings.edit()) {
-        putString(LAST_UPDATED_SETTTING, LocalDateTime.now().toString())
+        putString(LAST_UPDATED_SETTING, LocalDateTime.now().toString())
         apply()
     }
 
@@ -91,10 +96,22 @@ fun setLastUpload(context: Context) {
 
 fun getLastUpload(context: Context): String {
     val settings = PreferenceManager.getDefaultSharedPreferences(context)
-    return settings.getString(LAST_UPDATED_SETTTING, "Never")
+    return settings.getString(LAST_UPDATED_SETTING, "Never")
 }
 
 fun createRetrofitAdapter(baseUrl: String): Retrofit {
     val httpClient = okHttpClient().build()
     return decorateWithRhizomeFactories(createBaseChronicleRetrofitBuilder(baseUrl, httpClient)).build()
 }
+
+fun scheduleUploadJob(context: Context) {
+    val serviceComponent = ComponentName(context, UploadJobService::class.java)
+    val jobBuilder = JobInfo.Builder(0, serviceComponent)
+    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+    jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
+    jobBuilder.setPersisted(true)
+    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+    jobScheduler.schedule(jobBuilder.build())
+}
+
+const val UPLOAD_PERIOD_MILLIS =  15 * 60 * 1000L

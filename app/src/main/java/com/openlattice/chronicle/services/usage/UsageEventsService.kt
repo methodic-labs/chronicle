@@ -24,13 +24,11 @@ import java.util.concurrent.TimeUnit
 import android.view.Display
 import android.hardware.display.DisplayManager
 import android.os.Build
-import com.openlattice.chronicle.receivers.lifecycle.USAGE_PERIOD_MILLIS
 import com.openlattice.chronicle.sensors.*
 
-
-const val LIFETIME = 60 * 1000L
 const val USAGE_SERVICE_JOB_ID = 1
-const val POLL_INTERVAL = 5*1000L
+const val USAGE_PERIOD_MILLIS = 15 * 1000L
+const val POLL_INTERVAL = 5 * 1000L
 
 class UsageEventsService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -103,16 +101,23 @@ class UsageEventsService : JobService() {
         }
 
         if (running) {
+            Log.d(javaClass.name, "Collecting Usage Information. This service has been running for ${sw.elapsed(TimeUnit.SECONDS)} seconds.")
+
             executor.execute {
                 Log.i(javaClass.name, "Starting usage information collection. ")
                 val w = Stopwatch.createStarted()
                 sensors
                         .map { it.poll(propertyTypeIds) }
-                        .forEach { storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), id++, JsonSerializer.serializeQueueEntry(it))) }
-                Log.d(javaClass.name, "Persisting usage information took . Sampling a single entry took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
-            }
+                        .forEach {
+                            val data = JsonSerializer.serializeQueueEntry(it)
+                            // Only store non-empty data entiries.
+                            if (data.size > 0) {
+                                storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), id++, data))
+                            }
 
-            Log.d(javaClass.name, "Collecting Usage Information. This service has been running for ${sw.elapsed(TimeUnit.SECONDS)} seconds.")
+                        }
+                Log.d(javaClass.name, "Persisting usage information took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
+            }
 
             handler.postDelayed(this::doWork, POLL_INTERVAL)
         } else {
@@ -135,3 +140,4 @@ fun scheduleUsageEventsJob(context: Context) {
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
     jobScheduler.schedule(jobBuilder.build())
 }
+
