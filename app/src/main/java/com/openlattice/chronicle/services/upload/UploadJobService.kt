@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit
 const val PRODUCTION = "https://api.openlattice.com/"
 const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
+const val UPLOAD_PERIOD_MILLIS =  15 * 60 * 1000L
 
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -85,6 +86,8 @@ class UploadJobService : JobService() {
 
 }
 
+
+
 fun setLastUpload(context: Context) {
     val settings = PreferenceManager.getDefaultSharedPreferences(context)
     with(settings.edit()) {
@@ -113,5 +116,3 @@ fun scheduleUploadJob(context: Context) {
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
     jobScheduler.schedule(jobBuilder.build())
 }
-
-const val UPLOAD_PERIOD_MILLIS =  15 * 60 * 1000L

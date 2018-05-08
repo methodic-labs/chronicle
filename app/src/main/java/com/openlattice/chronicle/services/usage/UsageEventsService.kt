@@ -25,6 +25,7 @@ import android.view.Display
 import android.hardware.display.DisplayManager
 import android.os.Build
 import com.openlattice.chronicle.sensors.*
+import java.util.concurrent.locks.ReentrantLock
 
 const val USAGE_SERVICE_JOB_ID = 1
 const val USAGE_PERIOD_MILLIS = 15 * 1000L
@@ -36,6 +37,7 @@ class UsageEventsService : JobService() {
     private val handler = Handler()
     private val latch = CountDownLatch(1);
     private val shutdownLatch = CountDownLatch(1);
+    private val lock = ReentrantLock()
 
     private var id = 0L
     private var initialized = false
@@ -84,10 +86,10 @@ class UsageEventsService : JobService() {
     override fun onStopJob(params: JobParameters?): Boolean {
         Log.i(javaClass.name, "Stop requested after ${sw.elapsed(TimeUnit.SECONDS)}")
         running = false
-        chronicleDb.close()
         shutdownLatch.await()
         executor.shutdown()
         executor.awaitTermination(1, TimeUnit.MINUTES)
+        chronicleDb.close()
         Log.i(javaClass.name, "Usage collection gracefully shutdown.")
         scheduleUsageEventsJob(applicationContext)
         return true
@@ -108,13 +110,16 @@ class UsageEventsService : JobService() {
                 val w = Stopwatch.createStarted()
                 sensors
                         .map { it.poll(propertyTypeIds) }
+                        .filter { it.isNotEmpty() }
                         .forEach {
-                            val data = JsonSerializer.serializeQueueEntry(it)
-                            // Only store non-empty data entiries.
-                            if (data.size > 0) {
-                                storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), id++, data))
+                            val currentId: Long
+                            try {
+                                lock.lock()
+                                currentId = id++
+                            } finally {
+                                lock.unlock()
                             }
-
+                            storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), currentId, JsonSerializer.serializeQueueEntry(it)))
                         }
                 Log.d(javaClass.name, "Persisting usage information took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
             }
