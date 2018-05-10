@@ -4,9 +4,11 @@ import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.app.usage.UsageStatsManager.INTERVAL_BEST
 import android.content.Context
+import android.util.Log
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
+import org.joda.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -20,6 +22,10 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
     private val lock: Lock = ReentrantLock();
 
     override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
+        if (propertyTypeIds.isEmpty()) {
+            return ImmutableList.of()
+        }
+
         if (lock.tryLock() && ((currentPollTimestamp - previousPollTimestamp) >= USAGE_STATS_POLL_INTERVAL)) {
             val usageStats: List<UsageStats>
 
@@ -32,16 +38,18 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
                 lock.unlock()
             }
 
+            Log.i(javaClass.name, "Collected ${usageStats.size} stats.")
+
             return usageStats
                     .map {
                         ImmutableSetMultimap.Builder<UUID, Object>()
                                 .put(propertyTypeIds[ID]!!, UUID.randomUUID() as Object)
                                 .put(propertyTypeIds[NAME]!!, it.packageName as Object)
                                 .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" as Object)
-                                .put(propertyTypeIds[START_TIME]!!, it.firstTimeStamp as Object)
-                                .put(propertyTypeIds[END_TIME]!!, it.lastTimeStamp as Object)
+                                .put(propertyTypeIds[START_TIME]!!, LocalDateTime(it.firstTimeStamp) as Object)
+                                .put(propertyTypeIds[END_TIME]!!, LocalDateTime(it.lastTimeStamp) as Object)
                                 .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground as Object)
-                                .put(propertyTypeIds[TIMESTAMP]!!, it.lastTimeUsed as Object)
+                                .put(propertyTypeIds[TIMESTAMP]!!, LocalDateTime(it.lastTimeUsed) as Object)
                                 .build()
 
                     }

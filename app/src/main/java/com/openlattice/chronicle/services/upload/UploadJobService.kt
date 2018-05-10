@@ -13,8 +13,11 @@ import android.util.Log
 import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.services.sinks.BrokerDataSink
+import com.openlattice.chronicle.services.sinks.ConsoleSink
+import com.openlattice.chronicle.services.sinks.OpenLatticeSink
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.util.RetrofitBuilders.*
 import org.joda.time.LocalDateTime
@@ -26,7 +29,7 @@ import java.util.concurrent.TimeUnit
 const val PRODUCTION = "https://api.openlattice.com/"
 const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
-const val UPLOAD_PERIOD_MILLIS =  15 * 60 * 1000L
+const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
 
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -49,11 +52,14 @@ class UploadJobService : JobService() {
     override fun onStartJob(params: JobParameters?): Boolean {
         executor.execute {
             chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java!!, "chronicle").build()
-            deviceId = Settings.Secure.getString(applicationContext.getContentResolver(), Settings.Secure.ANDROID_ID)
+            deviceId = getDeviceId(this)
             settings = EnrollmentSettings(applicationContext)
             studyId = settings.getStudyId()
             participantId = settings.getParticipantId()
-            dataSink = BrokerDataSink(kotlin.collections.mutableSetOf(com.openlattice.chronicle.services.sinks.OpenLatticeSink(studyId, participantId, deviceId, chronicleApi)))
+            dataSink = BrokerDataSink(
+                    mutableSetOf(
+                            OpenLatticeSink(studyId, participantId, deviceId, chronicleApi),
+                            ConsoleSink()))
             Log.i(javaClass.name, "Job service is initialized")
         }
 
@@ -86,15 +92,12 @@ class UploadJobService : JobService() {
 
 }
 
-
-
 fun setLastUpload(context: Context) {
     val settings = PreferenceManager.getDefaultSharedPreferences(context)
     with(settings.edit()) {
         putString(LAST_UPDATED_SETTING, LocalDateTime.now().toString())
         apply()
     }
-
 }
 
 fun getLastUpload(context: Context): String {

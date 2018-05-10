@@ -7,11 +7,11 @@ import android.provider.Settings
 import com.crashlytics.android.Crashlytics
 import com.google.common.base.Optional
 import com.openlattice.chronicle.sources.AndroidDevice
-import java.security.AccessController.getContext
 import java.util.*
 
-val PARTICIPANT_ID = "participantId";
-val STUDTY_ID = "studyId";
+const val PARTICIPANT_ID = "participantId";
+const val STUDY_ID = "studyId"
+val INVALID_STUDY_ID = UUID(0,0)
 
 class EnrollmentSettings(private val context: Context) {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
@@ -21,16 +21,15 @@ class EnrollmentSettings(private val context: Context) {
     var enrolled: Boolean = true
 
     init {
-        val studyIdString = settings.getString(STUDTY_ID, "")
+        val studyIdString = settings.getString(STUDY_ID, "")
         participantId = settings.getString(PARTICIPANT_ID, "")
         if (studyIdString.isNotBlank() && participantId.isNotBlank()) {
             studyId = UUID.fromString(studyIdString)
             setCrashlyticsUser(studyId, participantId, getDeviceId(context))
-            enrolled = true
         } else {
             studyId = UUID(0, 0)
-            enrolled = false
         }
+        updateEnrolled()
     }
 
     fun getParticipantId(): String {
@@ -46,13 +45,19 @@ class EnrollmentSettings(private val context: Context) {
         settings.edit()
                 .putString(PARTICIPANT_ID, _participantId)
                 .apply()
+        updateEnrolled()
     }
 
     fun setStudyId(_studyId: UUID) {
         studyId = _studyId
         settings.edit()
-                .putString(STUDTY_ID, _studyId.toString())
+                .putString(STUDY_ID, _studyId.toString())
                 .apply()
+        updateEnrolled()
+    }
+
+    fun updateEnrolled() {
+        enrolled = !(studyId.equals( INVALID_STUDY_ID) || participantId.isBlank())
     }
 }
 

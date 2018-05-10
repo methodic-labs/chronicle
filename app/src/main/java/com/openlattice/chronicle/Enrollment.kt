@@ -1,10 +1,10 @@
 package com.openlattice.chronicle
 
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -16,10 +16,8 @@ import com.google.common.base.Optional
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
-import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
-import com.openlattice.chronicle.services.usage.scheduleUsageEventsJob
 import io.fabric.sdk.android.Fabric
 import java.lang.IllegalArgumentException
 import java.util.*
@@ -53,7 +51,6 @@ class Enrollment : AppCompatActivity() {
             val participantId = appLinkData.getQueryParameter("participantId")
             studyIdText.setText(studyId)
             participantIdText.setText(participantId)
-//            doEnrollment()
         }
     }
 
@@ -61,7 +58,7 @@ class Enrollment : AppCompatActivity() {
         doEnrollment()
     }
 
-    fun doEnrollment() {
+    private fun doEnrollment() {
         val studyIdText = findViewById<EditText>(R.id.studyIdText)
         val participantIdText = findViewById<EditText>(R.id.participantIdText)
         val errorMessageText = findViewById<TextView>(R.id.errorMessage)
@@ -91,7 +88,7 @@ class Enrollment : AppCompatActivity() {
                 executor.execute {
                     val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
 
-
+                    //TODO: Actually retrieve id of device.
                     val chronicleId = if (chronicleStudyApi.isKnownDatasource(id, participantId, deviceId)) {
                         UUID.randomUUID()
                     } else {
@@ -110,13 +107,10 @@ class Enrollment : AppCompatActivity() {
                             enrollmentSettings.setParticipantId(participantId)
                             progressBar.visibility = View.INVISIBLE
                             submitBtn.visibility = View.VISIBLE
-                            //studyIdText.visibility = View.INVISIBLE
-                            //participantIdText.visibility = View.INVISIBLE
                             errorMessageText.visibility = View.VISIBLE
-                            errorMessageText.setText(getString(R.string.device_enroll_success))
+                            errorMessageText.text = getString(R.string.device_enroll_success)
                             doMainActivity(this)
-                            scheduleUploadJob(this)
-                            scheduleUsageEventsJob(this)
+                            finish()
                         }
                     } else {
                         Log.e(javaClass.canonicalName, "Unable to enroll device.")
@@ -124,7 +118,7 @@ class Enrollment : AppCompatActivity() {
                             progressBar.visibility = View.INVISIBLE
                             submitBtn.visibility = View.VISIBLE
                             errorMessageText.visibility = View.VISIBLE
-                            errorMessageText.setText(getString(R.string.device_enroll_failure))
+                            errorMessageText.text = getString(R.string.device_enroll_failure)
                         }
                     }
                 }

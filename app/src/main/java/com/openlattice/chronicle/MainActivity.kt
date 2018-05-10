@@ -24,8 +24,6 @@ class MainActivity : AppCompatActivity() {
         Fabric.with(this,  Crashlytics())
         setContentView(R.layout.activity_main)
 
-        handler.post(this::updateLastUpload)
-
         if (hasUsageSettingPermission(this)) {
             val enrollment = EnrollmentSettings(this)
             if (enrollment.enrolled) {
@@ -35,6 +33,7 @@ class MainActivity : AppCompatActivity() {
                 participantIdText.text = "Participant Id: ${enrollment.getParticipantId()}"
                 scheduleUploadJob(this)
                 scheduleUsageEventsJob(this)
+                handler.post(this::updateLastUpload)
             } else {
                 startActivity(Intent(this, Enrollment::class.java))
             }
@@ -44,26 +43,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-//        if (enrollment.enrolled) {
-//            val errorMessageText = findViewById<TextView>(R.id.errorMessage)
-//            val studyIdText = findViewById<EditText>(R.id.studyIdText)
-//            val participantIdText = findViewById<EditText>(R.id.participantIdText)
-//            val submitBtn = findViewById<Button>(R.id.button)
-//
-//
-//            studyIdText.visibility = INVISIBLE
-//            participantIdText.visibility = INVISIBLE
-//            submitBtn.visibility = INVISIBLE
-//
-//            errorMessageText.text =
-//                    getString(R.string.already_enrolled) +
-//                    "\nStudy = ${enrollment.getStudyId().toString()}" +
-//                    "\nParticipant = ${enrollment.getParticipantId()}" +
-//                    "\nDevice = ${getDeviceId(this)}"
-//            errorMessageText.visibility = VISIBLE
-//        } else {
-//
-//        }
+
     }
 
     private fun updateLastUpload() {
