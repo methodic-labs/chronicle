@@ -8,6 +8,7 @@ import android.util.Log
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
+import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.locks.Lock
@@ -46,10 +47,10 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
                                 .put(propertyTypeIds[ID]!!, UUID.randomUUID() as Object)
                                 .put(propertyTypeIds[NAME]!!, it.packageName as Object)
                                 .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" as Object)
-                                .put(propertyTypeIds[START_TIME]!!, LocalDateTime(it.firstTimeStamp) as Object)
-                                .put(propertyTypeIds[END_TIME]!!, LocalDateTime(it.lastTimeStamp) as Object)
+                                .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp) as Object)
+                                .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp) as Object)
                                 .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground as Object)
-                                .put(propertyTypeIds[TIMESTAMP]!!, LocalDateTime(it.lastTimeUsed) as Object)
+                                .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed) as Object)
                                 .build()
 
                     }

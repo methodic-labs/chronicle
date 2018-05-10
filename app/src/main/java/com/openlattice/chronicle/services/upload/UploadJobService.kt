@@ -10,6 +10,7 @@ import android.content.Context
 import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.Log
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -19,6 +20,7 @@ import com.openlattice.chronicle.services.sinks.BrokerDataSink
 import com.openlattice.chronicle.services.sinks.ConsoleSink
 import com.openlattice.chronicle.services.sinks.OpenLatticeSink
 import com.openlattice.chronicle.storage.ChronicleDb
+import com.openlattice.chronicle.util.RetrofitBuilders
 import com.openlattice.chronicle.util.RetrofitBuilders.*
 import org.joda.time.LocalDateTime
 import retrofit2.Retrofit
@@ -27,13 +29,14 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 const val PRODUCTION = "https://api.openlattice.com/"
-const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
+const val BATCH_SIZE = 1 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
 
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
     private val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
+    private val serviceId = Random().nextLong()
 
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var settings: EnrollmentSettings
@@ -60,10 +63,10 @@ class UploadJobService : JobService() {
                     mutableSetOf(
                             OpenLatticeSink(studyId, participantId, deviceId, chronicleApi),
                             ConsoleSink()))
-            Log.i(javaClass.name, "Job service is initialized")
+            Log.i("${javaClass.name}-$serviceId" , "Job service is initialized")
         }
 
-        Log.i(javaClass.name, "Upload job service is running with batch size " + BATCH_SIZE.toString())
+        Log.i("${javaClass.name}-$serviceId" , "Upload job service is running with batch size " + BATCH_SIZE.toString())
 
         executor.execute({
             val queue = chronicleDb.queueEntryData()
@@ -75,12 +78,12 @@ class UploadJobService : JobService() {
                         .map { qe -> qe.data }
                         .map { qe -> JsonSerializer.deserializeQueueEntry(qe) }
                         .flatMap { it }
-                Log.d(javaClass.name, "Loading $BATCH_SIZE items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
+                Log.d("${javaClass.name}-$serviceId" , "Loading $BATCH_SIZE items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
                 w.reset()
                 w.start()
                 dataSink.submit(data)
                 setLastUpload(this)
-                Log.d(javaClass.name, "Uploading ${data.size} to OpenLattice items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
+                Log.d("${javaClass.name}-$serviceId" , "Uploading ${data.size} to OpenLattice items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
                 queue.deleteEntries(nextEntries)
                 nextEntries = queue.getNextEntries(BATCH_SIZE)
                 notEmptied = nextEntries.size == BATCH_SIZE
@@ -106,6 +109,7 @@ fun getLastUpload(context: Context): String {
 }
 
 fun createRetrofitAdapter(baseUrl: String): Retrofit {
+    RetrofitBuilders.mapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false )
     val httpClient = okHttpClient().build()
     return decorateWithRhizomeFactories(createBaseChronicleRetrofitBuilder(baseUrl, httpClient)).build()
 }
