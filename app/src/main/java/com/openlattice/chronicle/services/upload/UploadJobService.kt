@@ -29,7 +29,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 const val PRODUCTION = "https://api.openlattice.com/"
-const val BATCH_SIZE = 1 // 24 * 60 * 60 / 5 //17280
+const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
 
