@@ -8,9 +8,9 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.upload.getLastUpload
-import com.openlattice.chronicle.services.usage.scheduleUsageEventsJob
+import com.openlattice.chronicle.services.upload.scheduleUploadJob
+import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
 import io.fabric.sdk.android.Fabric
 
 
@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Fabric.with(this,  Crashlytics())
+        Fabric.with(this, Crashlytics())
         setContentView(R.layout.activity_main)
 
         if (hasUsageSettingPermission(this)) {
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
                 studyIdText.text = "Study Id: ${enrollment.getStudyId()}"
                 participantIdText.text = "Participant Id: ${enrollment.getParticipantId()}"
                 scheduleUploadJob(this)
-                scheduleUsageEventsJob(this)
+                scheduleUsageMonitoringJob(this)
                 handler.post(this::updateLastUpload)
             } else {
                 startActivity(Intent(this, Enrollment::class.java))
@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, PermissionActivity::class.java))
             return
         }
-
 
 
     }

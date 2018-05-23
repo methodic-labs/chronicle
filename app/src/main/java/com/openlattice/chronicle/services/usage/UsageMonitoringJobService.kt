@@ -1,19 +1,15 @@
 package com.openlattice.chronicle.services.usage
 
-import android.app.IntentService
-import android.app.Notification
-import android.app.Notification.PRIORITY_LOW
-import android.app.NotificationChannel
-import android.app.PendingIntent
 import android.app.job.JobInfo
+import android.app.job.JobParameters
 import android.app.job.JobScheduler
+import android.app.job.JobService
 import android.arch.persistence.room.Room
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.hardware.display.DisplayManager
-import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Display
 import com.crashlytics.android.Crashlytics
@@ -25,7 +21,6 @@ import com.openlattice.chronicle.sensors.PROPERTY_TYPES
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
 import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
 import com.openlattice.chronicle.serialization.JsonSerializer
-import com.openlattice.chronicle.serialization.JsonSerializer.serializeQueueEntry
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
@@ -37,17 +32,11 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
 
-const val USAGE_PERIOD_MILLIS = 15 * 60 * 1000L //This is how long the service will run in the background before re-scheduling itself
-const val POLL_INTERVAL = 5 * 1000L  //This is how long frequently the service will poll.
-const val ONGOING_NOTIFICATION_ID = 0
-const val USAGE_EVENTS_MONITORING_SERVICE = "usageEventsMonitoringService"
-
-class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
-
+class UsageMonitoringJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
     private val sw = Stopwatch.createStarted()
-    private val handler = Handler()
     private val latch = CountDownLatch(1);
     private val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
     private val rand = Random()
@@ -60,33 +49,10 @@ class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
 
     override fun onCreate() {
         super.onCreate()
-        Fabric.with(this, Crashlytics())
+        Fabric.with(this, Crashlytics() )
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-        val notificationIntent = Intent(this, UsageEventsService::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, MONITOR_USAGE_REQUEST, notificationIntent, 0)
-
-        //TODO: Consider using our own notification channel in Android O or later
-        val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notification.Builder(this, NotificationChannel.DEFAULT_CHANNEL_ID)
-        } else {
-            Notification.Builder(this)
-                    .setPriority(PRIORITY_LOW)
-        }
-                .setContentTitle("Chronicle Study Title")
-                .setContentText("Chronicle context text")
-                .setContentIntent(pendingIntent)
-                .setTicker("This is ticker text")
-                .build()
-
-        startForeground(ONGOING_NOTIFICATION_ID, notification)
-        Log.i(javaClass.name, "Usage service is created.")
-        return START_STICKY
-    }
-
-    override fun onHandleIntent(intent: Intent?) {
+    override fun onStartJob(params: JobParameters?): Boolean {
         executor.execute {
             propertyTypeIds = getPropertyTypeIds()
             chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle").build()
@@ -98,34 +64,24 @@ class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
             Log.i(javaClass.name, "Usage service is initialized")
             latch.countDown()
         }
-
         latch.await()
         Log.i(javaClass.name, "Usage service is running.")
+
         doWork()
-        while (true)
-            Thread.sleep(1000);
+
+        return false
     }
 
-    private fun isScreenOff(): Boolean {
-        val dm = applicationContext.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
-        for (display in dm.displays) {
-            if (display.state == Display.STATE_ON) {
-                return false
-            }
-        }
-        return true
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onStopJob(params: JobParameters?): Boolean {
         Log.i(javaClass.name, "Destroy requested after ${sw.elapsed(TimeUnit.SECONDS)}")
         executor.shutdown()
         executor.awaitTermination(1, TimeUnit.MINUTES)
         chronicleDb.close()
-        Log.i(javaClass.name, "Usage collection gracefully shutdown.")
+        Log.i(javaClass.name, "Usage events collection gracefully shutdown.")
+        return true
     }
 
-    private fun doWork() {
+    fun doWork() {
         if (isScreenOff()) {
             return
         }
@@ -147,10 +103,9 @@ class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
                         .map { it.poll(propertyTypeIds) }
                         .filter { it.isNotEmpty() }
                         .forEach {
-                            storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), serializeQueueEntry(it)))
+                            storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), JsonSerializer.serializeQueueEntry(it)))
                         }
                 Log.d(javaClass.name, "Persisting usage information took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
-                handler.postDelayed(this::doWork, POLL_INTERVAL)
             }
         }
     }
@@ -158,9 +113,26 @@ class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
     private fun getPropertyTypeIds(): Map<String, UUID> {
         return chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?: ImmutableMap.of()
     }
+
+    private fun isScreenOff(): Boolean {
+        val dm = applicationContext.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        for (display in dm.displays) {
+            if (display.state == Display.STATE_ON) {
+                return false
+            }
+        }
+        return true
+    }
 }
 
-const val MONITOR_USAGE_REQUEST = 0;
-fun scheduleUsageMonitoringService(context: Context) {
-    context.startService(Intent(context, UsageEventsService::class.java))
+const val MONITOR_USAGE_JOB = 3;
+
+fun scheduleUsageMonitoringJob(context: Context) {
+    val serviceComponent = ComponentName(context, UsageMonitoringJobService::class.java)
+    val jobBuilder = JobInfo.Builder(MONITOR_USAGE_JOB, serviceComponent)
+    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+    jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
+    jobBuilder.setPersisted(true)
+    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+    jobScheduler.schedule(jobBuilder.build())
 }

@@ -6,12 +6,17 @@ import android.preference.PreferenceManager
 import android.provider.Settings
 import com.crashlytics.android.Crashlytics
 import com.google.common.base.Optional
+import com.google.common.collect.ImmutableMap
+import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropertyTypeIds
+import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds
 import com.openlattice.chronicle.sources.AndroidDevice
+import com.openlattice.chronicle.util.RetrofitBuilders
 import java.util.*
 
 const val PARTICIPANT_ID = "participantId";
 const val STUDY_ID = "studyId"
-val INVALID_STUDY_ID = UUID(0,0)
+const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
+val INVALID_STUDY_ID = UUID(0, 0)
 
 class EnrollmentSettings(private val context: Context) {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
@@ -57,8 +62,21 @@ class EnrollmentSettings(private val context: Context) {
     }
 
     fun updateEnrolled() {
-        enrolled = !(studyId.equals( INVALID_STUDY_ID) || participantId.isBlank())
+        enrolled = !(studyId.equals(INVALID_STUDY_ID) || participantId.isBlank())
     }
+
+    fun setPropertyTypeIds(propertyTypeIds: Map<String, UUID>) {
+        settings
+                .edit()
+                .putString(PROPERTY_TYPE_IDS, serializePropertyTypeIds(propertyTypeIds))
+                .apply()
+    }
+
+    fun getPropertyTypeIds(): Map<String, UUID> {
+        return deserializePropertyTypeIds(settings.getString(PROPERTY_TYPE_IDS, ""))
+                ?: ImmutableMap.of()
+    }
+
 }
 
 fun getDeviceId(context: Context): String {
@@ -74,3 +92,4 @@ fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {
     Crashlytics.setUserEmail("$participantId@$studyId")
     Crashlytics.setUserName(deviceId)
 }
+

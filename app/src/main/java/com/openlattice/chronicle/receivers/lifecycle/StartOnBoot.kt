@@ -6,13 +6,13 @@ import android.content.Intent
 import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.util.Log
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
-import com.openlattice.chronicle.services.usage.scheduleUsageEventsJob
+import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
 
 class StartOnBoot : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && intent != null) {
             if (intent.action.equals(ACTION_BOOT_COMPLETED)) {
-                scheduleUsageEventsJob(context)
+                scheduleUsageMonitoringJob(context)
                 Log.i(javaClass.canonicalName, "Started usage service at boot.")
                 scheduleUploadJob(context)
                 Log.i(javaClass.canonicalName, "Scheduled upload job at boot.")
