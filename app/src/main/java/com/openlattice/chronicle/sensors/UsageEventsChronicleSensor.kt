@@ -8,7 +8,7 @@ import android.util.Log
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
-import org.joda.time.DateTime
+import org.joda.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -50,7 +50,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
                             propertyTypeIds[ID]!!, UUID.randomUUID() as Object,
                             propertyTypeIds[NAME]!!, it.packageName as Object,
                             propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType) as Object,
-                            propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp) as Object)
+                            propertyTypeIds[TIMESTAMP]!!, LocalDateTime(it.timeStamp) as Object)
                 }
     }
 
