@@ -23,8 +23,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     private var previousPollTimestamp = settings.getLong(LAST_USAGE_STATS_TIMESTAMP, System.currentTimeMillis() - USAGE_EVENTS_POLL_INTERVAL)
 
-    private val lock: Lock = ReentrantLock();
-
+    @Synchronized
     override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
         if (propertyTypeIds.isEmpty()) {
             return ImmutableList.of()
@@ -32,18 +31,11 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
 
         val currentPollTimestamp = System.currentTimeMillis()
 
-        if (lock.tryLock() && ((currentPollTimestamp - previousPollTimestamp) >= USAGE_STATS_POLL_INTERVAL)) {
-            val usageStats: List<UsageStats>
+        if ((currentPollTimestamp - previousPollTimestamp) >= USAGE_STATS_POLL_INTERVAL) {
 
-            //critical section is to only allow one thread to query usage stats.
-            try {
-                usageStats = usageStatsManager
-                        .queryUsageStats(INTERVAL_BEST, System.currentTimeMillis() - USAGE_STATS_POLL_INTERVAL, System.currentTimeMillis())
-                settings.edit().putLong(LAST_USAGE_STATS_TIMESTAMP, currentPollTimestamp).apply()
-                previousPollTimestamp = currentPollTimestamp
-            } finally {
-                lock.unlock()
-            }
+            val usageStats = usageStatsManager.queryUsageStats(INTERVAL_BEST, previousPollTimestamp, currentPollTimestamp)
+            settings.edit().putLong(LAST_USAGE_STATS_TIMESTAMP, currentPollTimestamp).apply()
+            previousPollTimestamp = currentPollTimestamp
 
             Log.i(javaClass.name, "Collected ${usageStats.size} stats.")
 

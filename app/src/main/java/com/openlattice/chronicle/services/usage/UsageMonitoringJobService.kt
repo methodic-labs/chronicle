@@ -81,10 +81,7 @@ class UsageMonitoringJobService : JobService() {
         return true
     }
 
-    fun doWork() {
-        if (isScreenOff()) {
-            return
-        }
+    private fun doWork() {
         if (propertyTypeIds == null) {
             propertyTypeIds = getPropertyTypeIds()
             if (propertyTypeIds == null) {

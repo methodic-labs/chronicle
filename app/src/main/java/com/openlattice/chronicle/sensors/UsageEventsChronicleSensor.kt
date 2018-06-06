@@ -14,6 +14,7 @@ import kotlin.collections.ArrayList
 
 const val USAGE_EVENTS_POLL_INTERVAL = 15 * 60 * 1000L
 const val LAST_USAGE_QUERY_TIMESTAMP = "com.openlattice.sensors.LastUsageQueryTimestamp"
+
 /**
  * A sensor that collect information about UsageEvents for uploading to Chronicle.
  */
@@ -21,6 +22,8 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     private var previousPollTimestamp = settings.getLong(LAST_USAGE_QUERY_TIMESTAMP, System.currentTimeMillis() - USAGE_EVENTS_POLL_INTERVAL)
+
+    @Synchronized
     override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
         if (propertyTypeIds.isEmpty()) {
             return ImmutableList.of()
