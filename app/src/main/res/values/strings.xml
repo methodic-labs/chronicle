@@ -14,5 +14,14 @@
         completions."
     </string>
     <string name="prompt_study_id">Enter your Study ID</string>
-    <string name="action_start_collection">Start Application Usage Logging</string>
+    <string name="prompt_participant_id">Enter your Participant ID</string>
+    <string name="action_start_collection">Enroll Device</string>
+    <string name="enrollment_configuration">enrollment</string>
+    <string name="already_enrolled">Device already enrolled</string>
+    <string name="invalid_participant">Invalid participant id.</string>
+    <string name="invalid_study_id_format">Invalid study id format.</string>
+    <string name="device_enroll_failure">Failed to enroll device. Please contact your study administrator.</string>
+    <string name="device_enroll_success">Successfully enrolled device!</string>
+    <string name="invalid_study_id_blank">Invalid study id.</string>
+    <string name="manual_usage_settings_permission">Your model phone requires manually granting of Usage Settings permissions. Please go to settings and grant this application usage settings.</string>
 </resources>

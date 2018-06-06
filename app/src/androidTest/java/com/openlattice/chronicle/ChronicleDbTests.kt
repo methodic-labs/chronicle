@@ -7,7 +7,6 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import android.arch.persistence.room.Room
-import com.esotericsoftware.kryo.Kryo
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
 import junit.framework.Assert
