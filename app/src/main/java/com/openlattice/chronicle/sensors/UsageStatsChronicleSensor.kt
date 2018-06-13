@@ -17,7 +17,7 @@ import java.util.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-const val USAGE_STATS_POLL_INTERVAL = 15*60 * 1000L
+const val USAGE_STATS_POLL_INTERVAL = 15 * 60 * 1000L
 const val LAST_USAGE_STATS_TIMESTAMP = "com.openlattice.sensors.LastUsageStatsTimestamp"
 
 class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
@@ -47,7 +47,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
                                 .put(propertyTypeIds[ID]!!, UUID.randomUUID() as Object)
                                 .put(propertyTypeIds[NAME]!!, it.packageName as Object)
                                 .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" as Object)
-                                .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp, DateTimeZone.getDefault()).toString() as Object)
+                                .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp).toString() as Object)
                                 .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp).toString() as Object)
                                 .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground as Object)
                                 .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed).toString() as Object)
