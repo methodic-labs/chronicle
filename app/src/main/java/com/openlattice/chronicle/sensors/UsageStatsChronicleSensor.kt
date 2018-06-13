@@ -10,12 +10,14 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-const val USAGE_STATS_POLL_INTERVAL = 60 * 1000L
+const val USAGE_STATS_POLL_INTERVAL = 15*60 * 1000L
 const val LAST_USAGE_STATS_TIMESTAMP = "com.openlattice.sensors.LastUsageStatsTimestamp"
 
 class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
@@ -45,10 +47,10 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
                                 .put(propertyTypeIds[ID]!!, UUID.randomUUID() as Object)
                                 .put(propertyTypeIds[NAME]!!, it.packageName as Object)
                                 .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" as Object)
-                                .put(propertyTypeIds[START_TIME]!!, LocalDateTime(it.firstTimeStamp) as Object)
-                                .put(propertyTypeIds[END_TIME]!!, LocalDateTime(it.lastTimeStamp) as Object)
+                                .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp, DateTimeZone.getDefault()).toString() as Object)
+                                .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp).toString() as Object)
                                 .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground as Object)
-                                .put(propertyTypeIds[TIMESTAMP]!!, LocalDateTime(it.lastTimeUsed) as Object)
+                                .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed).toString() as Object)
                                 .build()
 
                     }
