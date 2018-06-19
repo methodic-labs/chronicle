@@ -21,6 +21,7 @@ import com.openlattice.chronicle.sensors.PROPERTY_TYPES
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
 import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
 import com.openlattice.chronicle.serialization.JsonSerializer
+import com.openlattice.chronicle.serialization.JsonSerializer.serializeQueueEntry
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
@@ -100,7 +101,8 @@ class UsageMonitoringJobService : JobService() {
                         .map { it.poll(propertyTypeIds) }
                         .filter { it.isNotEmpty() }
                         .forEach {
-                            storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), JsonSerializer.serializeQueueEntry(it)))
+                            val queueEntry = it.filter { !it.isEmpty } //Filter out any empty write entries.
+                            storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), serializeQueueEntry(queueEntry)))
                         }
                 Log.d(javaClass.name, "Persisting usage information took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
             }
