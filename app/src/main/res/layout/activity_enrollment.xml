@@ -67,12 +67,12 @@
     <TextView
         android:id="@+id/errorMessage"
         android:layout_width="0dp"
-        android:layout_height="75"
         android:textAlignment="center"
         android:textSize="18sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/enrollmentProgress" />
+        app:layout_constraintTop_toBottomOf="@+id/enrollmentProgress"
+        android:layout_height="100dp" />
 </android.support.constraint.ConstraintLayout>
