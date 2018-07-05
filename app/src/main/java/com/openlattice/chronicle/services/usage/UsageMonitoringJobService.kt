@@ -28,6 +28,8 @@ import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
 import io.fabric.sdk.android.Fabric
+import org.joda.time.DateMidnight
+import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -50,7 +52,7 @@ class UsageMonitoringJobService : JobService() {
 
     override fun onCreate() {
         super.onCreate()
-        Fabric.with(this, Crashlytics() )
+        Fabric.with(this, Crashlytics())
     }
 
     override fun onStartJob(params: JobParameters?): Boolean {
@@ -97,14 +99,13 @@ class UsageMonitoringJobService : JobService() {
             executor.execute {
                 Log.i(javaClass.name, "Starting usage information collection. ")
                 val w = Stopwatch.createStarted()
-                sensors
-                        .map { it.poll(propertyTypeIds) }
-                        .filter { it.isNotEmpty() }
-                        .forEach {
-                            val queueEntry = it.filter { !it.isEmpty } //Filter out any empty write entries.
-                            storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), serializeQueueEntry(queueEntry)))
-                        }
-                Log.d(javaClass.name, "Persisting usage information took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
+                val queueEntry = sensors
+                        .flatMap { it.poll(propertyTypeIds) }
+                        .filter { !it.isEmpty } //Filter out any empty write entries.
+
+                storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), serializeQueueEntry(queueEntry)))
+
+                Log.d(javaClass.name, "Persisting ${queueEntry.size} usage information elements took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
             }
         }
     }

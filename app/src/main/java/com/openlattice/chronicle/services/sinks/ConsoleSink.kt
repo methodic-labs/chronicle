@@ -10,7 +10,8 @@ import java.util.*
  * This class is mainly for testing.
  */
 class ConsoleSink : DataSink {
-    override fun submit(data: List<SetMultimap<UUID, Any>>) {
+    override fun submit(data: List<SetMultimap<UUID, Any>>): Map<String, Boolean> {
         Log.d(javaClass.name, RetrofitBuilders.mapper.writeValueAsString(data))
+        return mapOf(ConsoleSink::javaClass.name to true )
     }
 }

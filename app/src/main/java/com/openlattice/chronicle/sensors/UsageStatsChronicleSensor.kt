@@ -9,6 +9,7 @@ import android.util.Log
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
+import org.joda.time.DateMidnight
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
@@ -23,7 +24,6 @@ const val LAST_USAGE_STATS_TIMESTAMP = "com.openlattice.sensors.LastUsageStatsTi
 class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-    private var previousPollTimestamp = settings.getLong(LAST_USAGE_STATS_TIMESTAMP, System.currentTimeMillis() - USAGE_EVENTS_POLL_INTERVAL)
 
     @Synchronized
     override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
@@ -31,32 +31,24 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
             return ImmutableList.of()
         }
 
-        val currentPollTimestamp = System.currentTimeMillis()
 
-        if ((currentPollTimestamp - previousPollTimestamp) >= USAGE_STATS_POLL_INTERVAL) {
+        val usageStats = usageStatsManager.queryUsageStats(INTERVAL_BEST, DateMidnight.now().millis, System.currentTimeMillis())
 
-            val usageStats = usageStatsManager.queryUsageStats(INTERVAL_BEST, previousPollTimestamp, currentPollTimestamp)
-            settings.edit().putLong(LAST_USAGE_STATS_TIMESTAMP, currentPollTimestamp).apply()
-            previousPollTimestamp = currentPollTimestamp
+        Log.i(javaClass.name, "Collected ${usageStats.size} stats.")
 
-            Log.i(javaClass.name, "Collected ${usageStats.size} stats.")
+        return usageStats
+                .map {
+                    ImmutableSetMultimap.Builder<UUID, Object>()
+                            .put(propertyTypeIds[ID]!!, UUID.randomUUID() as Object)
+                            .put(propertyTypeIds[NAME]!!, it.packageName as Object)
+                            .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" as Object)
+                            .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp).toString() as Object)
+                            .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp).toString() as Object)
+                            .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground as Object)
+                            .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed).toString() as Object)
+                            .build()
 
-            return usageStats
-                    .map {
-                        ImmutableSetMultimap.Builder<UUID, Object>()
-                                .put(propertyTypeIds[ID]!!, UUID.randomUUID() as Object)
-                                .put(propertyTypeIds[NAME]!!, it.packageName as Object)
-                                .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" as Object)
-                                .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp).toString() as Object)
-                                .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp).toString() as Object)
-                                .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground as Object)
-                                .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed).toString() as Object)
-                                .build()
-
-                    }
-        } else {
-            return ImmutableList.of()
-        }
+                }
     }
 }
 
