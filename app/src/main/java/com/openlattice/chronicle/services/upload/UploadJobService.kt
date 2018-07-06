@@ -83,7 +83,7 @@ class UploadJobService : JobService() {
             val queue = chronicleDb.queueEntryData()
             var nextEntries = queue.getNextEntries(BATCH_SIZE)
             var notEmptied = nextEntries.isNotEmpty()
-            while (notEmptied) {
+            while (notEmptied && chronicleApi.isRunning ) {
                 limiter.acquire()
                 val w = Stopwatch.createStarted()
                 val data = nextEntries
