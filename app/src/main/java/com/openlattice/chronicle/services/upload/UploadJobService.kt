@@ -12,10 +12,13 @@ import android.provider.Settings
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
 import com.google.common.util.concurrent.RateLimiter
 import com.openlattice.chronicle.ChronicleApi
+import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.services.sinks.BrokerDataSink
@@ -39,6 +42,7 @@ const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
     private val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
+    private val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
     private val serviceId = Random().nextLong()
     private val limiter = com.google.common.util.concurrent.RateLimiter.create(10.0)
 
@@ -80,33 +84,47 @@ class UploadJobService : JobService() {
         Log.i("${javaClass.name}-$serviceId", "Upload job service is running with batch size " + BATCH_SIZE.toString())
 
         executor.execute {
-            val queue = chronicleDb.queueEntryData()
-            var nextEntries = queue.getNextEntries(BATCH_SIZE)
-            var notEmptied = nextEntries.isNotEmpty()
-            while (notEmptied && chronicleApi.isRunning ) {
-                limiter.acquire()
-                val w = Stopwatch.createStarted()
-                val data = nextEntries
-                        .map { qe -> qe.data }
-                        .map { qe -> JsonSerializer.deserializeQueueEntry(qe) }
-                        .flatMap { it }
-                Log.d("${javaClass.name}-$serviceId", "Loading $BATCH_SIZE items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
-                w.reset()
-                w.start()
-                if( dataSink.submit(data)[OpenLatticeSink::javaClass.name] == true ) {
-                    setLastUpload(this)
-                    Log.d("${javaClass.name}-$serviceId", "Uploading ${data.size} to OpenLattice items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
-                    queue.deleteEntries(nextEntries)
-                    nextEntries = queue.getNextEntries(BATCH_SIZE)
-                    notEmptied = nextEntries.size == BATCH_SIZE
+            if (chronicleApi.isRunning) {
+                val deviceId = getDeviceId(applicationContext)
+                val datasourceId = settings.getStudyId()
+                val participantId = settings.getParticipantId()
+
+                //Only run the upload job if the device is already enrolled or we are able to properly enroll.
+                if (chronicleStudyApi.isKnownDatasource(datasourceId, participantId, deviceId)
+                        || (chronicleStudyApi.enrollSource(
+                                datasourceId,
+                                participantId,
+                                deviceId,
+                                Optional.of(getDevice(deviceId))) != null)) {
+
+                    val queue = chronicleDb.queueEntryData()
+                    var nextEntries = queue.getNextEntries(BATCH_SIZE)
+                    var notEmptied = nextEntries.isNotEmpty()
+                    while (notEmptied && chronicleApi.isRunning) {
+                        limiter.acquire()
+                        val w = Stopwatch.createStarted()
+                        val data = nextEntries
+                                .map { qe -> qe.data }
+                                .map { qe -> JsonSerializer.deserializeQueueEntry(qe) }
+                                .flatMap { it }
+                        Log.d("${javaClass.name}-$serviceId", "Loading $BATCH_SIZE items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
+                        w.reset()
+                        w.start()
+                        if (dataSink.submit(data)[OpenLatticeSink::javaClass.name] == true) {
+                            setLastUpload(this)
+                            Log.d("${javaClass.name}-$serviceId", "Uploading ${data.size} to OpenLattice items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
+                            queue.deleteEntries(nextEntries)
+                            nextEntries = queue.getNextEntries(BATCH_SIZE)
+                            notEmptied = nextEntries.size == BATCH_SIZE
+                        }
+                    }
+                    chronicleDb.close()
+                    jobFinished(params, false)
                 }
             }
-            chronicleDb.close()
-            jobFinished(params, false)
         }
         return true
     }
-
 }
 
 fun setLastUpload(context: Context) {
@@ -137,3 +155,4 @@ fun scheduleUploadJob(context: Context) {
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
     jobScheduler.schedule(jobBuilder.build())
 }
+
