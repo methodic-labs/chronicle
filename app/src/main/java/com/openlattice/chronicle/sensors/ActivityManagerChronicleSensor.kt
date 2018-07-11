@@ -24,7 +24,7 @@ class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
         }
     }
 
-    fun mapImportance(importance: Int): String {
+    private fun mapImportance(importance: Int): String {
         return when (importance) {
             IMPORTANCE_FOREGROUND -> "Foreground UI"
             IMPORTANCE_FOREGROUND_SERVICE -> "Foreground Service"

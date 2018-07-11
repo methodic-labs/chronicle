@@ -18,11 +18,8 @@ import java.util.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-const val USAGE_STATS_POLL_INTERVAL = 15 * 60 * 1000L
-const val LAST_USAGE_STATS_TIMESTAMP = "com.openlattice.sensors.LastUsageStatsTimestamp"
 
 class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
-    private val settings = PreferenceManager.getDefaultSharedPreferences(context)
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
     @Synchronized

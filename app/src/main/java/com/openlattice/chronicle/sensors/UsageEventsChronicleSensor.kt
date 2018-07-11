@@ -22,23 +22,22 @@ const val LAST_USAGE_QUERY_TIMESTAMP = "com.openlattice.sensors.LastUsageQueryTi
 class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-    private var previousPollTimestamp = settings.getLong(LAST_USAGE_QUERY_TIMESTAMP, System.currentTimeMillis() - USAGE_EVENTS_POLL_INTERVAL)
 
     @Synchronized
     override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
         if (propertyTypeIds.isEmpty()) {
+            Log.w(UsageEventsChronicleSensor::class.java.name, "Property type ids is empty!")
             return ImmutableList.of()
         }
-        val currentPollTimestamp = System.currentTimeMillis()
+
         val usageEventsList: MutableList<UsageEvents.Event> = ArrayList()
 
-        if ((currentPollTimestamp - previousPollTimestamp) < USAGE_EVENTS_POLL_INTERVAL) {
-            return ImmutableList.of()
-        }
+        val previousPollTimestamp = settings.getLong(LAST_USAGE_QUERY_TIMESTAMP, System.currentTimeMillis() - USAGE_EVENTS_POLL_INTERVAL)
+        val currentPollTimestamp = System.currentTimeMillis()
 
         val usageEvents = usageStatsManager.queryEvents(previousPollTimestamp, currentPollTimestamp)
         settings.edit().putLong(LAST_USAGE_QUERY_TIMESTAMP, currentPollTimestamp).apply()
-        previousPollTimestamp = currentPollTimestamp
+
 
         while (usageEvents.hasNextEvent()) {
             val event: UsageEvents.Event = UsageEvents.Event()
