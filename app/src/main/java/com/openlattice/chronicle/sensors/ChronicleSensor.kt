@@ -27,5 +27,5 @@ val PROPERTY_TYPES = setOf(
         END_TIME)
 
 interface ChronicleSensor {
-    fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>>
+    fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>>
 }

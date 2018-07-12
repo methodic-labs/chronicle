@@ -8,13 +8,11 @@ import android.arch.persistence.room.Room
 import android.content.ComponentName
 import android.content.Context
 import android.preference.PreferenceManager
-import android.provider.Settings
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
-import com.google.common.util.concurrent.RateLimiter
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.preferences.EnrollmentSettings

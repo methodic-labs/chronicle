@@ -24,7 +24,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
     @Synchronized
-    override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
+    override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>> {
         if (propertyTypeIds.isEmpty()) {
             Log.w(UsageEventsChronicleSensor::class.java.name, "Property type ids is empty!")
             return ImmutableList.of()
@@ -50,10 +50,10 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
         return usageEventsList
                 .map {
                     ImmutableSetMultimap.of(
-                            propertyTypeIds[ID]!!, UUID.randomUUID() as Object,
-                            propertyTypeIds[NAME]!!, it.packageName as Object,
-                            propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType) as Object,
-                            propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp) as Object)
+                            propertyTypeIds[ID]!!, UUID.randomUUID(),
+                            propertyTypeIds[NAME]!!, it.packageName,
+                            propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType),
+                            propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp))
                 }
     }
 

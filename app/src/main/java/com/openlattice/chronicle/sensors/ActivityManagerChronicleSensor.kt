@@ -14,13 +14,13 @@ import kotlin.collections.ArrayList
 class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
     private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
-    override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
+    override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>> {
         return activityManager.runningAppProcesses.map {
             ImmutableSetMultimap.of(
-                    propertyTypeIds[ID]!!, UUID.randomUUID() as Object,
-                    propertyTypeIds[NAME]!!, it.processName as Object,
-                    propertyTypeIds[IMPORTANCE]!!, mapImportance(it.importance) as Object,
-                    propertyTypeIds[TIMESTAMP]!!, DateTime().toString() as Object)
+                    propertyTypeIds[ID]!!, UUID.randomUUID(),
+                    propertyTypeIds[NAME]!!, it.processName,
+                    propertyTypeIds[IMPORTANCE]!!, mapImportance(it.importance),
+                    propertyTypeIds[TIMESTAMP]!!, DateTime().toString())
         }
     }
 

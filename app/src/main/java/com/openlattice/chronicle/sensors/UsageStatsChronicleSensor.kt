@@ -23,7 +23,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
     @Synchronized
-    override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Object>> {
+    override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>> {
         if (propertyTypeIds.isEmpty()) {
             return ImmutableList.of()
         }
@@ -33,16 +33,17 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
 
         Log.i(javaClass.name, "Collected ${usageStats.size} stats.")
 
+        //If we start seeing serialization oddities revert to doing DateTime.toString() here
         return usageStats
                 .map {
-                    ImmutableSetMultimap.Builder<UUID, Object>()
-                            .put(propertyTypeIds[ID]!!, UUID.randomUUID() as Object)
-                            .put(propertyTypeIds[NAME]!!, it.packageName as Object)
-                            .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" as Object)
-                            .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp).toString() as Object)
-                            .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp).toString() as Object)
-                            .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground as Object)
-                            .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed).toString() as Object)
+                    ImmutableSetMultimap.Builder<UUID, Any>()
+                            .put(propertyTypeIds[ID]!!, UUID.randomUUID())
+                            .put(propertyTypeIds[NAME]!!, it.packageName )
+                            .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" )
+                            .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp) )
+                            .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp))
+                            .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground )
+                            .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed))
                             .build()
 
                 }

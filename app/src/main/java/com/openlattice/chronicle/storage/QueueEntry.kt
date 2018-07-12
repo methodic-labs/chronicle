@@ -26,8 +26,8 @@ class QueueEntry(
     }
 
     override fun hashCode(): Int {
-        var result = writeTimestamp?.hashCode() ?: 0
-        result = 31 * result + (id?.hashCode() ?: 0)
+        var result = writeTimestamp.hashCode()
+        result = 31 * result + (id.hashCode())
         result = 31 * result + Arrays.hashCode(data)
         return result
     }
