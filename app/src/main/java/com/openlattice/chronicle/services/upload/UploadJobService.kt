@@ -29,6 +29,7 @@ import io.fabric.sdk.android.Fabric
 import org.joda.time.LocalDateTime
 import retrofit2.Retrofit
 import java.util.*
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -66,6 +67,7 @@ class UploadJobService : JobService() {
     }
 
     override fun onStartJob(params: JobParameters?): Boolean {
+        val latch = CountDownLatch(1)
         executor.execute {
             chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java!!, "chronicle").build()
             deviceId = getDeviceId(this)
@@ -77,8 +79,10 @@ class UploadJobService : JobService() {
                             OpenLatticeSink(studyId, participantId, deviceId, chronicleApi),
                             ConsoleSink()))
             Log.i("${javaClass.name}-$serviceId", "Job service is initialized")
+            latch.countDown()
         }
 
+        latch.await()
         Log.i("${javaClass.name}-$serviceId", "Upload job service is running with batch size " + BATCH_SIZE.toString())
 
         executor.execute {
