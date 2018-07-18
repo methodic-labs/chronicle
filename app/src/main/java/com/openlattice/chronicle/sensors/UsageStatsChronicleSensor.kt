@@ -38,12 +38,12 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
                 .map {
                     ImmutableSetMultimap.Builder<UUID, Any>()
                             .put(propertyTypeIds[ID]!!, UUID.randomUUID())
-                            .put(propertyTypeIds[NAME]!!, it.packageName )
-                            .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat" )
-                            .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp) )
-                            .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp))
-                            .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground )
-                            .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed))
+                            .put(propertyTypeIds[NAME]!!, it.packageName)
+                            .put(propertyTypeIds[IMPORTANCE]!!, "Usage Stat")
+                            .put(propertyTypeIds[START_TIME]!!, DateTime(it.firstTimeStamp).toString())
+                            .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp).toString())
+                            .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground)
+                            .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed).toString())
                             .build()
 
                 }

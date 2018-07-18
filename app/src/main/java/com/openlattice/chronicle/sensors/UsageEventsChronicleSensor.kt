@@ -53,7 +53,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
                             propertyTypeIds[ID]!!, UUID.randomUUID(),
                             propertyTypeIds[NAME]!!, it.packageName,
                             propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType),
-                            propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp))
+                            propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp).toString())
                 }
     }
 

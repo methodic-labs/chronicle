@@ -86,7 +86,7 @@ class UploadJobService : JobService() {
         Log.i("${javaClass.name}-$serviceId", "Upload job service is running with batch size " + BATCH_SIZE.toString())
 
         executor.execute {
-            if (chronicleApi.isRunning) {
+            if (chronicleApi.isRunning == true) {
                 val deviceId = getDeviceId(applicationContext)
                 val datasourceId = settings.getStudyId()
                 val participantId = settings.getParticipantId()
