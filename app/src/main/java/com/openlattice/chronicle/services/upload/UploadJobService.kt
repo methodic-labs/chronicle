@@ -26,6 +26,7 @@ import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.util.RetrofitBuilders
 import com.openlattice.chronicle.util.RetrofitBuilders.*
 import io.fabric.sdk.android.Fabric
+import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import retrofit2.Retrofit
 import java.util.*
@@ -132,7 +133,7 @@ class UploadJobService : JobService() {
 fun setLastUpload(context: Context) {
     val settings = PreferenceManager.getDefaultSharedPreferences(context)
     with(settings.edit()) {
-        putString(LAST_UPDATED_SETTING, LocalDateTime.now().toString())
+        putString(LAST_UPDATED_SETTING, DateTime.now().toString())
         apply()
     }
 }

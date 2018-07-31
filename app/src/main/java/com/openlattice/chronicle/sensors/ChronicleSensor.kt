@@ -14,6 +14,7 @@ const val ALTITUDE = "location.altitude"
 const val LONGITUDE = "location.longitude"
 const val LATITUDE = "location.latitude"
 const val ID = "general.stringid"
+const val TIMEZONE = "ol.timezone"
 val PROPERTY_TYPES = setOf(
         IMPORTANCE,
         NAME,
@@ -24,7 +25,8 @@ val PROPERTY_TYPES = setOf(
         ID,
         DURATION,
         START_TIME,
-        END_TIME)
+        END_TIME,
+        TIMEZONE)
 
 interface ChronicleSensor {
     fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>>

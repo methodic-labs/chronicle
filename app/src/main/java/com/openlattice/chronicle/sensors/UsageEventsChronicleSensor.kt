@@ -46,14 +46,15 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
         }
 
         Log.i(javaClass.name, "Collected ${usageEventsList.size} usage events.")
-
+        val timezone = TimeZone.getDefault().id
         return usageEventsList
                 .map {
                     ImmutableSetMultimap.of(
                             propertyTypeIds[ID]!!, UUID.randomUUID(),
                             propertyTypeIds[NAME]!!, it.packageName,
                             propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType),
-                            propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp).toString())
+                            propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp).toString(),
+                            propertyTypeIds[TIMEZONE]!!, timezone)
                 }
     }
 

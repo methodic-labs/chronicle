@@ -33,6 +33,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
 
         Log.i(javaClass.name, "Collected ${usageStats.size} stats.")
 
+        val timezone = TimeZone.getDefault().id
         //If we start seeing serialization oddities revert to doing DateTime.toString() here
         return usageStats
                 .map {
@@ -44,6 +45,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
                             .put(propertyTypeIds[END_TIME]!!, DateTime(it.lastTimeStamp).toString())
                             .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground)
                             .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed).toString())
+                            .put(propertyTypeIds[TIMEZONE]!!, timezone)
                             .build()
 
                 }
