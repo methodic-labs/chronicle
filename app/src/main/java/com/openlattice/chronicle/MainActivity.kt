@@ -27,10 +27,10 @@ class MainActivity : AppCompatActivity() {
         if (hasUsageSettingPermission(this)) {
             val enrollment = EnrollmentSettings(this)
             if (enrollment.enrolled) {
-                val studyIdText = findViewById<TextView>(R.id.mainStudyId)
-                val participantIdText = findViewById<TextView>(R.id.mainParticipantId)
-                studyIdText.text = "Study Id: ${enrollment.getStudyId()}"
-                participantIdText.text = "Participant Id: ${enrollment.getParticipantId()}"
+                val studyIdText = findViewById<TextView>(R.id.studyId)
+                val participantIdText = findViewById<TextView>(R.id.participantId)
+                studyIdText.text = enrollment.getStudyId().toString()
+                participantIdText.text = enrollment.getParticipantId()
                 scheduleUploadJob(this)
                 scheduleUsageMonitoringJob(this)
                 handler.post(this::updateLastUpload)
@@ -46,8 +46,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateLastUpload() {
-        val lastUploadText = findViewById<TextView>(R.id.lastUploadText)
-        lastUploadText.text = "Last Upload: ${getLastUpload(this)}"
+        val lastUploadText = findViewById<TextView>(R.id.lastUploadValue)
+        lastUploadText.text = getLastUpload(this)
         handler.postDelayed(this::updateLastUpload, LAST_UPLOAD_REFRESH_INTERVAL)
     }
 }
