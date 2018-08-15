@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
+import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -58,21 +59,28 @@ class Enrollment : AppCompatActivity() {
         doEnrollment()
     }
 
+    fun handleOnClickDone(view :View) {
+        doMainActivity(this)
+        finish()
+    }
+
     private fun doEnrollment() {
+
         val studyIdText = findViewById<EditText>(R.id.studyIdText)
         val participantIdText = findViewById<EditText>(R.id.participantIdText)
-        val errorMessageText = findViewById<TextView>(R.id.errorMessage)
+        val statusMessageText = findViewById<TextView>(R.id.statusMessage)
         val progressBar = findViewById<ProgressBar>(R.id.enrollmentProgress)
         val submitBtn = findViewById<Button>(R.id.button)
+        val doneBtn = findViewById<Button>(R.id.doneButton)
 
         if (studyIdText.text.isBlank()) {
-            errorMessageText.text = getString(R.string.invalid_study_id_blank)
-            errorMessageText.visibility = View.VISIBLE
+            statusMessageText.text = getString(R.string.invalid_study_id_blank)
+            statusMessageText.visibility = View.VISIBLE
         }
 
         if (participantIdText.text.isBlank()) {
-            errorMessageText.text = getString(R.string.invalid_participant)
-            errorMessageText.visibility = View.VISIBLE
+            statusMessageText.text = getString(R.string.invalid_participant)
+            statusMessageText.visibility = View.VISIBLE
         }
 
 
@@ -105,28 +113,32 @@ class Enrollment : AppCompatActivity() {
                             val enrollmentSettings = EnrollmentSettings(applicationContext)
                             enrollmentSettings.setStudyId(id)
                             enrollmentSettings.setParticipantId(participantId)
-                            progressBar.visibility = View.INVISIBLE
-                            submitBtn.visibility = View.VISIBLE
-                            errorMessageText.visibility = View.VISIBLE
-                            errorMessageText.text = getString(R.string.device_enroll_success)
-                            doMainActivity(this)
-                            finish()
+                            // hide text fields, progress bar, and enroll button
+                            studyIdText.visibility = View.GONE
+                            participantIdText.visibility = View.GONE
+                            progressBar.visibility = View.GONE
+                            submitBtn.visibility = View.GONE
+                            // show success message and done button
+                            statusMessageText.text = getString(R.string.device_enroll_success)
+                            statusMessageText.visibility = View.VISIBLE
+                            doneBtn.visibility = View.VISIBLE
                         }
                     } else {
                         Log.e(javaClass.canonicalName, "Unable to enroll device.")
                         mHandler.post {
                             progressBar.visibility = View.INVISIBLE
                             submitBtn.visibility = View.VISIBLE
-                            errorMessageText.visibility = View.VISIBLE
-                            errorMessageText.text = getString(R.string.device_enroll_failure)
+                            doneBtn.visibility = View.INVISIBLE
+                            statusMessageText.visibility = View.VISIBLE
+                            statusMessageText.text = getString(R.string.device_enroll_failure)
                         }
                     }
                 }
 
 
             } catch (e: IllegalArgumentException) {
-                errorMessageText.text = getString(R.string.invalid_study_id_format)
-                errorMessageText.visibility = View.VISIBLE
+                statusMessageText.text = getString(R.string.invalid_study_id_format)
+                statusMessageText.visibility = View.VISIBLE
                 Log.e(javaClass.canonicalName, "Unable to parse UUID.");
             }
         }
