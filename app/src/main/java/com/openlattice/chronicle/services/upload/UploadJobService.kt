@@ -27,7 +27,6 @@ import com.openlattice.chronicle.util.RetrofitBuilders
 import com.openlattice.chronicle.util.RetrofitBuilders.*
 import io.fabric.sdk.android.Fabric
 import org.joda.time.DateTime
-import org.joda.time.LocalDateTime
 import retrofit2.Retrofit
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -89,13 +88,17 @@ class UploadJobService : JobService() {
         executor.execute {
             if (chronicleApi.isRunning == true) {
                 val deviceId = getDeviceId(applicationContext)
-                val datasourceId = settings.getStudyId()
+                val studyId = settings.getStudyId()
                 val participantId = settings.getParticipantId()
 
+                if (deviceId.isNullOrBlank() || studyId == null || participantId.isNullOrBlank()) {
+                    Crashlytics.log("studyId: ${studyId} ; participantId: ${participantId} ; deviceId: ${deviceId}")
+                }
+
                 //Only run the upload job if the device is already enrolled or we are able to properly enroll.
-                if (chronicleStudyApi.isKnownDatasource(datasourceId, participantId, deviceId)
+                if (chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
                         || (chronicleStudyApi.enrollSource(
-                                datasourceId,
+                                studyId,
                                 participantId,
                                 deviceId,
                                 Optional.of(getDevice(deviceId))) != null)) {
