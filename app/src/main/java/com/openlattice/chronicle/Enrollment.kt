@@ -20,7 +20,6 @@ import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils
 import io.fabric.sdk.android.Fabric
-import java.lang.IllegalArgumentException
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -100,18 +99,18 @@ class Enrollment : AppCompatActivity() {
                 executor.execute {
                     val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
 
-                    //TODO: Actually retrieve id of device.
-                    val chronicleId = if (chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)) {
-                        UUID.randomUUID()
-                    } else {
-                        chronicleStudyApi.enrollSource(
-                                studyId,
-                                participantId,
-                                deviceId,
-                                Optional.of(getDevice(deviceId)))
+                    var isKnown = false
+                    var chronicleId :UUID? = null
+                    try {
+                        isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
+                        chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                    } catch (e : Exception) {
+                        Crashlytics.log("caught exception - studyId: $studyId ; participantId: $participantId")
+                        Crashlytics.logException(e)
                     }
 
-                    if (chronicleId != null) {
+                    // TODO: actually retrieve device id
+                    if (isKnown || chronicleId != null) {
                         Log.i(javaClass.canonicalName, "Chronicle id: " + chronicleId.toString())
                         mHandler.post {
                             val enrollmentSettings = EnrollmentSettings(applicationContext)
@@ -128,8 +127,8 @@ class Enrollment : AppCompatActivity() {
                             doneBtn.visibility = View.VISIBLE
                         }
                     } else {
-                        Crashlytics.log("unable to enroll device, chronicleId is null")
-                        Log.e(javaClass.canonicalName, "Unable to enroll device.")
+                        Crashlytics.log("unable to enroll device - studyId: $studyId ; participantId: $participantId")
+                        Log.e(javaClass.canonicalName, "unable to enroll device.")
                         mHandler.post {
                             progressBar.visibility = View.INVISIBLE
                             submitBtn.visibility = View.VISIBLE

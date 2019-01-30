@@ -8,8 +8,6 @@ import android.arch.persistence.room.Room
 import android.content.ComponentName
 import android.content.Context
 import android.hardware.display.DisplayManager
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.Display
 import com.crashlytics.android.Crashlytics
@@ -20,7 +18,6 @@ import com.openlattice.chronicle.sensors.ChronicleSensor
 import com.openlattice.chronicle.sensors.PROPERTY_TYPES
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
 import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
-import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.serialization.JsonSerializer.serializeQueueEntry
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
@@ -28,8 +25,6 @@ import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
 import io.fabric.sdk.android.Fabric
-import org.joda.time.DateMidnight
-import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
