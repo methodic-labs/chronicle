@@ -105,7 +105,7 @@ class Enrollment : AppCompatActivity() {
                         isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
                         chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
                     } catch (e : Exception) {
-                        Crashlytics.log("caught exception - studyId: $studyId ; participantId: $participantId")
+                        Crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                         Crashlytics.logException(e)
                     }
 
@@ -127,7 +127,7 @@ class Enrollment : AppCompatActivity() {
                             doneBtn.visibility = View.VISIBLE
                         }
                     } else {
-                        Crashlytics.log("unable to enroll device - studyId: $studyId ; participantId: $participantId")
+                        Crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                         Log.e(javaClass.canonicalName, "unable to enroll device.")
                         mHandler.post {
                             progressBar.visibility = View.INVISIBLE

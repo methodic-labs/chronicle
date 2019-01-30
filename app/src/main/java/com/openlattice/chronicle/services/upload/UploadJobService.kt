@@ -92,7 +92,7 @@ class UploadJobService : JobService() {
                 val participantId = settings.getParticipantId()
 
                 if (deviceId.isNullOrBlank() || studyId == null || participantId.isNullOrBlank()) {
-                    Crashlytics.log("studyId: $studyId ; participantId: $participantId ; deviceId: $deviceId")
+                    Crashlytics.log("studyId: \"$studyId\" ; participantId: \"$participantId\" ; deviceId: \"$deviceId\"")
                 }
 
                 var isKnown = false
@@ -101,7 +101,7 @@ class UploadJobService : JobService() {
                     isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
                     chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
                 } catch (e :Exception) {
-                    Crashlytics.log("caught exception - studyId: $studyId ; participantId: $participantId")
+                    Crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     Crashlytics.logException(e)
                 }
 
