@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
-import android.text.InputType
+import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -19,8 +19,8 @@ import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
+import com.openlattice.chronicle.utils.Utils
 import io.fabric.sdk.android.Fabric
-import java.lang.IllegalArgumentException
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -73,21 +73,27 @@ class Enrollment : AppCompatActivity() {
         val submitBtn = findViewById<Button>(R.id.button)
         val doneBtn = findViewById<Button>(R.id.doneButton)
 
-        if (studyIdText.text.isBlank()) {
+        val studyIdStr: String = studyIdText.text.toString().trim()
+        val participantId: String = participantIdText.text.toString().trim()
+
+        if (studyIdStr.isBlank()) {
             statusMessageText.text = getString(R.string.invalid_study_id_blank)
             statusMessageText.visibility = View.VISIBLE
         }
 
-        if (participantIdText.text.isBlank()) {
+        if (!Utils.isValidUUID(studyIdStr)) {
+            statusMessageText.text = getString(R.string.invalid_study_id_format)
+            statusMessageText.visibility = View.VISIBLE
+        }
+
+        if (participantId.isBlank()) {
             statusMessageText.text = getString(R.string.invalid_participant)
             statusMessageText.visibility = View.VISIBLE
         }
 
-
-        if (studyIdText.text.isNotBlank() && participantIdText.text.isNotBlank()) {
+        if (Utils.isValidUUID(studyIdStr) && participantId.isNotBlank()) {
             try {
-                val id = UUID.fromString(studyIdText.text.toString())
-                val participantId = participantIdText.text.toString()
+                val studyId = UUID.fromString(studyIdStr)
                 val deviceId = getDeviceId(applicationContext)
 
                 submitBtn.visibility = View.INVISIBLE
@@ -96,22 +102,22 @@ class Enrollment : AppCompatActivity() {
                 executor.execute {
                     val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
 
-                    //TODO: Actually retrieve id of device.
-                    val chronicleId = if (chronicleStudyApi.isKnownDatasource(id, participantId, deviceId)) {
-                        UUID.randomUUID()
-                    } else {
-                        chronicleStudyApi.enrollSource(
-                                id,
-                                participantId,
-                                deviceId,
-                                Optional.of(getDevice(deviceId)))
+                    var isKnown = false
+                    var chronicleId :UUID? = null
+                    try {
+                        isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
+                        chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                    } catch (e : Exception) {
+                        Crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
+                        Crashlytics.logException(e)
                     }
 
-                    if (chronicleId != null) {
+                    // TODO: actually retrieve device id
+                    if (isKnown || chronicleId != null) {
                         Log.i(javaClass.canonicalName, "Chronicle id: " + chronicleId.toString())
                         mHandler.post {
                             val enrollmentSettings = EnrollmentSettings(applicationContext)
-                            enrollmentSettings.setStudyId(id)
+                            enrollmentSettings.setStudyId(studyId)
                             enrollmentSettings.setParticipantId(participantId)
                             // hide text fields, progress bar, and enroll button
                             studyIdText.visibility = View.GONE
@@ -124,7 +130,8 @@ class Enrollment : AppCompatActivity() {
                             doneBtn.visibility = View.VISIBLE
                         }
                     } else {
-                        Log.e(javaClass.canonicalName, "Unable to enroll device.")
+                        Crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")
+                        Log.e(javaClass.canonicalName, "unable to enroll device.")
                         mHandler.post {
                             progressBar.visibility = View.INVISIBLE
                             submitBtn.visibility = View.VISIBLE
@@ -139,7 +146,8 @@ class Enrollment : AppCompatActivity() {
             } catch (e: IllegalArgumentException) {
                 statusMessageText.text = getString(R.string.invalid_study_id_format)
                 statusMessageText.visibility = View.VISIBLE
-                Log.e(javaClass.canonicalName, "Unable to parse UUID.");
+                Crashlytics.logException(e)
+                Log.e(javaClass.canonicalName, "Unable to parse UUID.")
             }
         }
     }
