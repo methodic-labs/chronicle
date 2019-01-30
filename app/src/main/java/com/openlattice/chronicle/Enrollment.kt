@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
+import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -72,25 +73,27 @@ class Enrollment : AppCompatActivity() {
         val submitBtn = findViewById<Button>(R.id.button)
         val doneBtn = findViewById<Button>(R.id.doneButton)
 
-        if (studyIdText.text.isBlank()) {
+        val studyIdStr: String = studyIdText.text.toString().trim()
+        val participantId: String = participantIdText.text.toString().trim()
+
+        if (studyIdStr.isBlank()) {
             statusMessageText.text = getString(R.string.invalid_study_id_blank)
             statusMessageText.visibility = View.VISIBLE
         }
 
-        if (!Utils.isValidUUID(studyIdText.text.toString())) {
+        if (!Utils.isValidUUID(studyIdStr)) {
             statusMessageText.text = getString(R.string.invalid_study_id_format)
             statusMessageText.visibility = View.VISIBLE
         }
 
-        if (participantIdText.text.isBlank()) {
+        if (participantId.isBlank()) {
             statusMessageText.text = getString(R.string.invalid_participant)
             statusMessageText.visibility = View.VISIBLE
         }
 
-        if (Utils.isValidUUID(studyIdText.text.toString()) && participantIdText.text.isNotBlank()) {
+        if (Utils.isValidUUID(studyIdStr) && participantId.isNotBlank()) {
             try {
-                val studyId = UUID.fromString(studyIdText.text.toString())
-                val participantId = participantIdText.text.toString()
+                val studyId = UUID.fromString(studyIdStr)
                 val deviceId = getDeviceId(applicationContext)
 
                 submitBtn.visibility = View.INVISIBLE
