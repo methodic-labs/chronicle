@@ -10,8 +10,8 @@ import com.google.common.collect.ImmutableMap
 import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropertyTypeIds
 import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds
 import com.openlattice.chronicle.sources.AndroidDevice
-import com.openlattice.chronicle.util.RetrofitBuilders
-import java.util.*
+import com.openlattice.chronicle.utils.Utils
+import java.util.UUID
 
 const val PARTICIPANT_ID = "participantId";
 const val STUDY_ID = "studyId"
@@ -28,7 +28,7 @@ class EnrollmentSettings(private val context: Context) {
     init {
         val studyIdString = settings.getString(STUDY_ID, "")
         participantId = settings.getString(PARTICIPANT_ID, "")
-        if (studyIdString.isNotBlank() && participantId.isNotBlank()) {
+        if (Utils.isValidUUID(studyIdString) && participantId.isNotBlank()) {
             studyId = UUID.fromString(studyIdString)
             setCrashlyticsUser(studyId, participantId, getDeviceId(context))
         } else {

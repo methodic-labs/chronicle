@@ -40,7 +40,7 @@ ext.jackson_version = '2.6.5'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation('com.crashlytics.sdk.android:crashlytics:2.9.4@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.8@aar') {
         transitive = true
     }
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
