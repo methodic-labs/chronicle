@@ -97,10 +97,10 @@ class UsageMonitoringJobService : JobService() {
                 val queueEntry = sensors
                         .flatMap { it.poll(propertyTypeIds) }
                         .filter { !it.isEmpty } //Filter out any empty write entries.
-
-                storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), serializeQueueEntry(queueEntry)))
-
-                Log.d(javaClass.name, "Persisting ${queueEntry.size} usage information elements took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
+                queueEntry.asSequence().chunked(1000).forEach { chunk ->
+                    storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), serializeQueueEntry(chunk)))
+                    Log.d(javaClass.name, "Persisting ${chunk.size} usage information elements took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
+                }
             }
         }
     }
