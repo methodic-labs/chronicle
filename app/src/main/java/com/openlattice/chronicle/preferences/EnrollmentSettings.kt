@@ -13,7 +13,8 @@ import com.openlattice.chronicle.sources.AndroidDevice
 import com.openlattice.chronicle.utils.Utils
 import java.util.UUID
 
-const val PARTICIPANT_ID = "participantId";
+const val PARTICIPANT_ID = "participantId"
+const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val STUDY_ID = "studyId"
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
 val INVALID_STUDY_ID = UUID(0, 0)
@@ -59,6 +60,16 @@ class EnrollmentSettings(private val context: Context) {
                 .putString(STUDY_ID, _studyId.toString())
                 .apply()
         updateEnrolled()
+    }
+
+    fun setNotificationsEnabled(notificationsEnabled :Boolean) {
+        settings.edit()
+                .putBoolean(NOTIFICATIONS_ENABLED, notificationsEnabled)
+                .apply()
+    }
+
+    fun getNotificationsEnabled (): Boolean {
+        return settings.getBoolean(NOTIFICATIONS_ENABLED, false)
     }
 
     fun updateEnrolled() {

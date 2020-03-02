@@ -25,4 +25,10 @@
     <string name="participant_id_header">Participant Id:</string>
     <string name="study_id_header">Study Id:</string>
     <string name="last_upload_header">Last Upload:</string>
+
+
+    <!--  notifications channels -->
+    <string name="channel_description"> Channel for chronicle survey daily notifications</string>
+    <string name="channel_name"> Chronicle </string>
+
 </resources>

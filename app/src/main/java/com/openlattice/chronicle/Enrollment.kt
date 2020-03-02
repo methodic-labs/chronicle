@@ -17,6 +17,7 @@ import com.google.common.base.Optional
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
+import com.openlattice.chronicle.services.notifications.NotificationsService
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils
@@ -104,9 +105,11 @@ class Enrollment : AppCompatActivity() {
 
                     var isKnown = false
                     var chronicleId :UUID? = null
+                    var notificationsEnabled = false
                     try {
                         isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
                         chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                        notificationsEnabled = chronicleStudyApi.isNotificationsEnabled(studyId)
                     } catch (e : Exception) {
                         Crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                         Crashlytics.logException(e)
@@ -117,8 +120,10 @@ class Enrollment : AppCompatActivity() {
                         Log.i(javaClass.canonicalName, "Chronicle id: " + chronicleId.toString())
                         mHandler.post {
                             val enrollmentSettings = EnrollmentSettings(applicationContext)
+
                             enrollmentSettings.setStudyId(studyId)
                             enrollmentSettings.setParticipantId(participantId)
+                            enrollmentSettings.setNotificationsEnabled(notificationsEnabled)
                             // hide text fields, progress bar, and enroll button
                             studyIdText.visibility = View.GONE
                             participantIdText.visibility = View.GONE
@@ -128,6 +133,9 @@ class Enrollment : AppCompatActivity() {
                             statusMessageText.text = getString(R.string.device_enroll_success)
                             statusMessageText.visibility = View.VISIBLE
                             doneBtn.visibility = View.VISIBLE
+
+                            // schedule notifications
+                            startService(Intent(this, NotificationsService::class.java))
                         }
                     } else {
                         Crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")

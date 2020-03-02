@@ -7,6 +7,7 @@ import android.app.job.JobService
 import android.arch.persistence.room.Room
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.preference.PreferenceManager
 import android.util.Log
 import com.crashlytics.android.Crashlytics
@@ -15,9 +16,7 @@ import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.ChronicleStudyApi
-import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.preferences.getDevice
-import com.openlattice.chronicle.preferences.getDeviceId
+import com.openlattice.chronicle.preferences.*
 import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.services.sinks.BrokerDataSink
 import com.openlattice.chronicle.services.sinks.ConsoleSink
@@ -33,7 +32,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-const val PRODUCTION = "http://10.0.2.2:8081"
+const val PRODUCTION = "https://api.openlattice.com/"
 const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
@@ -97,13 +96,19 @@ class UploadJobService : JobService() {
 
                 var isKnown = false
                 var chronicleId :UUID? = null
+                var notificationsEnabled = false
                 try {
                     isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
                     chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                    notificationsEnabled = chronicleStudyApi.isNotificationsEnabled(studyId)
                 } catch (e :Exception) {
                     Crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     Crashlytics.logException(e)
                 }
+
+                // update enrollment settings
+                settings.setNotificationsEnabled(notificationsEnabled)
+
 
                 //Only run the upload job if the device is already enrolled or we are able to properly enroll.
                 if (isKnown || chronicleId != null) {
