@@ -32,7 +32,7 @@ class EnrollmentSettings(private val context: Context) {
             studyId = UUID.fromString(studyIdString)
             setCrashlyticsUser(studyId, participantId, getDeviceId(context))
         } else {
-            studyId = UUID(0, 0)
+            studyId = INVALID_STUDY_ID
         }
         updateEnrolled()
     }
