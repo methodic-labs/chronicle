@@ -60,7 +60,9 @@ class PermissionActivity : AppCompatActivity() {
 
 
 fun doMainActivity(context: Context) {
-    context.startActivity(Intent(context, MainActivity::class.java))
+    val intent = Intent(context, MainActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    context.startActivity(intent)
 }
 
 fun hasUsageSettingPermission(context: Context): Boolean {
