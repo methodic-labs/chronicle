@@ -14,7 +14,7 @@ const val CHANNEL_ID = "Chronicle"
 class NotificationsService :IntentService ("SurveyNotificationsService") {
 
     override fun onHandleIntent(intent: Intent) {
-        var enrollmentSettings = EnrollmentSettings(this)
+        val enrollmentSettings = EnrollmentSettings(this)
 
         if (enrollmentSettings.getNotificationsEnabled()) {
             scheduleNotifications()
@@ -29,7 +29,7 @@ class NotificationsService :IntentService ("SurveyNotificationsService") {
     private fun scheduleNotifications () {
 
         val alarmManager : AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        var alarmIntent = createPendingAlarmIntent()
+        val alarmIntent = createPendingAlarmIntent()
 
         // set alarm to fire at 7.00pm central time
         val calendar : Calendar = Calendar.getInstance()
@@ -50,8 +50,8 @@ class NotificationsService :IntentService ("SurveyNotificationsService") {
     // ref: https://stackoverflow.com/questions/11681095/cancel-an-alarmmanager-pendingintent-in-another-pendingintent
 
     private fun cancelPendingNotifications() {
-        var alarmManager : AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        var alarmIntent = createPendingAlarmIntent()
+        val alarmManager : AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmIntent = createPendingAlarmIntent()
 
         alarmIntent.cancel()
         alarmManager.cancel(alarmIntent)
