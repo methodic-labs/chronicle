@@ -19,13 +19,13 @@ import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 class NotificationsReceiver : BroadcastReceiver () {
     override fun onReceive(context: Context, intent: Intent) {
 
-        var enrollmentSettings = EnrollmentSettings(context)
+        val enrollmentSettings = EnrollmentSettings(context)
 
         val participantId = enrollmentSettings.getParticipantId()
         val studyId = enrollmentSettings.getStudyId().toString()
 
         // create url based on this intent
-        var uriBuilder :Uri.Builder = Uri.Builder()
+        val uriBuilder :Uri.Builder = Uri.Builder()
                 .scheme("https")
                 .encodedAuthority("openlattice.com")
                 .appendPath("chronicle")
