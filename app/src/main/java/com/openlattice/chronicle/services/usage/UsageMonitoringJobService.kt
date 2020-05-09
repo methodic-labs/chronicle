@@ -131,3 +131,8 @@ fun scheduleUsageMonitoringJob(context: Context) {
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
     jobScheduler.schedule(jobBuilder.build())
 }
+
+fun cancelUsageMonitoringJobScheduler(context :Context) {
+    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+    jobScheduler.cancel(MONITOR_USAGE_JOB)
+}

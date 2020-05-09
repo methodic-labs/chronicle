@@ -7,10 +7,12 @@ import android.os.Looper
 import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 import com.crashlytics.android.Crashlytics
+import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.upload.getLastUpload
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
+import com.openlattice.chronicle.services.status.scheduleParticipationStatusJob
 import io.fabric.sdk.android.Fabric
 
 
@@ -31,8 +33,12 @@ class MainActivity : AppCompatActivity() {
                 val participantIdText = findViewById<TextView>(R.id.participantId)
                 studyIdText.text = enrollment.getStudyId().toString()
                 participantIdText.text = enrollment.getParticipantId()
-                scheduleUploadJob(this)
-                scheduleUsageMonitoringJob(this)
+
+                if (enrollment.getParticipationStatus() == ParticipationStatus.ENROLLED) {
+                    scheduleUploadJob(this)
+                    scheduleUsageMonitoringJob(this)
+                }
+                scheduleParticipationStatusJob(this)
                 handler.post(this::updateLastUpload)
             } else {
                 startActivity(Intent(this, Enrollment::class.java))

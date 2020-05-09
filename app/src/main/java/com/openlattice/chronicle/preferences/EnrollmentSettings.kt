@@ -7,6 +7,7 @@ import android.provider.Settings
 import com.crashlytics.android.Crashlytics
 import com.google.common.base.Optional
 import com.google.common.collect.ImmutableMap
+import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropertyTypeIds
 import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds
 import com.openlattice.chronicle.sources.AndroidDevice
@@ -15,6 +16,8 @@ import java.util.UUID
 
 const val PARTICIPANT_ID = "participantId";
 const val STUDY_ID = "studyId"
+const val PARTICIPATION_STATUS = "participationStatus"
+
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
 val INVALID_STUDY_ID = UUID(0, 0)
 
@@ -75,6 +78,17 @@ class EnrollmentSettings(private val context: Context) {
     fun getPropertyTypeIds(): Map<String, UUID> {
         return deserializePropertyTypeIds(settings.getString(PROPERTY_TYPE_IDS, ""))
                 ?: ImmutableMap.of()
+    }
+
+    fun setParticipationStatus(participationStatus: ParticipationStatus) {
+        settings
+                .edit()
+                .putString(PARTICIPATION_STATUS, participationStatus.toString())
+                .apply()
+    }
+
+    fun getParticipationStatus() :ParticipationStatus {
+        return ParticipationStatus.valueOf(settings.getString(PARTICIPATION_STATUS, ParticipationStatus.UNKNOWN.toString()))
     }
 
 }

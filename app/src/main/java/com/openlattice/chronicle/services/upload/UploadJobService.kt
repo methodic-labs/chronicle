@@ -15,6 +15,7 @@ import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.ChronicleStudyApi
+import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
@@ -157,6 +158,8 @@ fun createRetrofitAdapter(baseUrl: String): Retrofit {
     return decorateWithRhizomeFactories(createBaseChronicleRetrofitBuilder(baseUrl, httpClient)).build()
 }
 
+const val UPLOAD_JOB_ID = 5;
+
 fun scheduleUploadJob(context: Context) {
     val serviceComponent = ComponentName(context, UploadJobService::class.java)
     val jobBuilder = JobInfo.Builder(0, serviceComponent)
@@ -165,5 +168,10 @@ fun scheduleUploadJob(context: Context) {
     jobBuilder.setPersisted(true)
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
     jobScheduler.schedule(jobBuilder.build())
+}
+
+fun cancelUploadJobScheduler (context: Context) {
+    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+    jobScheduler.cancel(UPLOAD_JOB_ID)
 }
 
