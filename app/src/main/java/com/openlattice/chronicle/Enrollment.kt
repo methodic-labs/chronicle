@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
-import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -17,7 +16,6 @@ import com.google.common.base.Optional
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
-import com.openlattice.chronicle.services.notifications.NotificationsService
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils
@@ -133,9 +131,6 @@ class Enrollment : AppCompatActivity() {
                             statusMessageText.text = getString(R.string.device_enroll_success)
                             statusMessageText.visibility = View.VISIBLE
                             doneBtn.visibility = View.VISIBLE
-
-                            // schedule notifications
-                            startService(Intent(this, NotificationsService::class.java))
                         }
                     } else {
                         Crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")

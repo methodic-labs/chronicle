@@ -58,7 +58,10 @@
         <receiver android:name=".receivers.lifecycle.NotificationsReceiver" />
 
 
-        <service android:name=".services.notifications.NotificationsService" />
+        <service
+            android:name=".services.notifications.NotificationsService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <service
             android:name=".services.upload.UploadJobService"
