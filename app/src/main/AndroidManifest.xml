@@ -77,6 +77,7 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".services.status.ParticipationStatusMonitoringService"
+            android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <meta-data

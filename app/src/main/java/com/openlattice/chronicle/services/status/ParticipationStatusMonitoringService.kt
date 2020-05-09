@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -17,51 +18,51 @@ import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.cancelUsageMonitoringJobScheduler
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
+import io.fabric.sdk.android.Fabric
 import java.lang.Exception
 import java.util.*
+import java.util.concurrent.Executors
 
 const val STATUS_CHECK_PERIOD_MILLIS = 15 * 60 * 1000L
 
 class ParticipationStatusMonitoringService : JobService() {
+    private val executor = Executors.newSingleThreadExecutor()
+    private val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
+
+    override fun onCreate() {
+        super.onCreate()
+        Fabric.with(this, Crashlytics())
+    }
     override fun onStopJob(p0: JobParameters?): Boolean {
+        Log.i(javaClass.name, "Participation status service stopped")
         return true
     }
 
     override fun onStartJob(p0: JobParameters?): Boolean {
+        Log.i(javaClass.name, "Participation status service initialized")
         val enrollmentSettings = EnrollmentSettings(applicationContext)
         val studyId :UUID = enrollmentSettings.getStudyId()
         val participantId :String = enrollmentSettings.getParticipantId()
 
-        EnrollmentStatusTask(studyId, participantId, enrollmentSettings, applicationContext).execute()
-        return true
-    }
-
-    class EnrollmentStatusTask(private val studyId :UUID, private val participantId :String, private val enrollmentSettings: EnrollmentSettings, private val context :Context) : AsyncTask<Objects, Void, ParticipationStatus>() {
-        private val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
-
-        override fun doInBackground(vararg params: Objects?): ParticipationStatus {
-            val participationStatus: ParticipationStatus
+        executor.execute {
+            var participationStatus: ParticipationStatus
             try {
                 participationStatus = chronicleStudyApi.getParticipationStatus(studyId, participantId)
             } catch (e :Exception) {
-                return ParticipationStatus.UNKNOWN
+                Log.e(javaClass.name, "Error retrieving participation status")
+                participationStatus = ParticipationStatus.UNKNOWN
             }
-            return participationStatus
-        }
+            enrollmentSettings.setParticipationStatus(participationStatus)
 
-        override fun onPostExecute(result: ParticipationStatus) {
-            super.onPostExecute(result)
-            Log.i(javaClass.name, "Status of participant $participantId in study ${studyId}: $result")
-            enrollmentSettings.setParticipationStatus(result)
-
-            if (result == ParticipationStatus.ENROLLED) {
-                scheduleUploadJob(context)
-                scheduleUsageMonitoringJob(context)
+            if (participationStatus == ParticipationStatus.ENROLLED) {
+                scheduleUploadJob(this)
+                scheduleUsageMonitoringJob(this)
             } else {
-                cancelUsageMonitoringJobScheduler(context)
-                cancelUploadJobScheduler(context)
+                cancelUsageMonitoringJobScheduler(this)
+                cancelUploadJobScheduler(this)
             }
         }
+        return true
     }
 }
 
