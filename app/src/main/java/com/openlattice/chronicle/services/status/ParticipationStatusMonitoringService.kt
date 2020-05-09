@@ -35,7 +35,8 @@ class ParticipationStatusMonitoringService : JobService() {
     }
     override fun onStopJob(p0: JobParameters?): Boolean {
         Log.i(javaClass.name, "Participation status service stopped")
-        return true
+        executor.shutdown()
+        return true // reschedule the job
     }
 
     override fun onStartJob(parameters: JobParameters?): Boolean {
@@ -52,7 +53,7 @@ class ParticipationStatusMonitoringService : JobService() {
                 Log.e(javaClass.name, "Error retrieving participation status")
                 participationStatus = ParticipationStatus.UNKNOWN
             }
-            Log.e(javaClass.name, "Participation status: $participationStatus")
+            Log.i(javaClass.name, "Participation status: $participationStatus")
             enrollmentSettings.setParticipationStatus(participationStatus)
 
             if (participationStatus == ParticipationStatus.ENROLLED) {
@@ -62,7 +63,7 @@ class ParticipationStatusMonitoringService : JobService() {
                 cancelUsageMonitoringJobScheduler(this)
                 cancelUploadJobScheduler(this)
             }
-            jobFinished(parameters, true)
+            jobFinished(parameters, false)
         }
         return true
     }
