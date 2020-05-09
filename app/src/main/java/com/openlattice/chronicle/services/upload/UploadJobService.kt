@@ -34,10 +34,11 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-const val PRODUCTION = "https://api.openlattice.com/"
+const val PRODUCTION = "http://10.0.2.2:8081"
 const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
+const val UPLOAD_JOB_ID = 5;
 
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -158,11 +159,9 @@ fun createRetrofitAdapter(baseUrl: String): Retrofit {
     return decorateWithRhizomeFactories(createBaseChronicleRetrofitBuilder(baseUrl, httpClient)).build()
 }
 
-const val UPLOAD_JOB_ID = 5;
-
 fun scheduleUploadJob(context: Context) {
     val serviceComponent = ComponentName(context, UploadJobService::class.java)
-    val jobBuilder = JobInfo.Builder(0, serviceComponent)
+    val jobBuilder = JobInfo.Builder(UPLOAD_JOB_ID, serviceComponent)
     jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
     jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
     jobBuilder.setPersisted(true)
