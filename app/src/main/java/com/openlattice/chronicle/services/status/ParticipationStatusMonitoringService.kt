@@ -38,7 +38,7 @@ class ParticipationStatusMonitoringService : JobService() {
         return true
     }
 
-    override fun onStartJob(p0: JobParameters?): Boolean {
+    override fun onStartJob(parameters: JobParameters?): Boolean {
         Log.i(javaClass.name, "Participation status service initialized")
         val enrollmentSettings = EnrollmentSettings(applicationContext)
         val studyId :UUID = enrollmentSettings.getStudyId()
@@ -52,6 +52,7 @@ class ParticipationStatusMonitoringService : JobService() {
                 Log.e(javaClass.name, "Error retrieving participation status")
                 participationStatus = ParticipationStatus.UNKNOWN
             }
+            Log.e(javaClass.name, "Participation status: $participationStatus")
             enrollmentSettings.setParticipationStatus(participationStatus)
 
             if (participationStatus == ParticipationStatus.ENROLLED) {
@@ -61,6 +62,7 @@ class ParticipationStatusMonitoringService : JobService() {
                 cancelUsageMonitoringJobScheduler(this)
                 cancelUploadJobScheduler(this)
             }
+            jobFinished(parameters, true)
         }
         return true
     }
