@@ -24,6 +24,7 @@ import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
+import com.openlattice.chronicle.utils.Utils.isJobServiceScheduled
 import io.fabric.sdk.android.Fabric
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -31,6 +32,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
+const val MONITOR_USAGE_JOB = 3;
 
 class UsageMonitoringJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -120,16 +122,16 @@ class UsageMonitoringJobService : JobService() {
     }
 }
 
-const val MONITOR_USAGE_JOB = 3;
-
 fun scheduleUsageMonitoringJob(context: Context) {
-    val serviceComponent = ComponentName(context, UsageMonitoringJobService::class.java)
-    val jobBuilder = JobInfo.Builder(MONITOR_USAGE_JOB, serviceComponent)
-    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-    jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
-    jobBuilder.setPersisted(true)
-    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-    jobScheduler.schedule(jobBuilder.build())
+    if (!isJobServiceScheduled(context, MONITOR_USAGE_JOB)) {
+        val serviceComponent = ComponentName(context, UsageMonitoringJobService::class.java)
+        val jobBuilder = JobInfo.Builder(MONITOR_USAGE_JOB, serviceComponent)
+        jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+        jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
+        jobBuilder.setPersisted(true)
+        val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        jobScheduler.schedule(jobBuilder.build())
+    }
 }
 
 fun cancelUsageMonitoringJobScheduler(context :Context) {

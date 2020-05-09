@@ -15,7 +15,6 @@ import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.ChronicleStudyApi
-import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
@@ -26,6 +25,7 @@ import com.openlattice.chronicle.services.sinks.OpenLatticeSink
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.util.RetrofitBuilders
 import com.openlattice.chronicle.util.RetrofitBuilders.*
+import com.openlattice.chronicle.utils.Utils.isJobServiceScheduled
 import io.fabric.sdk.android.Fabric
 import org.joda.time.DateTime
 import retrofit2.Retrofit
@@ -160,13 +160,15 @@ fun createRetrofitAdapter(baseUrl: String): Retrofit {
 }
 
 fun scheduleUploadJob(context: Context) {
-    val serviceComponent = ComponentName(context, UploadJobService::class.java)
-    val jobBuilder = JobInfo.Builder(UPLOAD_JOB_ID, serviceComponent)
-    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-    jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
-    jobBuilder.setPersisted(true)
-    val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-    jobScheduler.schedule(jobBuilder.build())
+    if (!isJobServiceScheduled(context, UPLOAD_JOB_ID)) {
+        val serviceComponent = ComponentName(context, UploadJobService::class.java)
+        val jobBuilder = JobInfo.Builder(UPLOAD_JOB_ID, serviceComponent)
+        jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+        jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
+        jobBuilder.setPersisted(true)
+        val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        jobScheduler.schedule(jobBuilder.build())
+    }
 }
 
 fun cancelUploadJobScheduler (context: Context) {
