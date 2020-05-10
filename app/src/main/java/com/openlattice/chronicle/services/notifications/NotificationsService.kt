@@ -12,6 +12,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.preference.PreferenceManager
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.ChronicleStudyApi
@@ -23,12 +24,14 @@ import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils.isJobServiceScheduled
 import io.fabric.sdk.android.Fabric
+import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.Executors
 
 const val CHANNEL_ID = "Chronicle"
 const val NOTIFICATION_JOB_ID = 11;
 const val NOTIFICATION_PERIOD_MILLIS = 24 * 60 * 60 * 1000L
+const val LAST_NOTIFICATION_SETTING = "last_notification"
 
 class NotificationsService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -91,7 +94,11 @@ class NotificationsService : JobService() {
         calendar.set(Calendar.HOUR_OF_DAY, 19)
         calendar.set(Calendar.MINUTE, 0)
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+        // only send notification if none has been sent today
+        if (getLastNotificationDate(this) != DateTime.now().toLocalDate().toString()) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+            setLastNotificationDate(this)
+        }
     }
 
     // invoke this when the participant is no longer enrolled or the study's notifications are turned off
@@ -124,6 +131,19 @@ fun createNotificationChannel(context: Context) {
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
+}
+
+fun setLastNotificationDate(context: Context) {
+    val settings = PreferenceManager.getDefaultSharedPreferences(context)
+    settings
+            .edit()
+            .putString(LAST_NOTIFICATION_SETTING, DateTime.now().toLocalDate().toString())
+            .apply()
+}
+
+fun getLastNotificationDate(context: Context) :String {
+    val settings = PreferenceManager.getDefaultSharedPreferences(context)
+    return settings.getString(LAST_NOTIFICATION_SETTING, "")
 }
 
 fun scheduleNotificationJobService(context: Context) {
