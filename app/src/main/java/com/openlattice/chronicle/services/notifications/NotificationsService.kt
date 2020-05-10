@@ -51,12 +51,13 @@ class NotificationsService : JobService() {
     override fun onStartJob(parameters: JobParameters?): Boolean {
         Log.i(javaClass.name, "Notifications service initialized")
 
-        createNotificationChannel(this)
-        val enrollmentSettings = EnrollmentSettings(this)
-        val participantId: String = enrollmentSettings.getParticipantId()
-        val studyId: UUID = enrollmentSettings.getStudyId()
-
         executor.execute {
+            createNotificationChannel(this)
+
+            val enrollmentSettings = EnrollmentSettings(this)
+            val participantId: String = enrollmentSettings.getParticipantId()
+            val studyId: UUID = enrollmentSettings.getStudyId()
+
             var notificationsEnabled = enrollmentSettings.getNotificationsEnabled()
             var participationStatus = enrollmentSettings.getParticipationStatus()
             try {
