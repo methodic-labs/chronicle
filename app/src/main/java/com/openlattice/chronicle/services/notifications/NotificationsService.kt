@@ -54,8 +54,8 @@ class NotificationsService : JobService() {
         val studyId: UUID = enrollmentSettings.getStudyId()
 
         executor.execute {
-            var notificationsEnabled = false
-            var participationStatus = ParticipationStatus.UNKNOWN
+            var notificationsEnabled = enrollmentSettings.getNotificationsEnabled()
+            var participationStatus = enrollmentSettings.getParticipationStatus()
             try {
                 notificationsEnabled = chronicleStudyApi.isNotificationsEnabled(studyId)
                 participationStatus = chronicleStudyApi.getParticipationStatus(studyId, participantId)
@@ -65,11 +65,15 @@ class NotificationsService : JobService() {
             }
             Log.i(javaClass.name, "Notifications enabled :$notificationsEnabled, participation status: $participationStatus")
 
+            enrollmentSettings.setNotificationsEnabled(notificationsEnabled)
+            enrollmentSettings.setParticipationStatus(participationStatus)
+
             if (notificationsEnabled && participationStatus == ParticipationStatus.ENROLLED) {
                 scheduleNotification()
             } else {
                 cancelNotification()
             }
+            jobFinished(parameters, false)
         }
         return true;
     }
@@ -83,7 +87,7 @@ class NotificationsService : JobService() {
         val alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         // set alarm to fire at 7.00pm
-        val calendar : Calendar = Calendar.getInstance()
+        val calendar: Calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 19)
         calendar.set(Calendar.MINUTE, 0)
 
