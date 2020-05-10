@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="purple">#A192FF</color>
     <color name="purple_dark">#7654FF</color>
+    <color name="neutral">#555e6f</color>
 </resources>
