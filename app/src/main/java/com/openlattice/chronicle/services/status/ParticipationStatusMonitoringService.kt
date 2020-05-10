@@ -41,20 +41,20 @@ class ParticipationStatusMonitoringService : JobService() {
 
     override fun onStartJob(parameters: JobParameters?): Boolean {
         Log.i(javaClass.name, "Participation status service initialized")
+
         val enrollmentSettings = EnrollmentSettings(applicationContext)
         val studyId :UUID = enrollmentSettings.getStudyId()
         val participantId :String = enrollmentSettings.getParticipantId()
 
         executor.execute {
-            var participationStatus: ParticipationStatus
+            var participationStatus = enrollmentSettings.getParticipationStatus()
             try {
                 participationStatus = chronicleStudyApi.getParticipationStatus(studyId, participantId)
             } catch (e :Exception) {
-                Log.e(javaClass.name, "Error retrieving participation status")
-                participationStatus = ParticipationStatus.UNKNOWN
+                Crashlytics.log("caught exception: studyId: \"$studyId\" participantId: \"$participantId\"")
+                Crashlytics.logException(e)
             }
             Log.i(javaClass.name, "Participation status: $participationStatus")
-            enrollmentSettings.setParticipationStatus(participationStatus)
 
             if (participationStatus == ParticipationStatus.ENROLLED) {
                 scheduleUploadJob(this)
@@ -63,6 +63,8 @@ class ParticipationStatusMonitoringService : JobService() {
                 cancelUsageMonitoringJobScheduler(this)
                 cancelUploadJobScheduler(this)
             }
+
+            enrollmentSettings.setParticipationStatus(participationStatus)
             jobFinished(parameters, false)
         }
         return true
