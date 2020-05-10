@@ -1,24 +1,19 @@
 package com.openlattice.chronicle.receivers.lifecycle
 
 import android.app.Notification
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.media.RingtoneManager
 import android.net.Uri
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
-import android.text.format.DateFormat
 import android.text.format.DateUtils
 import android.widget.RemoteViews
 import com.openlattice.chronicle.R
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.preferences.PARTICIPANT_ID
-import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 
 const val NOTIFICATION_ID = 5;
@@ -52,8 +47,9 @@ class NotificationsReceiver : BroadcastReceiver() {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_notification)
                 .setColor(ContextCompat.getColor(context, R.color.purple_dark))
+                .setCustomContentView(notificationLayout)
                 .setCustomBigContentView(notificationLayout)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT) //support android 7.1
+                .setPriority(NotificationCompat.PRIORITY_HIGH) //support android 7.1
                 .setContentIntent(pendingIntent)
                 .setDefaults(Notification.DEFAULT_VIBRATE)
                 .setAutoCancel(true) // remove when user taps on notification
