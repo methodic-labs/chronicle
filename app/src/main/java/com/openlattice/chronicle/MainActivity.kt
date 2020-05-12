@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.services.notifications.createNotificationChannel
+import com.openlattice.chronicle.services.notifications.scheduleNotificationJobService
 import com.openlattice.chronicle.services.upload.getLastUpload
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
@@ -24,16 +26,27 @@ class MainActivity : AppCompatActivity() {
         Fabric.with(this, Crashlytics())
         setContentView(R.layout.activity_main)
 
+        // create notification channel
+        createNotificationChannel(this)
+
         if (hasUsageSettingPermission(this)) {
             val enrollment = EnrollmentSettings(this)
             if (enrollment.enrolled) {
                 val studyIdText = findViewById<TextView>(R.id.studyId)
                 val participantIdText = findViewById<TextView>(R.id.participantId)
-                studyIdText.text = enrollment.getStudyId().toString()
-                participantIdText.text = enrollment.getParticipantId()
+
+                val studyId = enrollment.getStudyId().toString()
+                val participantId = enrollment.getParticipantId()
+
+                studyIdText.text = studyId
+                participantIdText.text = participantId
+
                 scheduleUploadJob(this)
                 scheduleUsageMonitoringJob(this)
+                scheduleNotificationJobService(this)
+
                 handler.post(this::updateLastUpload)
+
             } else {
                 startActivity(Intent(this, Enrollment::class.java))
             }
@@ -42,10 +55,9 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-
     }
 
-    private fun updateLastUpload() {
+    private fun updateLastUpload( ) {
         val lastUploadText = findViewById<TextView>(R.id.lastUploadValue)
         lastUploadText.text = getLastUpload(this)
         handler.postDelayed(this::updateLastUpload, LAST_UPLOAD_REFRESH_INTERVAL)

@@ -96,11 +96,11 @@ class UploadJobService : JobService() {
                 }
 
                 var isKnown = false
-                var chronicleId :UUID? = null
+                var chronicleId: UUID? = null
                 try {
                     isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
                     chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
-                } catch (e :Exception) {
+                } catch (e: Exception) {
                     Crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     Crashlytics.logException(e)
                 }
