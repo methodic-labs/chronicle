@@ -26,7 +26,7 @@ class StartOnBoot : BroadcastReceiver() {
                 }
                 scheduleNotificationJobService(context)
                 Log.i(javaClass.name, "Scheduled notification service at boot")
-                
+
                 scheduleParticipationStatusJob(context)
                 Log.i(javaClass.name, "Scheduled participation status service at boot")
             }

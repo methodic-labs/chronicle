@@ -46,7 +46,6 @@ class MainActivity : AppCompatActivity() {
                 scheduleNotificationJobService(this)
                 scheduleParticipationStatusJob(this)
                 handler.post(this::updateLastUpload)
-
             } else {
                 startActivity(Intent(this, Enrollment::class.java))
             }
