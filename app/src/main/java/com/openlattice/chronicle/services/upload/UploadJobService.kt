@@ -15,6 +15,7 @@ import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.ChronicleStudyApi
+import com.openlattice.chronicle.constants.Jobs.UPLOAD_JOB_ID
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
@@ -38,7 +39,6 @@ const val PRODUCTION = "https://api.openlattice.com/"
 const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
-const val UPLOAD_JOB_ID = 5;
 
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -160,9 +160,9 @@ fun createRetrofitAdapter(baseUrl: String): Retrofit {
 }
 
 fun scheduleUploadJob(context: Context) {
-    if (!isJobServiceScheduled(context, UPLOAD_JOB_ID)) {
+    if (!isJobServiceScheduled(context, UPLOAD_JOB_ID.id)) {
         val serviceComponent = ComponentName(context, UploadJobService::class.java)
-        val jobBuilder = JobInfo.Builder(UPLOAD_JOB_ID, serviceComponent)
+        val jobBuilder = JobInfo.Builder(UPLOAD_JOB_ID.id, serviceComponent)
         jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
         jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
         jobBuilder.setPersisted(true)
@@ -173,6 +173,6 @@ fun scheduleUploadJob(context: Context) {
 
 fun cancelUploadJobScheduler (context: Context) {
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-    jobScheduler.cancel(UPLOAD_JOB_ID)
+    jobScheduler.cancel(UPLOAD_JOB_ID.id)
 }
 

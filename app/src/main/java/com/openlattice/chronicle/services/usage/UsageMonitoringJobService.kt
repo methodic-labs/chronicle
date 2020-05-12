@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableMap
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.sensors.ChronicleSensor
 import com.openlattice.chronicle.sensors.PROPERTY_TYPES
+import com.openlattice.chronicle.constants.Jobs.MONITOR_USAGE_JOB_ID
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
 import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
 import com.openlattice.chronicle.serialization.JsonSerializer.serializeQueueEntry
@@ -32,7 +33,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
-const val MONITOR_USAGE_JOB = 3;
 
 class UsageMonitoringJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -123,9 +123,9 @@ class UsageMonitoringJobService : JobService() {
 }
 
 fun scheduleUsageMonitoringJob(context: Context) {
-    if (!isJobServiceScheduled(context, MONITOR_USAGE_JOB)) {
+    if (!isJobServiceScheduled(context, MONITOR_USAGE_JOB_ID.id)) {
         val serviceComponent = ComponentName(context, UsageMonitoringJobService::class.java)
-        val jobBuilder = JobInfo.Builder(MONITOR_USAGE_JOB, serviceComponent)
+        val jobBuilder = JobInfo.Builder(MONITOR_USAGE_JOB_ID.id, serviceComponent)
         jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
         jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
         jobBuilder.setPersisted(true)
@@ -136,5 +136,5 @@ fun scheduleUsageMonitoringJob(context: Context) {
 
 fun cancelUsageMonitoringJobScheduler(context :Context) {
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-    jobScheduler.cancel(MONITOR_USAGE_JOB)
+    jobScheduler.cancel(MONITOR_USAGE_JOB_ID.id)
 }

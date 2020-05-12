@@ -17,6 +17,7 @@ import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.R
+import com.openlattice.chronicle.constants.Jobs.NOTIFICATION_JOB_ID
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
@@ -29,7 +30,6 @@ import java.util.*
 import java.util.concurrent.Executors
 
 const val CHANNEL_ID = "Chronicle"
-const val NOTIFICATION_JOB_ID = 11;
 const val NOTIFICATION_PERIOD_MILLIS = 24 * 60 * 60 * 1000L
 const val LAST_NOTIFICATION_SETTING = "last_notification"
 
@@ -148,9 +148,9 @@ fun getLastNotificationDate(context: Context) :String {
 }
 
 fun scheduleNotificationJobService(context: Context) {
-    if (!isJobServiceScheduled(context, NOTIFICATION_JOB_ID)) {
+    if (!isJobServiceScheduled(context, NOTIFICATION_JOB_ID.id)) {
         val componentName = ComponentName(context, NotificationsService::class.java)
-        val jobBuilder = JobInfo.Builder(NOTIFICATION_JOB_ID, componentName)
+        val jobBuilder = JobInfo.Builder(NOTIFICATION_JOB_ID.id, componentName)
         jobBuilder.setPersisted(true)
         jobBuilder.setPeriodic(NOTIFICATION_PERIOD_MILLIS)
         jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)

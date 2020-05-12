@@ -13,6 +13,7 @@ import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.upload.PRODUCTION
+import com.openlattice.chronicle.constants.Jobs.MONITOR_PARTICIPATION_STATUS_JOB_ID
 import com.openlattice.chronicle.services.upload.cancelUploadJobScheduler
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
@@ -73,7 +74,7 @@ class ParticipationStatusMonitoringService : JobService() {
 
 fun scheduleParticipationStatusJob(context :Context) {
     val serviceComponent = ComponentName(context, ParticipationStatusMonitoringService::class.java)
-    val jobBuilder = JobInfo.Builder(0, serviceComponent)
+    val jobBuilder = JobInfo.Builder(MONITOR_PARTICIPATION_STATUS_JOB_ID.id, serviceComponent)
     jobBuilder.setPersisted(true)
     jobBuilder.setPeriodic(STATUS_CHECK_PERIOD_MILLIS)
     jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
