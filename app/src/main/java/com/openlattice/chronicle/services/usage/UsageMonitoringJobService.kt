@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableMap
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.sensors.ChronicleSensor
 import com.openlattice.chronicle.sensors.PROPERTY_TYPES
+import com.openlattice.chronicle.constants.Jobs.MONITOR_USAGE_JOB_ID
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
 import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
 import com.openlattice.chronicle.serialization.JsonSerializer.serializeQueueEntry
@@ -24,6 +25,7 @@ import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
+import com.openlattice.chronicle.utils.Utils.isJobServiceScheduled
 import io.fabric.sdk.android.Fabric
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -120,14 +122,19 @@ class UsageMonitoringJobService : JobService() {
     }
 }
 
-const val MONITOR_USAGE_JOB = 3;
-
 fun scheduleUsageMonitoringJob(context: Context) {
-    val serviceComponent = ComponentName(context, UsageMonitoringJobService::class.java)
-    val jobBuilder = JobInfo.Builder(MONITOR_USAGE_JOB, serviceComponent)
-    jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-    jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
-    jobBuilder.setPersisted(true)
+    if (!isJobServiceScheduled(context, MONITOR_USAGE_JOB_ID.id)) {
+        val serviceComponent = ComponentName(context, UsageMonitoringJobService::class.java)
+        val jobBuilder = JobInfo.Builder(MONITOR_USAGE_JOB_ID.id, serviceComponent)
+        jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+        jobBuilder.setPeriodic(UPLOAD_PERIOD_MILLIS)
+        jobBuilder.setPersisted(true)
+        val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        jobScheduler.schedule(jobBuilder.build())
+    }
+}
+
+fun cancelUsageMonitoringJobScheduler(context :Context) {
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-    jobScheduler.schedule(jobBuilder.build())
+    jobScheduler.cancel(MONITOR_USAGE_JOB_ID.id)
 }

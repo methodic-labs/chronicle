@@ -19,6 +19,7 @@ const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val STUDY_ID = "studyId"
 const val PARTICIPATION_STATUS = "participationStatus"
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
+
 val INVALID_STUDY_ID = UUID(0, 0)
 
 class EnrollmentSettings(private val context: Context) {
@@ -116,4 +117,3 @@ fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {
     Crashlytics.setUserEmail("$participantId@$studyId")
     Crashlytics.setUserName(deviceId)
 }
-
