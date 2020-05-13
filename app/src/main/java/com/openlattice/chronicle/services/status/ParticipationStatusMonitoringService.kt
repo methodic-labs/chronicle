@@ -43,12 +43,12 @@ class ParticipationStatusMonitoringService : JobService() {
     override fun onStartJob(parameters: JobParameters?): Boolean {
         Log.i(javaClass.name, "Participation status service initialized")
 
-        val enrollmentSettings = EnrollmentSettings(applicationContext)
-        val studyId :UUID = enrollmentSettings.getStudyId()
-        val participantId :String = enrollmentSettings.getParticipantId()
-
         executor.execute {
+            val enrollmentSettings = EnrollmentSettings(applicationContext)
+            val studyId :UUID = enrollmentSettings.getStudyId()
+            val participantId :String = enrollmentSettings.getParticipantId()
             var participationStatus = enrollmentSettings.getParticipationStatus()
+            
             try {
                 participationStatus = chronicleStudyApi.getParticipationStatus(studyId, participantId)
             } catch (e :Exception) {
