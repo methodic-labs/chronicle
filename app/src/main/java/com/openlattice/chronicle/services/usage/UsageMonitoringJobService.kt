@@ -58,7 +58,7 @@ class UsageMonitoringJobService : JobService() {
             chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle").build()
             storageQueue = chronicleDb.queueEntryData()
             sensors = mutableSetOf(
-                    UsageStatsChronicleSensor(applicationContext),
+                    // UsageStatsChronicleSensor(applicationContext),
                     UsageEventsChronicleSensor(applicationContext)
             )
             Log.i(javaClass.name, "Usage service is initialized")
