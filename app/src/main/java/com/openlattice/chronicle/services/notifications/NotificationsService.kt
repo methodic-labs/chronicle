@@ -12,8 +12,6 @@ import io.fabric.sdk.android.Fabric
 import java.util.*
 
 const val CHANNEL_ID = "Chronicle"
-const val NOTIFICATION_PERIOD_MILLIS = 24 * 60 * 60 * 1000L
-const val LAST_NOTIFICATION_SETTING = "last_notification"
 const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
 
 class NotificationsService: IntentService("NotificationsService") {
@@ -58,22 +56,7 @@ class NotificationsService: IntentService("NotificationsService") {
         if (pendingIntent != null) {
             alarmManager.cancel(pendingIntent)
         }
-        setLastNotificationDate("")
     }
-
-    private fun setLastNotificationDate(value: String) {
-        val settings = PreferenceManager.getDefaultSharedPreferences(this)
-        settings
-                .edit()
-                .putString(LAST_NOTIFICATION_SETTING, value)
-                .apply()
-    }
-
-    private fun getLastNotificationDate() :String {
-        val settings = PreferenceManager.getDefaultSharedPreferences(this)
-        return settings.getString(LAST_NOTIFICATION_SETTING, "")
-    }
-
 }
 
 
