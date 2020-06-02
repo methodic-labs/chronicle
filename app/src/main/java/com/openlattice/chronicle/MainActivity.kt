@@ -10,11 +10,10 @@ import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.createNotificationChannel
-import com.openlattice.chronicle.services.notifications.scheduleNotificationJobService
+import com.openlattice.chronicle.services.status.scheduleParticipationStatusJob
 import com.openlattice.chronicle.services.upload.getLastUpload
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
-import com.openlattice.chronicle.services.status.scheduleParticipationStatusJob
 import io.fabric.sdk.android.Fabric
 
 
@@ -43,7 +42,6 @@ class MainActivity : AppCompatActivity() {
                     scheduleUploadJob(this)
                     scheduleUsageMonitoringJob(this)
                 }
-                scheduleNotificationJobService(this)
                 scheduleParticipationStatusJob(this)
                 handler.post(this::updateLastUpload)
             } else {

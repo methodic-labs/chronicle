@@ -76,7 +76,7 @@
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
-            android:name=".services.status.ParticipationStatusMonitoringService"
+            android:name=".services.status.EnrollmentStatusMonitoringService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
