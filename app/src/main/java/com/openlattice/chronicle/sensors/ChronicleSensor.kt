@@ -6,6 +6,7 @@ import java.util.*
 
 const val IMPORTANCE = "ol.recordtype"
 const val NAME = "general.fullname"
+const val APP_NAME = "ol.title"
 const val TIMESTAMP = "ol.datelogged"
 const val DURATION = "general.Duration"
 const val START_TIME = "ol.datetimestart"
@@ -15,9 +16,11 @@ const val LONGITUDE = "location.longitude"
 const val LATITUDE = "location.latitude"
 const val ID = "general.stringid"
 const val TIMEZONE = "ol.timezone"
+
 val PROPERTY_TYPES = setOf(
         IMPORTANCE,
         NAME,
+        APP_NAME,
         TIMESTAMP,
         ALTITUDE,
         LONGITUDE,

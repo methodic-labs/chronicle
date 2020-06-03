@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
-import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -104,9 +103,11 @@ class Enrollment : AppCompatActivity() {
 
                     var isKnown = false
                     var chronicleId :UUID? = null
+                    var notificationsEnabled = false
                     try {
                         isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
                         chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                        notificationsEnabled = chronicleStudyApi.isNotificationsEnabled(studyId)
                     } catch (e : Exception) {
                         Crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                         Crashlytics.logException(e)
@@ -117,8 +118,10 @@ class Enrollment : AppCompatActivity() {
                         Log.i(javaClass.canonicalName, "Chronicle id: " + chronicleId.toString())
                         mHandler.post {
                             val enrollmentSettings = EnrollmentSettings(applicationContext)
+
                             enrollmentSettings.setStudyId(studyId)
                             enrollmentSettings.setParticipantId(participantId)
+                            enrollmentSettings.setNotificationsEnabled(notificationsEnabled)
                             // hide text fields, progress bar, and enroll button
                             studyIdText.visibility = View.GONE
                             participantIdText.visibility = View.GONE

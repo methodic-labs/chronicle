@@ -9,6 +9,7 @@ import android.util.Log
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
+import com.openlattice.chronicle.utils.Utils.getAppFullName
 import org.joda.time.DateMidnight
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
@@ -46,6 +47,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
                             .put(propertyTypeIds[DURATION]!!, it.totalTimeInForeground)
                             .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.lastTimeUsed).toString())
                             .put(propertyTypeIds[TIMEZONE]!!, timezone)
+                            .put(propertyTypeIds[APP_NAME]!!, getAppFullName(context, it.packageName))
                             .build()
 
                 }

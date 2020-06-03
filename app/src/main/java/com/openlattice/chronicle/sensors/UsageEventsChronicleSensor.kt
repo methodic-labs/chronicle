@@ -8,6 +8,7 @@ import android.util.Log
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
+import com.openlattice.chronicle.utils.Utils.getAppFullName
 import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import java.util.*
@@ -22,6 +23,7 @@ const val LAST_USAGE_QUERY_TIMESTAMP = "com.openlattice.sensors.LastUsageQueryTi
 class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+    private val appContext = context
 
     @Synchronized
     override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>> {
@@ -44,17 +46,19 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
             usageEvents.getNextEvent(event)
             usageEventsList.add(event)
         }
-
         Log.i(javaClass.name, "Collected ${usageEventsList.size} usage events.")
         val timezone = TimeZone.getDefault().id
         return usageEventsList
                 .map {
-                    ImmutableSetMultimap.of(
-                            propertyTypeIds[ID]!!, UUID.randomUUID(),
-                            propertyTypeIds[NAME]!!, it.packageName,
-                            propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType),
-                            propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp).toString(),
-                            propertyTypeIds[TIMEZONE]!!, timezone)
+                    ImmutableSetMultimap.builder<UUID, Any>()
+                            .put(propertyTypeIds[ID]!!, UUID.randomUUID())
+                            .put(propertyTypeIds[NAME]!!, it.packageName)
+                            .put(propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType))
+                            .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp).toString())
+                            .put(propertyTypeIds[TIMEZONE]!!, timezone)
+                            .put(propertyTypeIds[APP_NAME]!!, getAppFullName(appContext, it.packageName))
+                            .build()
+
                 }
     }
 
