@@ -4,15 +4,21 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.preference.PreferenceManager
+import android.util.Log
 import com.crashlytics.android.Crashlytics
+import com.google.gson.Gson
 import com.openlattice.chronicle.R
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
+import com.openlattice.chronicle.storage.Notification
 import io.fabric.sdk.android.Fabric
+import org.springframework.scheduling.config.CronTask
+import org.springframework.scheduling.support.CronSequenceGenerator
+import java.lang.Exception
 import java.util.*
 
 const val CHANNEL_ID = "Chronicle"
 const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
+const val NOTIFICATION_ENTRY = "notificationEntry"
 
 class NotificationsService: IntentService("NotificationsService") {
     override fun onCreate() {
@@ -21,38 +27,54 @@ class NotificationsService: IntentService("NotificationsService") {
     }
 
     override fun onHandleIntent(intent: Intent) {
+        val serializedString = intent.getStringExtra(NOTIFICATION_ENTRY)
+
         if (intent.getBooleanExtra(NOTIFICATIONS_ENABLED, true)) {
-            scheduleNotification()
+            scheduleNotification(serializedString)
         } else {
-            cancelNotification()
+            cancelNotification(serializedString)
         }
     }
 
     // schedule notification at 7.00pm
     // ref: https://developer.android.com/training/scheduling/alarms
-    private fun scheduleNotification() {
+    private fun scheduleNotification(serializedString: String) {
+        val notification  = Gson().fromJson(serializedString, Notification::class.java)
+        Log.i(javaClass.name, "notification to schedule: $notification")
 
         val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, NotificationsReceiver::class.java)
-        val alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        
+        val alarmIntent = PendingIntent.getBroadcast(this, notification.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        // set alarm to fire at 7.00pm
-        val calendar: Calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 19)
-        calendar.set(Calendar.MINUTE, 0)
+        try {
 
-        if (calendar.timeInMillis < System.currentTimeMillis()) {
-            calendar.add(Calendar.DATE, 1)
+            val date = CronSequenceGenerator(notification.cronExpression).next(Date())
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+            } else{
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+            }
+
+        } catch (e: Exception) {
+            Log.i(javaClass.name, "caught exception", e)
         }
 
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+
     }
 
     // invoke this when the participant is no longer enrolled or the study's notifications are turned off
-    private fun cancelNotification() {
+    private fun cancelNotification(serializedString: String) {
+        val notification  = Gson().fromJson(serializedString, Notification::class.java)
+        Log.i(javaClass.name, "Notification to cancel: $notification")
+
         val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, NotificationsReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_NO_CREATE)
+
+        val pendingIntent = PendingIntent.getBroadcast(this, notification.getRequestCode(), intent, PendingIntent.FLAG_NO_CREATE)
         if (pendingIntent != null) {
             alarmManager.cancel(pendingIntent)
         }
