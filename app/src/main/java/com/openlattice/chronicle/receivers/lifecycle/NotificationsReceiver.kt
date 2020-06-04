@@ -15,17 +15,18 @@ import android.text.format.DateUtils
 import android.widget.RemoteViews
 import com.openlattice.chronicle.R
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.PARTICIPANT_ID
+import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 
 const val NOTIFICATION_ID = 5;
 
 class NotificationsReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent) {
 
-        val enrollmentSettings = EnrollmentSettings(context)
-
-        val participantId = enrollmentSettings.getParticipantId()
-        val studyId = enrollmentSettings.getStudyId().toString()
+        val participantId = intent.getStringExtra(PARTICIPANT_ID)
+        val studyId = intent.getStringExtra(STUDY_ID)
 
         // create url based on this intent
         val uriBuilder: Uri.Builder = Uri.Builder()

@@ -74,7 +74,7 @@ class EnrollmentStatusMonitoringService : JobService() {
             // schedule notification
             val intent = Intent(this, NotificationsService::class.java)
             intent.putExtra(NOTIFICATIONS_ENABLED, participationStatus == ParticipationStatus.ENROLLED && notificationsEnabled)
-            this.startService(intent)
+            NotificationsService.enqueueWork(this, intent)
 
             enrollmentSettings.setParticipationStatus(participationStatus)
             enrollmentSettings.setNotificationsEnabled(notificationsEnabled)
