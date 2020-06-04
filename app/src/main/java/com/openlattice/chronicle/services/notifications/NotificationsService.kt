@@ -1,12 +1,20 @@
 package com.openlattice.chronicle.services.notifications
 
-import android.app.*
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.preference.PreferenceManager
+import android.support.v4.app.JobIntentService
 import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.R
+import com.openlattice.chronicle.constants.Jobs
+import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.PARTICIPANT_ID
+import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
 import io.fabric.sdk.android.Fabric
 import java.util.*
@@ -14,13 +22,23 @@ import java.util.*
 const val CHANNEL_ID = "Chronicle"
 const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
 
-class NotificationsService: IntentService("NotificationsService") {
+class NotificationsService: JobIntentService() {
+    private lateinit var settings: EnrollmentSettings
+
     override fun onCreate() {
         super.onCreate()
         Fabric.with(this, Crashlytics())
+        settings = EnrollmentSettings(this)
     }
 
-    override fun onHandleIntent(intent: Intent) {
+    companion object {
+        fun enqueueWork(context: Context, intent: Intent) {
+            val serviceComponent = ComponentName(context, NotificationsService::class.java)
+            enqueueWork(context, serviceComponent, Jobs.NOTIFICATION_JOB_ID.id, intent)
+        }
+    }
+
+    override fun onHandleWork(intent: Intent) {
         if (intent.getBooleanExtra(NOTIFICATIONS_ENABLED, true)) {
             scheduleNotification()
         } else {
@@ -34,6 +52,9 @@ class NotificationsService: IntentService("NotificationsService") {
 
         val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, NotificationsReceiver::class.java)
+        intent.putExtra(PARTICIPANT_ID, settings.getParticipantId())
+        intent.putExtra(STUDY_ID, settings.getStudyId().toString())
+
         val alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         // set alarm to fire at 7.00pm
@@ -52,11 +73,15 @@ class NotificationsService: IntentService("NotificationsService") {
     private fun cancelNotification() {
         val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, NotificationsReceiver::class.java)
+        intent.putExtra(PARTICIPANT_ID, settings.getParticipantId())
+        intent.putExtra(STUDY_ID, settings.getStudyId().toString())
+
         val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_NO_CREATE)
         if (pendingIntent != null) {
             alarmManager.cancel(pendingIntent)
         }
     }
+
 }
 
 
