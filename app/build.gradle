@@ -16,8 +16,8 @@ android {
         applicationId "com.openlattice.chronicle"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 8
-        versionName "2020-06-02"
+        versionCode 9
+        versionName "2020-06-04"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true

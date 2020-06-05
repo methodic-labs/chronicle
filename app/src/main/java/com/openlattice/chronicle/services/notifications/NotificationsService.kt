@@ -1,13 +1,22 @@
 package com.openlattice.chronicle.services.notifications
 
-import android.app.*
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import android.support.v4.app.JobIntentService
 import com.crashlytics.android.Crashlytics
 import com.google.gson.Gson
 import com.openlattice.chronicle.R
+import com.openlattice.chronicle.constants.Jobs
+import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.PARTICIPANT_ID
+import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
 import com.openlattice.chronicle.storage.Notification
 import io.fabric.sdk.android.Fabric
@@ -20,15 +29,23 @@ const val CHANNEL_ID = "Chronicle"
 const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val NOTIFICATION_ENTRY = "notificationEntry"
 
-class NotificationsService: IntentService("NotificationsService") {
+class NotificationsService: JobIntentService() {
+    private lateinit var settings: EnrollmentSettings
+
     override fun onCreate() {
         super.onCreate()
         Fabric.with(this, Crashlytics())
+        settings = EnrollmentSettings(this)
     }
 
-    override fun onHandleIntent(intent: Intent) {
-        val serializedString = intent.getStringExtra(NOTIFICATION_ENTRY)
+    companion object {
+        fun enqueueWork(context: Context, intent: Intent) {
+            val serviceComponent = ComponentName(context, NotificationsService::class.java)
+            enqueueWork(context, serviceComponent, Jobs.NOTIFICATION_JOB_ID.id, intent)
+        }
+    }
 
+    override fun onHandleWork(intent: Intent) {
         if (intent.getBooleanExtra(NOTIFICATIONS_ENABLED, true)) {
             scheduleNotification(serializedString)
         } else {
@@ -44,7 +61,7 @@ class NotificationsService: IntentService("NotificationsService") {
 
         val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, NotificationsReceiver::class.java)
-        
+
         val alarmIntent = PendingIntent.getBroadcast(this, notification.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         try {
@@ -79,6 +96,7 @@ class NotificationsService: IntentService("NotificationsService") {
             alarmManager.cancel(pendingIntent)
         }
     }
+
 }
 
 

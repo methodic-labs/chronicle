@@ -108,7 +108,7 @@ class EnrollmentStatusMonitoringService : JobService() {
                 putExtra(NOTIFICATIONS_ENABLED, participationStatus == ParticipationStatus.ENROLLED && notificationsEnabled)
             }
 
-            startService(intent)
+            NotificationsService.enqueueWork(this, intent)
 
             // schedule notifications for active questionnaires
             for ((key, value) in activeQuestionnaires) {
@@ -132,7 +132,7 @@ class EnrollmentStatusMonitoringService : JobService() {
                         putExtra(NOTIFICATION_ENTRY,  Gson().toJson(notification))
                         putExtra(NOTIFICATIONS_ENABLED, active != null && active)
                     }
-                    startService(intent)
+                    NotificationsService.enqueueWork(this, intent)
                 }
             }
 
@@ -142,22 +142,6 @@ class EnrollmentStatusMonitoringService : JobService() {
             jobFinished(parameters, false)
         }
         return true
-    }
-
-    private fun saveNotifications(entries :MutableList<Notification>) {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        preferences
-                .edit()
-                .putString(SAVED_NOTIFICATIONS, Gson().toJson(entries))
-                .apply()
-    }
-
-    private fun getSavedNotifications() : List<*>? {
-        val settings = PreferenceManager.getDefaultSharedPreferences(this)
-        val default = Gson().toJson(arrayListOf<Notification>())
-        val serializedString = settings.getString(SAVED_NOTIFICATIONS, default)
-
-        return Gson().fromJson(serializedString, List::class.java)
     }
 }
 
