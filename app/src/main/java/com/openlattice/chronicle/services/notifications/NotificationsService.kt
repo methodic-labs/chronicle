@@ -8,8 +8,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import android.support.v4.app.JobIntentService
+import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.google.gson.Gson
 import com.openlattice.chronicle.R
@@ -18,18 +18,15 @@ import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
-import com.openlattice.chronicle.storage.Notification
 import io.fabric.sdk.android.Fabric
-import org.springframework.scheduling.config.CronTask
 import org.springframework.scheduling.support.CronSequenceGenerator
-import java.lang.Exception
 import java.util.*
 
 const val CHANNEL_ID = "Chronicle"
 const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val NOTIFICATION_ENTRY = "notificationEntry"
 
-class NotificationsService: JobIntentService() {
+class NotificationsService : JobIntentService() {
     private lateinit var settings: EnrollmentSettings
 
     override fun onCreate() {
@@ -46,57 +43,66 @@ class NotificationsService: JobIntentService() {
     }
 
     override fun onHandleWork(intent: Intent) {
+        val notificationEntry = intent.getStringExtra(NOTIFICATION_ENTRY)
         if (intent.getBooleanExtra(NOTIFICATIONS_ENABLED, true)) {
-            scheduleNotification(serializedString)
+            scheduleNotification(notificationEntry)
         } else {
-            cancelNotification(serializedString)
+            cancelNotification(notificationEntry)
         }
     }
 
-    // schedule notification at 7.00pm
+    // schedule next notification
     // ref: https://developer.android.com/training/scheduling/alarms
-    private fun scheduleNotification(serializedString: String) {
-        val notification  = Gson().fromJson(serializedString, Notification::class.java)
+    private fun scheduleNotification(notificationEntry: String) {
+        val notification = Gson().fromJson(notificationEntry, NotificationEntry::class.java)
         Log.i(javaClass.name, "notification to schedule: $notification")
 
-        val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, NotificationsReceiver::class.java)
-
-        val alarmIntent = PendingIntent.getBroadcast(this, notification.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val intent = createNotificationIntent(notificationEntry)
+        val pendingIntent = PendingIntent.getBroadcast(this, notification.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         try {
-
+            // Cron expression must of length 6 or will throw IllegalArgumentException exception
+            // example input: "0 0 */2 * * *" (repeat every 2 hours)
             val date = CronSequenceGenerator(notification.cronExpression).next(Date())
             val calendar = Calendar.getInstance()
             calendar.time = date
+            Log.i(javaClass.name, "notification time: $date")
+
+            val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
-            } else{
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
             }
 
         } catch (e: Exception) {
             Log.i(javaClass.name, "caught exception", e)
         }
 
-
     }
 
     // invoke this when the participant is no longer enrolled or the study's notifications are turned off
-    private fun cancelNotification(serializedString: String) {
-        val notification  = Gson().fromJson(serializedString, Notification::class.java)
+    private fun cancelNotification(notificationEntry: String) {
+        val notification = Gson().fromJson(notificationEntry, NotificationEntry::class.java)
         Log.i(javaClass.name, "Notification to cancel: $notification")
 
-        val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, NotificationsReceiver::class.java)
+        val intent = createNotificationIntent(notificationEntry)
+        val pendingIntent = PendingIntent.getBroadcast(this, notification.hashCode(), intent, PendingIntent.FLAG_NO_CREATE)
 
-        val pendingIntent = PendingIntent.getBroadcast(this, notification.getRequestCode(), intent, PendingIntent.FLAG_NO_CREATE)
+        val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (pendingIntent != null) {
             alarmManager.cancel(pendingIntent)
         }
     }
 
+    private fun createNotificationIntent(notificationEntry: String): Intent {
+        return Intent(this, NotificationsReceiver::class.java).apply {
+            putExtra(NOTIFICATION_ENTRY, notificationEntry)
+            putExtra(STUDY_ID, settings.getStudyId().toString())
+            putExtra(PARTICIPANT_ID, settings.getParticipantId())
+        }
+    }
 }
 
 
@@ -112,7 +118,6 @@ fun createNotificationChannel(context: Context) {
         val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
             description = channelDescription
         }
-
         //register channel
         val notificationManager: NotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

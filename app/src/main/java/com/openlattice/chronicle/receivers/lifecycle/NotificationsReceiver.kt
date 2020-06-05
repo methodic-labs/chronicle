@@ -1,7 +1,6 @@
 package com.openlattice.chronicle.receivers.lifecycle
 
 import android.app.Notification
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,13 +12,13 @@ import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import android.text.format.DateUtils
 import android.widget.RemoteViews
+import com.google.gson.Gson
 import com.openlattice.chronicle.R
-import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
-
-const val NOTIFICATION_ID = 5;
+import com.openlattice.chronicle.services.notifications.NOTIFICATION_ENTRY
+import com.openlattice.chronicle.utils.Utils.createNotificationTargetUrl
 
 class NotificationsReceiver : BroadcastReceiver() {
 
@@ -27,24 +26,20 @@ class NotificationsReceiver : BroadcastReceiver() {
 
         val participantId = intent.getStringExtra(PARTICIPANT_ID)
         val studyId = intent.getStringExtra(STUDY_ID)
+        val notificationEntry = intent.getStringExtra(NOTIFICATION_ENTRY)
 
-        // create url based on this intent
-        val uriBuilder: Uri.Builder = Uri.Builder()
-                .scheme("https")
-                .encodedAuthority("openlattice.com")
-                .appendPath("chronicle")
-                .appendEncodedPath("#")
-                .appendPath("survey")
-                .appendQueryParameter("studyId", studyId)
-                .appendQueryParameter("participantId", participantId)
+        val notification = Gson().fromJson(notificationEntry, com.openlattice.chronicle.services.notifications.NotificationEntry::class.java)
 
         // intent to launch survey in browser
-        val notifyIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uriBuilder.build().toString()))
+        val targetUrl = createNotificationTargetUrl(notification, studyId, participantId)
+        val notifyIntent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         // layout to use in custom notification
         val notificationLayout = RemoteViews(context.packageName, R.layout.notification)
         notificationLayout.setTextViewText(R.id.timestamp, DateUtils.formatDateTime(context, System.currentTimeMillis(), DateUtils.FORMAT_SHOW_TIME))
+        notificationLayout.setTextViewText(R.id.notification_title, notification.title)
+        notificationLayout.setTextViewText(R.id.notification_message, notification.message)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_notification)
@@ -60,7 +55,7 @@ class NotificationsReceiver : BroadcastReceiver() {
         builder.setSound(notificationSound)
 
         with(NotificationManagerCompat.from(context)) {
-            notify(NOTIFICATION_ID, builder.build())
+            notify(notification.hashCode(), builder.build())
         }
     }
 }

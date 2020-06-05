@@ -58,15 +58,18 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/notification_title"
         style="@style/TextAppearance.Compat.Notification.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="7dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:scrollHorizontally="true"
         android:text="@string/notification_title" />
 
     <TextView
-        android:id="@+id/content"
+        android:id="@+id/notification_message"
         style="@style/TextAppearance.Compat.Notification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
