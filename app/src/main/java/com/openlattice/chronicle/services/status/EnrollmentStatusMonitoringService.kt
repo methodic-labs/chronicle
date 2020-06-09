@@ -65,19 +65,19 @@ class EnrollmentStatusMonitoringService : JobService() {
 
             var participationStatus = enrollmentSettings.getParticipationStatus()
             var notificationsEnabled = enrollmentSettings.getAwarenessNotificationsEnabled()
-            var activeQuestionnaires: Map<UUID, Map<FullQualifiedName, Set<Any>>> = HashMap()
+            var studyQuestionnaires: Map<UUID, Map<FullQualifiedName, Set<Any>>> = HashMap()
 
             try {
                 participationStatus = chronicleStudyApi.getParticipationStatus(studyId, participantId)
                 notificationsEnabled = chronicleStudyApi.isNotificationsEnabled(studyId)
-                activeQuestionnaires = chronicleStudyApi.getStudyQuestionnaires(studyId)
+                studyQuestionnaires = chronicleStudyApi.getStudyQuestionnaires(studyId)
 
             } catch (e: Exception) {
                 Crashlytics.log("caught exception: studyId: \"$studyId\" participantId: \"$participantId\"")
                 Crashlytics.logException(e)
             }
             Log.i(javaClass.name, "Participation status: $participationStatus")
-            Log.i(javaClass.name, "active questionnaires: $activeQuestionnaires")
+            Log.i(javaClass.name, "Study questionnaires: $studyQuestionnaires")
 
             if (participationStatus == ParticipationStatus.ENROLLED) {
                 scheduleUploadJob(this)
@@ -102,12 +102,10 @@ class EnrollmentStatusMonitoringService : JobService() {
             NotificationsService.enqueueWork(this, intent)
 
             // schedule notifications for active questionnaires
-            for ((key, value) in activeQuestionnaires) {
+            for ((key, value) in studyQuestionnaires) {
                 val cron = value[FullQualifiedName(CRON)]?.iterator()?.next()?.toString()
                 val name = value[FullQualifiedName(NAME)]?.iterator()?.next()?.toString()
                 val active = value[FullQualifiedName(ACTIVE)]?.iterator()?.next()?.equals(true)
-
-                Log.i(javaClass.name, "questionnaire $key -> active ? $active")
 
                 if (!cron.isNullOrEmpty() && !name.isNullOrEmpty()) {
                     notification = NotificationEntry(
@@ -120,7 +118,7 @@ class EnrollmentStatusMonitoringService : JobService() {
 
                     intent = Intent(this, NotificationsService::class.java).apply {
                         putExtra(NOTIFICATION_ENTRY,  Gson().toJson(notification))
-                        putExtra(NOTIFICATIONS_ENABLED, active != null && active)
+                        putExtra(NOTIFICATIONS_ENABLED, active != null && active && participationStatus == ParticipationStatus.ENROLLED)
                     }
                     NotificationsService.enqueueWork(this, intent)
                 }

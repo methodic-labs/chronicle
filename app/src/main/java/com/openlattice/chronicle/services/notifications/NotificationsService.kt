@@ -82,7 +82,7 @@ class NotificationsService : JobIntentService() {
 
     }
 
-    // invoke this when the participant is no longer enrolled or the study's notifications are turned off
+    // invoke this when a scheduled notification needs to be cancelled
     private fun cancelNotification(notificationEntry: String) {
         val notification = Gson().fromJson(notificationEntry, NotificationEntry::class.java)
         Log.i(javaClass.name, "Notification to cancel: $notification")
