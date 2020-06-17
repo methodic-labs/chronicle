@@ -59,7 +59,6 @@ class NotificationsService : JobIntentService() {
             val rule = RecurrenceRule(recurrenceRule)
             val iterator = rule.iterator(DateTime.now().timestamp, TimeZone.getDefault())
             val nextTimestamp: Long = iterator.nextMillis()
-
             return Date(nextTimestamp)
         } catch (e: Exception) {
             Log.i(javaClass.name, "caught exception", e)
