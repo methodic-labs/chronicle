@@ -103,15 +103,15 @@ class EnrollmentStatusMonitoringService : JobService() {
 
             // schedule notifications for active questionnaires
             for ((key, value) in studyQuestionnaires) {
-                val cron = value[FullQualifiedName(RECURRENCE_RULE)]?.iterator()?.next()?.toString()
+                val recurrenceRule = value[FullQualifiedName(RECURRENCE_RULE)]?.iterator()?.next()?.toString()
                 val name = value[FullQualifiedName(NAME)]?.iterator()?.next()?.toString()
                 val active = value[FullQualifiedName(ACTIVE)]?.iterator()?.next()?.equals(true)
 
-                if (!cron.isNullOrEmpty() && !name.isNullOrEmpty()) {
+                if (!recurrenceRule.isNullOrEmpty() && !name.isNullOrEmpty()) {
                     notification = NotificationEntry(
                             key.toString(),
                             NotificationType.QUESTIONNAIRE,
-                            cron,
+                            recurrenceRule,
                             name,
                             "Tap to complete questionnaire"
                     )
