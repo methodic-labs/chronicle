@@ -15,7 +15,7 @@ const val LONGITUDE = "location.longitude"
 const val LATITUDE = "location.latitude"
 const val ID = "general.stringid"
 const val TIMEZONE = "ol.timezone"
-const val CRON = "ol.cron"
+const val RECURRENCE_RULE = "ol.rrule"
 const val NAME = "ol.name"
 const val ACTIVE = "ol.active"
 
@@ -33,7 +33,7 @@ val PROPERTY_TYPES = setOf(
         END_TIME,
         TIMEZONE,
         ACTIVE,
-        CRON,
+        RECURRENCE_RULE,
         NAME)
 
 interface ChronicleSensor {

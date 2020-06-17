@@ -19,7 +19,8 @@ import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
 import io.fabric.sdk.android.Fabric
-import org.springframework.scheduling.support.CronSequenceGenerator
+import org.dmfs.rfc5545.DateTime
+import org.dmfs.rfc5545.recur.RecurrenceRule
 import java.util.*
 
 const val CHANNEL_ID = "Chronicle"
@@ -51,6 +52,21 @@ class NotificationsService : JobIntentService() {
         }
     }
 
+    // generate next date from a rfc 5545 recurrence string
+    // https://tools.ietf.org/html/rfc5545#section-3.3.10
+    private fun getNextRecurringDate(recurrenceRule: String): Date? {
+        try {
+            val rule = RecurrenceRule(recurrenceRule)
+            val iterator = rule.iterator(DateTime.now().timestamp, TimeZone.getDefault())
+            val nextTimestamp: Long = iterator.nextMillis()
+
+            return Date(nextTimestamp)
+        } catch (e: Exception) {
+            Log.i(javaClass.name, "caught exception", e)
+        }
+        return null
+    }
+
     // schedule next notification
     // ref: https://developer.android.com/training/scheduling/alarms
     private fun scheduleNotification(notificationEntry: String) {
@@ -61,12 +77,11 @@ class NotificationsService : JobIntentService() {
         val pendingIntent = PendingIntent.getBroadcast(this, notification.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         try {
-            // Cron expression must of length 6 or will throw IllegalArgumentException exception
-            // example input: "0 0 */2 * * *" (repeat every 2 hours)
-            val date = CronSequenceGenerator(notification.cronExpression).next(Date())
+            val date = getNextRecurringDate(notification.recurrenceRule)!!
+            Log.i(javaClass.name, "notification time: $date")
+
             val calendar = Calendar.getInstance()
             calendar.time = date
-            Log.i(javaClass.name, "notification time: $date")
 
             val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 

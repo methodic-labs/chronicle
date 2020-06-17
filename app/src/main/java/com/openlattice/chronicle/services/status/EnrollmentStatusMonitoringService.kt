@@ -16,7 +16,7 @@ import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.sensors.ACTIVE
-import com.openlattice.chronicle.sensors.CRON
+import com.openlattice.chronicle.sensors.RECURRENCE_RULE
 import com.openlattice.chronicle.sensors.NAME
 import com.openlattice.chronicle.services.notifications.NOTIFICATIONS_ENABLED
 import com.openlattice.chronicle.services.notifications.NOTIFICATION_ENTRY
@@ -90,7 +90,7 @@ class EnrollmentStatusMonitoringService : JobService() {
             var notification = NotificationEntry(
                     studyId.toString(),
                     NotificationType.AWARENESS,
-                    "0 0 19 * * *",
+                    "FREQ=DAILY;BYHOUR=19;BYMINUTE=0;BYSECOND=0",
                     "Chronicle Survey",
                     "Tap to complete survey"
             )
@@ -103,7 +103,7 @@ class EnrollmentStatusMonitoringService : JobService() {
 
             // schedule notifications for active questionnaires
             for ((key, value) in studyQuestionnaires) {
-                val cron = value[FullQualifiedName(CRON)]?.iterator()?.next()?.toString()
+                val cron = value[FullQualifiedName(RECURRENCE_RULE)]?.iterator()?.next()?.toString()
                 val name = value[FullQualifiedName(NAME)]?.iterator()?.next()?.toString()
                 val active = value[FullQualifiedName(ACTIVE)]?.iterator()?.next()?.equals(true)
 
