@@ -3,12 +3,10 @@ package com.openlattice.chronicle.sensors
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo.*
 import android.content.Context
-import com.google.common.collect.HashMultimap
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
 import org.joda.time.DateTime
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
@@ -18,7 +16,7 @@ class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
         return activityManager.runningAppProcesses.map {
             ImmutableSetMultimap.of(
                     propertyTypeIds[ID]!!, UUID.randomUUID(),
-                    propertyTypeIds[NAME]!!, it.processName,
+                    propertyTypeIds[GENERAL_NAME]!!, it.processName,
                     propertyTypeIds[IMPORTANCE]!!, mapImportance(it.importance),
                     propertyTypeIds[TIMESTAMP]!!, DateTime().toString())
         }

@@ -15,7 +15,7 @@ import com.openlattice.chronicle.utils.Utils
 import java.util.UUID
 
 const val PARTICIPANT_ID = "participantId"
-const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
+const val AWARENESS_NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val STUDY_ID = "studyId"
 const val PARTICIPATION_STATUS = "participationStatus"
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
@@ -65,14 +65,14 @@ class EnrollmentSettings(private val context: Context) {
         updateEnrolled()
     }
 
-    fun setNotificationsEnabled(notificationsEnabled :Boolean) {
+    fun setAwarenessNotificationsEnabled(notificationsEnabled :Boolean) {
         settings.edit()
-                .putBoolean(NOTIFICATIONS_ENABLED, notificationsEnabled)
+                .putBoolean(AWARENESS_NOTIFICATIONS_ENABLED, notificationsEnabled)
                 .apply()
     }
 
-    fun getNotificationsEnabled (): Boolean {
-        return settings.getBoolean(NOTIFICATIONS_ENABLED, false)
+    fun getAwarenessNotificationsEnabled (): Boolean {
+        return settings.getBoolean(AWARENESS_NOTIFICATIONS_ENABLED, false)
     }
 
     fun updateEnrolled() {

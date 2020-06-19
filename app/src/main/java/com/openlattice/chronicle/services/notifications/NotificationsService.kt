@@ -9,7 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.support.v4.app.JobIntentService
+import android.util.Log
 import com.crashlytics.android.Crashlytics
+import com.google.gson.Gson
 import com.openlattice.chronicle.R
 import com.openlattice.chronicle.constants.Jobs
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -17,12 +19,15 @@ import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
 import io.fabric.sdk.android.Fabric
+import org.dmfs.rfc5545.DateTime
+import org.dmfs.rfc5545.recur.RecurrenceRule
 import java.util.*
 
 const val CHANNEL_ID = "Chronicle"
 const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
+const val NOTIFICATION_ENTRY = "notificationEntry"
 
-class NotificationsService: JobIntentService() {
+class NotificationsService : JobIntentService() {
     private lateinit var settings: EnrollmentSettings
 
     override fun onCreate() {
@@ -39,49 +44,79 @@ class NotificationsService: JobIntentService() {
     }
 
     override fun onHandleWork(intent: Intent) {
+        val notificationEntry = intent.getStringExtra(NOTIFICATION_ENTRY)
         if (intent.getBooleanExtra(NOTIFICATIONS_ENABLED, true)) {
-            scheduleNotification()
+            scheduleNotification(notificationEntry)
         } else {
-            cancelNotification()
+            cancelNotification(notificationEntry)
         }
     }
 
-    // schedule notification at 7.00pm
+    // generate next date from a rfc 5545 recurrence string
+    // https://tools.ietf.org/html/rfc5545#section-3.3.10
+    private fun getNextRecurringDate(recurrenceRule: String): Date? {
+        try {
+            val rule = RecurrenceRule(recurrenceRule)
+            val iterator = rule.iterator(DateTime.now().timestamp, TimeZone.getDefault())
+            val nextTimestamp: Long = iterator.nextMillis()
+            return Date(nextTimestamp)
+        } catch (e: Exception) {
+            Log.i(javaClass.name, "caught exception", e)
+        }
+        return null
+    }
+
+    // schedule next notification
     // ref: https://developer.android.com/training/scheduling/alarms
-    private fun scheduleNotification() {
+    private fun scheduleNotification(notificationEntry: String) {
+        val notification = Gson().fromJson(notificationEntry, NotificationEntry::class.java)
+        Log.i(javaClass.name, "notification to schedule: $notification")
 
-        val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, NotificationsReceiver::class.java)
-        intent.putExtra(PARTICIPANT_ID, settings.getParticipantId())
-        intent.putExtra(STUDY_ID, settings.getStudyId().toString())
+        val intent = createNotificationIntent(notificationEntry)
+        val pendingIntent = PendingIntent.getBroadcast(this, notification.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        try {
+            val date = getNextRecurringDate(notification.recurrenceRule)!!
+            Log.i(javaClass.name, "notification time: $date")
 
-        // set alarm to fire at 7.00pm
-        val calendar: Calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 19)
-        calendar.set(Calendar.MINUTE, 0)
+            val calendar = Calendar.getInstance()
+            calendar.time = date
 
-        if (calendar.timeInMillis < System.currentTimeMillis()) {
-            calendar.add(Calendar.DATE, 1)
+            val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+            }
+
+        } catch (e: Exception) {
+            Log.i(javaClass.name, "caught exception", e)
         }
 
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
     }
 
-    // invoke this when the participant is no longer enrolled or the study's notifications are turned off
-    private fun cancelNotification() {
-        val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, NotificationsReceiver::class.java)
-        intent.putExtra(PARTICIPANT_ID, settings.getParticipantId())
-        intent.putExtra(STUDY_ID, settings.getStudyId().toString())
+    // invoke this when a scheduled notification needs to be cancelled
+    private fun cancelNotification(notificationEntry: String) {
+        val notification = Gson().fromJson(notificationEntry, NotificationEntry::class.java)
+        Log.i(javaClass.name, "Notification to cancel: $notification")
 
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_NO_CREATE)
+        val intent = createNotificationIntent(notificationEntry)
+        val pendingIntent = PendingIntent.getBroadcast(this, notification.hashCode(), intent, PendingIntent.FLAG_NO_CREATE)
+
+        val alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (pendingIntent != null) {
             alarmManager.cancel(pendingIntent)
         }
     }
 
+    private fun createNotificationIntent(notificationEntry: String): Intent {
+        return Intent(this, NotificationsReceiver::class.java).apply {
+            putExtra(NOTIFICATION_ENTRY, notificationEntry)
+            putExtra(STUDY_ID, settings.getStudyId().toString())
+            putExtra(PARTICIPANT_ID, settings.getParticipantId())
+        }
+    }
 }
 
 
@@ -97,11 +132,9 @@ fun createNotificationChannel(context: Context) {
         val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
             description = channelDescription
         }
-
         //register channel
         val notificationManager: NotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 }
-

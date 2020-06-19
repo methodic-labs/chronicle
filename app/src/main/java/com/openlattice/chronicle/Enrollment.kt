@@ -121,7 +121,7 @@ class Enrollment : AppCompatActivity() {
 
                             enrollmentSettings.setStudyId(studyId)
                             enrollmentSettings.setParticipantId(participantId)
-                            enrollmentSettings.setNotificationsEnabled(notificationsEnabled)
+                            enrollmentSettings.setAwarenessNotificationsEnabled(notificationsEnabled)
                             // hide text fields, progress bar, and enroll button
                             studyIdText.visibility = View.GONE
                             participantIdText.visibility = View.GONE

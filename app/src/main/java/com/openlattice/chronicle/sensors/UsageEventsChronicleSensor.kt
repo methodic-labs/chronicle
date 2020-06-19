@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
 import com.openlattice.chronicle.utils.Utils.getAppFullName
 import org.joda.time.DateTime
-import org.joda.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -52,7 +51,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
                 .map {
                     ImmutableSetMultimap.builder<UUID, Any>()
                             .put(propertyTypeIds[ID]!!, UUID.randomUUID())
-                            .put(propertyTypeIds[NAME]!!, it.packageName)
+                            .put(propertyTypeIds[GENERAL_NAME]!!, it.packageName)
                             .put(propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType))
                             .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp).toString())
                             .put(propertyTypeIds[TIMEZONE]!!, timezone)
