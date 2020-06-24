@@ -40,8 +40,6 @@ android {
     }
 }
 
-ext.jackson_version = '2.6.5'
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -56,9 +54,7 @@ dependencies {
         exclude module: 'guava'
     }
     implementation 'com.android.support:support-v4:27.1.1'
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:${jackson_version}") {
-        exclude module: 'guava'
-    }
+
     implementation 'org.slf4j:slf4j-android:1.7.25'
     implementation 'com.google.guava:guava:22.0-android'
 
