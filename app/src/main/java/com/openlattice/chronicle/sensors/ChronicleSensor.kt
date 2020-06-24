@@ -1,11 +1,10 @@
 package com.openlattice.chronicle.sensors
 
 import com.google.common.collect.SetMultimap
-import org.joda.time.LocalDateTime
 import java.util.*
 
 const val IMPORTANCE = "ol.recordtype"
-const val NAME = "general.fullname"
+const val GENERAL_NAME = "general.fullname"
 const val APP_NAME = "ol.title"
 const val TIMESTAMP = "ol.datelogged"
 const val DURATION = "general.Duration"
@@ -16,10 +15,13 @@ const val LONGITUDE = "location.longitude"
 const val LATITUDE = "location.latitude"
 const val ID = "general.stringid"
 const val TIMEZONE = "ol.timezone"
+const val RECURRENCE_RULE = "ol.rrule"
+const val NAME = "ol.name"
+const val ACTIVE = "ol.active"
 
 val PROPERTY_TYPES = setOf(
         IMPORTANCE,
-        NAME,
+        GENERAL_NAME,
         APP_NAME,
         TIMESTAMP,
         ALTITUDE,
@@ -29,7 +31,10 @@ val PROPERTY_TYPES = setOf(
         DURATION,
         START_TIME,
         END_TIME,
-        TIMEZONE)
+        TIMEZONE,
+        ACTIVE,
+        RECURRENCE_RULE,
+        NAME)
 
 interface ChronicleSensor {
     fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>>
