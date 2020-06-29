@@ -103,24 +103,28 @@ class EnrollmentStatusMonitoringService : JobService() {
 
             // schedule notifications for active questionnaires
             for ((key, value) in studyQuestionnaires) {
-                val recurrenceRule = value[FullQualifiedName(RECURRENCE_RULE)]?.iterator()?.next()?.toString()
+                val recurrenceRuleSet = value[FullQualifiedName(RECURRENCE_RULE)]?.iterator()?.next()?.toString()
                 val name = value[FullQualifiedName(NAME)]?.iterator()?.next()?.toString()
                 val active = value[FullQualifiedName(ACTIVE)]?.iterator()?.next()?.equals(true)
 
-                if (!recurrenceRule.isNullOrEmpty() && !name.isNullOrEmpty()) {
-                    notification = NotificationEntry(
-                            key.toString(),
-                            NotificationType.QUESTIONNAIRE,
-                            recurrenceRule,
-                            name,
-                            "Tap to complete questionnaire"
-                    )
+                if (!recurrenceRuleSet.isNullOrEmpty() && !name.isNullOrEmpty()) {
 
-                    intent = Intent(this, NotificationsService::class.java).apply {
-                        putExtra(NOTIFICATION_ENTRY,  Gson().toJson(notification))
-                        putExtra(NOTIFICATIONS_ENABLED, active != null && active && participationStatus == ParticipationStatus.ENROLLED)
+                    recurrenceRuleSet.split("RRULE:").filter { it.isNotEmpty() }.forEach {
+                        run {
+                            notification = NotificationEntry(
+                                    key.toString(),
+                                    NotificationType.QUESTIONNAIRE,
+                                    it,
+                                    name,
+                                    "Tap to complete questionnaire"
+                            )
+                            intent = Intent(this, NotificationsService::class.java).apply {
+                                putExtra(NOTIFICATION_ENTRY, Gson().toJson(notification))
+                                putExtra(NOTIFICATIONS_ENABLED, active != null && active && participationStatus == ParticipationStatus.ENROLLED)
+                            }
+                            NotificationsService.enqueueWork(this, intent)
+                        }
                     }
-                    NotificationsService.enqueueWork(this, intent)
                 }
             }
 
