@@ -53,7 +53,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation('com.openlattice:chronicle-api:0.0.11-SNAPSHOT') {
+    implementation('com.openlattice:chronicle-api:0.0.12') {
         exclude module: 'guava'
     }
     implementation 'com.android.support:support-v4:27.1.1'
