@@ -10,7 +10,7 @@ import com.crashlytics.android.Crashlytics
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.createNotificationChannel
-import com.openlattice.chronicle.services.status.scheduleParticipationStatusJob
+import com.openlattice.chronicle.services.status.scheduleEnrollmentStatusJob
 import com.openlattice.chronicle.services.upload.getLastUpload
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
                     scheduleUploadJob(this)
                     scheduleUsageMonitoringJob(this)
                 }
-                scheduleParticipationStatusJob(this)
+                scheduleEnrollmentStatusJob(this)
                 handler.post(this::updateLastUpload)
             } else {
                 startActivity(Intent(this, Enrollment::class.java))
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun updateLastUpload( ) {
+    private fun updateLastUpload() {
         val lastUploadText = findViewById<TextView>(R.id.lastUploadValue)
         lastUploadText.text = getLastUpload(this)
         handler.postDelayed(this::updateLastUpload, LAST_UPLOAD_REFRESH_INTERVAL)
