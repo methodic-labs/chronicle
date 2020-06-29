@@ -16,10 +16,11 @@ import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.sensors.ACTIVE
-import com.openlattice.chronicle.sensors.RECURRENCE_RULE
 import com.openlattice.chronicle.sensors.NAME
+import com.openlattice.chronicle.sensors.RECURRENCE_RULE
 import com.openlattice.chronicle.services.notifications.NOTIFICATIONS_ENABLED
 import com.openlattice.chronicle.services.notifications.NOTIFICATION_ENTRY
+import com.openlattice.chronicle.services.notifications.NotificationEntry
 import com.openlattice.chronicle.services.notifications.NotificationsService
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.cancelUploadJobScheduler
@@ -27,7 +28,6 @@ import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.cancelUsageMonitoringJobScheduler
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
-import com.openlattice.chronicle.services.notifications.NotificationEntry
 import io.fabric.sdk.android.Fabric
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
@@ -103,24 +103,25 @@ class EnrollmentStatusMonitoringService : JobService() {
 
             // schedule notifications for active questionnaires
             for ((key, value) in studyQuestionnaires) {
-                val recurrenceRule = value[FullQualifiedName(RECURRENCE_RULE)]?.iterator()?.next()?.toString()
+                val recurrenceRuleSet = value[FullQualifiedName(RECURRENCE_RULE)]?.iterator()?.next()?.toString()
                 val name = value[FullQualifiedName(NAME)]?.iterator()?.next()?.toString()
                 val active = value[FullQualifiedName(ACTIVE)]?.iterator()?.next()?.equals(true)
 
-                if (!recurrenceRule.isNullOrEmpty() && !name.isNullOrEmpty()) {
-                    notification = NotificationEntry(
-                            key.toString(),
-                            NotificationType.QUESTIONNAIRE,
-                            recurrenceRule,
-                            name,
-                            "Tap to complete questionnaire"
-                    )
-
-                    intent = Intent(this, NotificationsService::class.java).apply {
-                        putExtra(NOTIFICATION_ENTRY,  Gson().toJson(notification))
-                        putExtra(NOTIFICATIONS_ENABLED, active != null && active && participationStatus == ParticipationStatus.ENROLLED)
+                if (!recurrenceRuleSet.isNullOrEmpty() && !name.isNullOrEmpty()) {
+                    recurrenceRuleSet.split("RRULE:").filter { it.isNotEmpty() }.forEach {
+                        notification = NotificationEntry(
+                                key.toString(),
+                                NotificationType.QUESTIONNAIRE,
+                                it,
+                                name,
+                                "Tap to complete questionnaire"
+                        )
+                        intent = Intent(this, NotificationsService::class.java).apply {
+                            putExtra(NOTIFICATION_ENTRY, Gson().toJson(notification))
+                            putExtra(NOTIFICATIONS_ENABLED, active != null && active && participationStatus == ParticipationStatus.ENROLLED)
+                        }
+                        NotificationsService.enqueueWork(this, intent)
                     }
-                    NotificationsService.enqueueWork(this, intent)
                 }
             }
 
@@ -133,7 +134,6 @@ class EnrollmentStatusMonitoringService : JobService() {
     }
 
 }
-
 
 
 fun scheduleEnrollmentStatusJob(context: Context) {
