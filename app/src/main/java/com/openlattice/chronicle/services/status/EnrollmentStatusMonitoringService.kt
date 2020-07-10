@@ -42,10 +42,6 @@ class EnrollmentStatusMonitoringService : JobService() {
 
     private lateinit var enrollmentSettings: EnrollmentSettings;
 
-    override fun onCreate() {
-        super.onCreate()
-    }
-
     override fun onStopJob(p0: JobParameters?): Boolean {
         Log.i(javaClass.name, "Enrollment status service stopped")
         executor.shutdown()

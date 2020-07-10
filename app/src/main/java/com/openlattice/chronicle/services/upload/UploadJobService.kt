@@ -54,10 +54,6 @@ class UploadJobService : JobService() {
     private lateinit var deviceId: String
     private lateinit var dataSink: BrokerDataSink
 
-    override fun onCreate() {
-        super.onCreate()
-    }
-
     override fun onStopJob(params: JobParameters?): Boolean {
         executor.shutdown()
         executor.awaitTermination(1, TimeUnit.MINUTES)

@@ -4,21 +4,19 @@ import android.app.job.JobInfo
 import android.app.job.JobParameters
 import android.app.job.JobScheduler
 import android.app.job.JobService
-import androidx.room.Room
 import android.content.ComponentName
 import android.content.Context
 import android.hardware.display.DisplayManager
 import android.util.Log
 import android.view.Display
-import com.crashlytics.android.Crashlytics
+import androidx.room.Room
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableMap
 import com.openlattice.chronicle.ChronicleApi
+import com.openlattice.chronicle.constants.Jobs.MONITOR_USAGE_JOB_ID
 import com.openlattice.chronicle.sensors.ChronicleSensor
 import com.openlattice.chronicle.sensors.PROPERTY_TYPES
-import com.openlattice.chronicle.constants.Jobs.MONITOR_USAGE_JOB_ID
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
-import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
 import com.openlattice.chronicle.serialization.JsonSerializer.serializeQueueEntry
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
@@ -26,7 +24,6 @@ import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
 import com.openlattice.chronicle.utils.Utils.isJobServiceScheduled
-import io.fabric.sdk.android.Fabric
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -46,11 +43,6 @@ class UsageMonitoringJobService : JobService() {
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
     private lateinit var sensors: Set<ChronicleSensor>
-
-    override fun onCreate() {
-        super.onCreate()
-        Fabric.with(this, Crashlytics())
-    }
 
     override fun onStartJob(params: JobParameters?): Boolean {
         executor.execute {
@@ -134,7 +126,7 @@ fun scheduleUsageMonitoringJob(context: Context) {
     }
 }
 
-fun cancelUsageMonitoringJobScheduler(context :Context) {
+fun cancelUsageMonitoringJobScheduler(context: Context) {
     val jobScheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
     jobScheduler.cancel(MONITOR_USAGE_JOB_ID.id)
 }

@@ -51,11 +51,7 @@ class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
     private lateinit var sensors: Set<ChronicleSensor>
-
-    override fun onCreate() {
-        super.onCreate()
-    }
-
+    
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         val notificationIntent = Intent(this, UsageEventsService::class.java)
