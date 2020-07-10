@@ -26,7 +26,12 @@ const val NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val NOTIFICATION_ENTRY = "notificationEntry"
 
 class NotificationsService : JobIntentService() {
-    private var settings: EnrollmentSettings = EnrollmentSettings(this)
+    private lateinit var settings: EnrollmentSettings
+
+    override fun onCreate() {
+        super.onCreate()
+        settings = EnrollmentSettings(this)
+    }
 
     companion object {
         fun enqueueWork(context: Context, intent: Intent) {
