@@ -8,9 +8,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.core.app.JobIntentService
 import android.util.Log
-import com.crashlytics.android.Crashlytics
+import androidx.core.app.JobIntentService
 import com.google.gson.Gson
 import com.openlattice.chronicle.R
 import com.openlattice.chronicle.constants.Jobs
@@ -18,7 +17,6 @@ import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
-import io.fabric.sdk.android.Fabric
 import org.dmfs.rfc5545.DateTime
 import org.dmfs.rfc5545.recur.RecurrenceRule
 import java.util.*
@@ -32,7 +30,6 @@ class NotificationsService : JobIntentService() {
 
     override fun onCreate() {
         super.onCreate()
-        Fabric.with(this, Crashlytics())
         settings = EnrollmentSettings(this)
     }
 

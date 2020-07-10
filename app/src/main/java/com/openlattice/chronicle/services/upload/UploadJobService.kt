@@ -9,10 +9,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.preference.PreferenceManager
 import android.util.Log
-import com.crashlytics.android.Crashlytics
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.constants.Jobs.UPLOAD_JOB_ID
@@ -27,7 +27,6 @@ import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.util.RetrofitBuilders
 import com.openlattice.chronicle.util.RetrofitBuilders.*
 import com.openlattice.chronicle.utils.Utils.isJobServiceScheduled
-import io.fabric.sdk.android.Fabric
 import org.joda.time.DateTime
 import retrofit2.Retrofit
 import java.util.*
@@ -35,7 +34,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-const val PRODUCTION = "https://api.openlattice.com/"
+const val PRODUCTION = "http://10.0.2.2:8090"
 const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
@@ -46,6 +45,7 @@ class UploadJobService : JobService() {
     private val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
     private val serviceId = Random().nextLong()
     private val limiter = com.google.common.util.concurrent.RateLimiter.create(10.0)
+    private val crashlytics = FirebaseCrashlytics.getInstance()
 
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var settings: EnrollmentSettings
@@ -56,7 +56,6 @@ class UploadJobService : JobService() {
 
     override fun onCreate() {
         super.onCreate()
-        Fabric.with(this, Crashlytics())
     }
 
     override fun onStopJob(params: JobParameters?): Boolean {
@@ -94,7 +93,7 @@ class UploadJobService : JobService() {
                 val participantId = settings.getParticipantId()
 
                 if (deviceId.isNullOrBlank() || studyId == null || participantId.isNullOrBlank()) {
-                    Crashlytics.log("studyId: \"$studyId\" ; participantId: \"$participantId\" ; deviceId: \"$deviceId\"")
+                    crashlytics.log("studyId: \"$studyId\" ; participantId: \"$participantId\" ; deviceId: \"$deviceId\"")
                 }
 
                 var isKnown = false
@@ -103,8 +102,8 @@ class UploadJobService : JobService() {
                     isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
                     chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
                 } catch (e: Exception) {
-                    Crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
-                    Crashlytics.logException(e)
+                    crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
+                    FirebaseCrashlytics.getInstance().recordException(e)
                 }
 
                 //Only run the upload job if the device is already enrolled or we are able to properly enroll.

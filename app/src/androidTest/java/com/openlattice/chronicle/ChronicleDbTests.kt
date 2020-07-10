@@ -1,15 +1,15 @@
 package com.openlattice.chronicle
 
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.openlattice.chronicle.storage.ChronicleDb
-import org.junit.BeforeClass
-import org.junit.Test
-import org.junit.runner.RunWith
 import androidx.room.Room
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
 import junit.framework.Assert
+import org.junit.BeforeClass
+import org.junit.Test
+import org.junit.runner.RunWith
 
 
 @RunWith(AndroidJUnit4::class)
@@ -21,10 +21,10 @@ class ChronicleDbTests {
         @BeforeClass
         @JvmStatic
         fun setupChronicleDb() {
-            val appContext = InstrumentationRegistry.getTargetContext()
+            val appContext = InstrumentationRegistry.getInstrumentation().targetContext
             chronicleDb = Room.databaseBuilder(appContext, ChronicleDb::class.java!!, "chronicle").build()
             storageQueue = chronicleDb.queueEntryData()
-            chronicleDb.queueEntryData().deleteEntries( chronicleDb.queueEntryData().getNextEntries(1000) )
+            chronicleDb.queueEntryData().deleteEntries(chronicleDb.queueEntryData().getNextEntries(1000))
         }
 
     }
@@ -54,10 +54,10 @@ class ChronicleDbTests {
 
         ChronicleDbHolder.storageQueue.insertEntries(qeList);
         val actualArr = ChronicleDbHolder.storageQueue.getNextEntries(4)
-        Assert.assertEquals(4, actualArr.size )
-        Assert.assertEquals(qe1,actualArr[ 0 ])
-        Assert.assertEquals(qe2,actualArr[ 1 ])
-        Assert.assertEquals(qe3,actualArr[ 2 ])
-        Assert.assertEquals(qe4,actualArr[ 3 ])
+        Assert.assertEquals(4, actualArr.size)
+        Assert.assertEquals(qe1, actualArr[0])
+        Assert.assertEquals(qe2, actualArr[1])
+        Assert.assertEquals(qe3, actualArr[2])
+        Assert.assertEquals(qe4, actualArr[3])
     }
 }

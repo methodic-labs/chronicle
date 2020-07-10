@@ -8,7 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.crashlytics.android.Crashlytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.constants.Jobs.MONITOR_PARTICIPATION_STATUS_JOB_ID
@@ -28,7 +28,6 @@ import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.cancelUsageMonitoringJobScheduler
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
-import io.fabric.sdk.android.Fabric
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
 import java.util.concurrent.Executors
@@ -39,12 +38,12 @@ const val STATUS_CHECK_PERIOD_MILLIS = 15 * 60 * 1000L
 class EnrollmentStatusMonitoringService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
     private val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
+    private val crashlytics = FirebaseCrashlytics.getInstance()
 
     private lateinit var enrollmentSettings: EnrollmentSettings;
 
     override fun onCreate() {
         super.onCreate()
-        Fabric.with(this, Crashlytics())
     }
 
     override fun onStopJob(p0: JobParameters?): Boolean {
@@ -73,8 +72,8 @@ class EnrollmentStatusMonitoringService : JobService() {
                 studyQuestionnaires = chronicleStudyApi.getStudyQuestionnaires(studyId)
 
             } catch (e: Exception) {
-                Crashlytics.log("caught exception: studyId: \"$studyId\" participantId: \"$participantId\"")
-                Crashlytics.logException(e)
+                crashlytics.log("caught exception: studyId: \"$studyId\" participantId: \"$participantId\"")
+                FirebaseCrashlytics.getInstance().recordException(e)
             }
             Log.i(javaClass.name, "Participation status: $participationStatus")
             Log.i(javaClass.name, "Study questionnaires: $studyQuestionnaires")

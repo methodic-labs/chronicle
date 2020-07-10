@@ -4,15 +4,15 @@ import android.content.Context
 import android.os.Build
 import android.preference.PreferenceManager
 import android.provider.Settings
-import com.crashlytics.android.Crashlytics
 import com.google.common.base.Optional
 import com.google.common.collect.ImmutableMap
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropertyTypeIds
 import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds
 import com.openlattice.chronicle.sources.AndroidDevice
 import com.openlattice.chronicle.utils.Utils
-import java.util.UUID
+import java.util.*
 
 const val PARTICIPANT_ID = "participantId"
 const val AWARENESS_NOTIFICATIONS_ENABLED = "notificationsEnabled"
@@ -65,13 +65,13 @@ class EnrollmentSettings(private val context: Context) {
         updateEnrolled()
     }
 
-    fun setAwarenessNotificationsEnabled(notificationsEnabled :Boolean) {
+    fun setAwarenessNotificationsEnabled(notificationsEnabled: Boolean) {
         settings.edit()
                 .putBoolean(AWARENESS_NOTIFICATIONS_ENABLED, notificationsEnabled)
                 .apply()
     }
 
-    fun getAwarenessNotificationsEnabled (): Boolean {
+    fun getAwarenessNotificationsEnabled(): Boolean {
         return settings.getBoolean(AWARENESS_NOTIFICATIONS_ENABLED, false)
     }
 
@@ -98,7 +98,7 @@ class EnrollmentSettings(private val context: Context) {
                 .apply()
     }
 
-    fun getParticipationStatus() :ParticipationStatus {
+    fun getParticipationStatus(): ParticipationStatus {
         return ParticipationStatus.valueOf(settings.getString(PARTICIPATION_STATUS, ParticipationStatus.UNKNOWN.toString()))
     }
 
@@ -113,7 +113,7 @@ fun getDevice(deviceId: String): AndroidDevice {
 }
 
 fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {
-    Crashlytics.setUserIdentifier(participantId)
-    Crashlytics.setUserEmail("$participantId@$studyId")
-    Crashlytics.setUserName(deviceId)
+    val crashlytics = FirebaseCrashlytics.getInstance()
+
+    crashlytics.setUserId(participantId)
 }
