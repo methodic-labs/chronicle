@@ -4,7 +4,7 @@ import android.app.job.JobScheduler
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
-import com.crashlytics.android.Crashlytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.services.notifications.NotificationEntry
 import java.util.*
@@ -16,7 +16,7 @@ object Utils {
         val uuidAsString = uuid.toString()
         uuidAsString == possibleUUID
     } catch (e: IllegalArgumentException) {
-        Crashlytics.logException(e)
+        FirebaseCrashlytics.getInstance().recordException(e)
         false
     }
 
