@@ -8,7 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.support.v4.app.JobIntentService
+import androidx.core.app.JobIntentService
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.google.gson.Gson

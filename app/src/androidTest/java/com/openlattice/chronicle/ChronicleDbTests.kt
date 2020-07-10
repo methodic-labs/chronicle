@@ -1,12 +1,12 @@
 package com.openlattice.chronicle
 
-import android.support.test.InstrumentationRegistry
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.openlattice.chronicle.storage.ChronicleDb
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
-import android.arch.persistence.room.Room
+import androidx.room.Room
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
 import junit.framework.Assert

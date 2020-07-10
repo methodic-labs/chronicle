@@ -5,7 +5,7 @@ import android.app.Notification
 import android.app.Notification.PRIORITY_LOW
 import android.app.NotificationChannel
 import android.app.PendingIntent
-import android.arch.persistence.room.Room
+import androidx.room.Room
 import android.content.Context
 import android.content.Intent
 import android.hardware.display.DisplayManager
