@@ -12,6 +12,6 @@ import java.util.*
 class ConsoleSink : DataSink {
     override fun submit(data: List<SetMultimap<UUID, Any>>): Map<String, Boolean> {
         Log.d(javaClass.name, RetrofitBuilders.mapper.writeValueAsString(data))
-        return mapOf(ConsoleSink::javaClass.name to true )
+        return mapOf(ConsoleSink::class.java.name to true )
     }
 }
