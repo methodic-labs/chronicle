@@ -17,6 +17,7 @@ import java.util.*
 const val PARTICIPANT_ID = "participantId"
 const val AWARENESS_NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val STUDY_ID = "studyId"
+const val DEVICE_ID = "deviceId"
 const val PARTICIPATION_STATUS = "participationStatus"
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
 
@@ -116,4 +117,6 @@ fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {
     val crashlytics = FirebaseCrashlytics.getInstance()
 
     crashlytics.setUserId(participantId)
+    crashlytics.setCustomKey(DEVICE_ID, deviceId)
+    crashlytics.setCustomKey(STUDY_ID, studyId.toString())
 }
