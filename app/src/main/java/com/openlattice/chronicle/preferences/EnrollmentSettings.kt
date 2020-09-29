@@ -35,7 +35,8 @@ class EnrollmentSettings(private val context: Context) {
         participantId = settings.getString(PARTICIPANT_ID, "")
         if (Utils.isValidUUID(studyIdString) && participantId.isNotBlank()) {
             studyId = UUID.fromString(studyIdString)
-            setCrashlyticsUser(studyId, participantId, getDeviceId(context))
+            setCrashlyticsUser(participantId)
+            setCrashlyticsState(studyId, getDeviceId(context))
         } else {
             studyId = INVALID_STUDY_ID
         }
@@ -113,10 +114,14 @@ fun getDevice(deviceId: String): AndroidDevice {
     return AndroidDevice(deviceId, Build.MODEL, Build.VERSION.CODENAME, Build.BRAND, Build.DISPLAY, Build.VERSION.SDK_INT.toString(), Build.PRODUCT, deviceId, Optional.absent())
 }
 
-fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {
+fun setCrashlyticsUser(participantId: String) {
     val crashlytics = FirebaseCrashlytics.getInstance()
 
     crashlytics.setUserId(participantId)
+}
+fun setCrashlyticsState(studyId: UUID, deviceId: String) {
+    val crashlytics = FirebaseCrashlytics.getInstance()
+
     crashlytics.setCustomKey(DEVICE_ID, deviceId)
     crashlytics.setCustomKey(STUDY_ID, studyId.toString())
 }
