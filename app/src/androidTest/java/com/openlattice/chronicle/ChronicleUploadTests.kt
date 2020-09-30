@@ -1,12 +1,13 @@
 package com.openlattice.chronicle
 
-import android.arch.persistence.room.Room
+import androidx.room.Room
 import android.os.Build
 import android.provider.Settings
-import android.support.test.InstrumentationRegistry
-import android.support.test.InstrumentationRegistry.getContext
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.util.Log
+import androidx.test.InstrumentationRegistry.getContext
+import androidx.test.InstrumentationRegistry.getTargetContext
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
@@ -32,7 +33,7 @@ class ChronicleUploadTests {
         @BeforeClass
         @JvmStatic
         fun setupChronicleDb() {
-            val appContext = InstrumentationRegistry.getTargetContext()
+            val appContext = InstrumentationRegistry.getInstrumentation().targetContext
             chronicleDb = Room.databaseBuilder(appContext, ChronicleDb::class.java!!, "chronicle").build()
             storageQueue = chronicleDb.queueEntryData()
             chronicleDb.queueEntryData().deleteEntries(chronicleDb.queueEntryData().getNextEntries(1000))

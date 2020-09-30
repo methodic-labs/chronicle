@@ -6,19 +6,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import com.crashlytics.android.Crashlytics
-import io.fabric.sdk.android.Fabric
-
+import androidx.appcompat.app.AppCompatActivity
 
 class PermissionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Fabric.with(this,  Crashlytics())
         setContentView(R.layout.activity_permission)
         if (hasUsageSettingPermission(this)) {
             doMainActivity(this)
@@ -56,7 +52,6 @@ class PermissionActivity : AppCompatActivity() {
                 })
     }
 }
-
 
 
 fun doMainActivity(context: Context) {
