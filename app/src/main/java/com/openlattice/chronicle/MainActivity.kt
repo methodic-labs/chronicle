@@ -35,8 +35,11 @@ class MainActivity : AppCompatActivity() {
             if (enrollment.enrolled) {
                 val studyIdText = findViewById<TextView>(R.id.studyId)
                 val participantIdText = findViewById<TextView>(R.id.participantId)
+                val orgIdTextView = findViewById<TextView>(R.id.orgId)
+
                 studyIdText.text = enrollment.getStudyId().toString()
                 participantIdText.text = enrollment.getParticipantId()
+                orgIdTextView.text = enrollment.getOrganizationId().toString()
 
                 if (enrollment.getParticipationStatus() == ParticipationStatus.ENROLLED) {
                     scheduleUploadJob(this)

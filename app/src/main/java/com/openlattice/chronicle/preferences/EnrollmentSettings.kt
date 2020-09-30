@@ -17,26 +17,33 @@ import java.util.UUID
 const val PARTICIPANT_ID = "participantId"
 const val AWARENESS_NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val STUDY_ID = "studyId"
+const val ORGANIZATION_ID = "organizationId"
 const val PARTICIPATION_STATUS = "participationStatus"
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
 
 val INVALID_STUDY_ID = UUID(0, 0)
+val INVALID_ORG_ID = INVALID_STUDY_ID;
 
 class EnrollmentSettings(private val context: Context) {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
 
     private var participantId: String
     private var studyId: UUID
+    private var organizationId: UUID
     var enrolled: Boolean = true
 
     init {
+        val orgIdStr = settings.getString(ORGANIZATION_ID, "")
         val studyIdString = settings.getString(STUDY_ID, "")
         participantId = settings.getString(PARTICIPANT_ID, "")
-        if (Utils.isValidUUID(studyIdString) && participantId.isNotBlank()) {
+
+        if ( Utils.isValidUUID(orgIdStr) && Utils.isValidUUID(studyIdString) && participantId.isNotBlank()) {
             studyId = UUID.fromString(studyIdString)
+            organizationId = UUID.fromString(orgIdStr)
             setCrashlyticsUser(studyId, participantId, getDeviceId(context))
         } else {
             studyId = INVALID_STUDY_ID
+            organizationId = INVALID_ORG_ID
         }
         updateEnrolled()
     }
@@ -53,6 +60,18 @@ class EnrollmentSettings(private val context: Context) {
         participantId = _participantId
         settings.edit()
                 .putString(PARTICIPANT_ID, _participantId)
+                .apply()
+        updateEnrolled()
+    }
+
+    fun getOrganizationId(): UUID {
+        return organizationId
+    }
+
+    fun setOrganizationId(orgId: UUID) {
+        organizationId = orgId;
+        settings.edit()
+                .putString(ORGANIZATION_ID, orgId.toString())
                 .apply()
         updateEnrolled()
     }
@@ -76,7 +95,7 @@ class EnrollmentSettings(private val context: Context) {
     }
 
     fun updateEnrolled() {
-        enrolled = !(studyId.equals(INVALID_STUDY_ID) || participantId.isBlank())
+        enrolled = !( organizationId.equals(INVALID_STUDY_ID) || studyId.equals(INVALID_STUDY_ID) || participantId.isBlank())
     }
 
     fun setPropertyTypeIds(propertyTypeIds: Map<String, UUID>) {
