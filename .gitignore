@@ -10,3 +10,4 @@
 /app/release
 /captures
 .externalNativeBuild
+google-services.json

@@ -4,9 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
-import com.crashlytics.android.Crashlytics
+import androidx.appcompat.app.AppCompatActivity
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.createNotificationChannel
@@ -14,8 +13,6 @@ import com.openlattice.chronicle.services.status.scheduleEnrollmentStatusJob
 import com.openlattice.chronicle.services.upload.getLastUpload
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
-import io.fabric.sdk.android.Fabric
-
 
 const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
 
@@ -24,7 +21,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Fabric.with(this, Crashlytics())
         setContentView(R.layout.activity_main)
 
         // create notification channel

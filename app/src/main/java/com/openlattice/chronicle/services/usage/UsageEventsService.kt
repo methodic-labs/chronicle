@@ -5,7 +5,7 @@ import android.app.Notification
 import android.app.Notification.PRIORITY_LOW
 import android.app.NotificationChannel
 import android.app.PendingIntent
-import android.arch.persistence.room.Room
+import androidx.room.Room
 import android.content.Context
 import android.content.Intent
 import android.hardware.display.DisplayManager
@@ -13,7 +13,6 @@ import android.os.Build
 import android.os.Handler
 import android.util.Log
 import android.view.Display
-import com.crashlytics.android.Crashlytics
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableMap
 import com.openlattice.chronicle.ChronicleApi
@@ -27,7 +26,6 @@ import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
-import io.fabric.sdk.android.Fabric
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -53,11 +51,6 @@ class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
     private lateinit var sensors: Set<ChronicleSensor>
-
-    override fun onCreate() {
-        super.onCreate()
-        Fabric.with(this, Crashlytics())
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)

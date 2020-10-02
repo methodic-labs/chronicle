@@ -4,20 +4,21 @@ import android.content.Context
 import android.os.Build
 import android.preference.PreferenceManager
 import android.provider.Settings
-import com.crashlytics.android.Crashlytics
 import com.google.common.base.Optional
 import com.google.common.collect.ImmutableMap
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropertyTypeIds
 import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds
 import com.openlattice.chronicle.sources.AndroidDevice
 import com.openlattice.chronicle.utils.Utils
-import java.util.UUID
+import java.util.*
 
 const val PARTICIPANT_ID = "participantId"
 const val AWARENESS_NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val STUDY_ID = "studyId"
 const val ORGANIZATION_ID = "organizationId"
+const val DEVICE_ID = "deviceId"
 const val PARTICIPATION_STATUS = "participationStatus"
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
 
@@ -40,7 +41,8 @@ class EnrollmentSettings(private val context: Context) {
         if ( Utils.isValidUUID(orgIdStr) && Utils.isValidUUID(studyIdString) && participantId.isNotBlank()) {
             studyId = UUID.fromString(studyIdString)
             organizationId = UUID.fromString(orgIdStr)
-            setCrashlyticsUser(studyId, participantId, getDeviceId(context))
+            setCrashlyticsUser(participantId)
+            setCrashlyticsState(studyId, getDeviceId(context))
         } else {
             studyId = INVALID_STUDY_ID
             organizationId = INVALID_ORG_ID
@@ -84,13 +86,13 @@ class EnrollmentSettings(private val context: Context) {
         updateEnrolled()
     }
 
-    fun setAwarenessNotificationsEnabled(notificationsEnabled :Boolean) {
+    fun setAwarenessNotificationsEnabled(notificationsEnabled: Boolean) {
         settings.edit()
                 .putBoolean(AWARENESS_NOTIFICATIONS_ENABLED, notificationsEnabled)
                 .apply()
     }
 
-    fun getAwarenessNotificationsEnabled (): Boolean {
+    fun getAwarenessNotificationsEnabled(): Boolean {
         return settings.getBoolean(AWARENESS_NOTIFICATIONS_ENABLED, false)
     }
 
@@ -117,7 +119,7 @@ class EnrollmentSettings(private val context: Context) {
                 .apply()
     }
 
-    fun getParticipationStatus() :ParticipationStatus {
+    fun getParticipationStatus(): ParticipationStatus {
         return ParticipationStatus.valueOf(settings.getString(PARTICIPATION_STATUS, ParticipationStatus.UNKNOWN.toString()))
     }
 
@@ -131,8 +133,14 @@ fun getDevice(deviceId: String): AndroidDevice {
     return AndroidDevice(deviceId, Build.MODEL, Build.VERSION.CODENAME, Build.BRAND, Build.DISPLAY, Build.VERSION.SDK_INT.toString(), Build.PRODUCT, deviceId, Optional.absent())
 }
 
-fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {
-    Crashlytics.setUserIdentifier(participantId)
-    Crashlytics.setUserEmail("$participantId@$studyId")
-    Crashlytics.setUserName(deviceId)
+fun setCrashlyticsUser(participantId: String) {
+    val crashlytics = FirebaseCrashlytics.getInstance()
+
+    crashlytics.setUserId(participantId)
+}
+fun setCrashlyticsState(studyId: UUID, deviceId: String) {
+    val crashlytics = FirebaseCrashlytics.getInstance()
+
+    crashlytics.setCustomKey(DEVICE_ID, deviceId)
+    crashlytics.setCustomKey(STUDY_ID, studyId.toString())
 }
