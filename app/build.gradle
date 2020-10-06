@@ -10,6 +10,9 @@ apply from: "https://raw.githubusercontent.com/openlattice/gradles/master/repos.
 
 apply plugin: 'com.google.firebase.crashlytics'
 
+def signingProperties = new Properties()
+signingProperties.load(new FileInputStream(file('signing.properties')))
+
 android {
     compileSdkVersion 28
     configurations.all {
@@ -24,11 +27,23 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
+    signingConfigs {
+        chronicle {
+            keyAlias signingProperties['keyAlias']
+            keyPassword signingProperties['keyPassword']
+            storeFile file(signingProperties['storeFile'])
+            storePassword signingProperties['storePassword']
+        }
+    }
     buildTypes {
-        release {
+        debug {
             debuggable true
+            signingConfig signingConfigs.chronicle
+        }
+        release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.chronicle
         }
     }
     compileOptions {
