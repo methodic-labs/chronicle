@@ -11,3 +11,5 @@
 /captures
 .externalNativeBuild
 google-services.json
+chronicle.jks
+signing.properties
