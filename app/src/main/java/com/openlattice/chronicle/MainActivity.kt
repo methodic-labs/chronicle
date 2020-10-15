@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.StrictMode
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.createNotificationChannel
@@ -17,9 +19,15 @@ import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
 const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
 
 class MainActivity : AppCompatActivity() {
+
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        if (BuildConfig.DEBUG) {
+            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false)
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 

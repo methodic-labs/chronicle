@@ -34,9 +34,9 @@ class EnrollmentSettings(private val context: Context) {
     var enrolled: Boolean = true
 
     init {
-        val orgIdStr = settings.getString(ORGANIZATION_ID, "")
-        val studyIdString = settings.getString(STUDY_ID, "")
-        participantId = settings.getString(PARTICIPANT_ID, "")
+        val orgIdStr = settings.getString(ORGANIZATION_ID, "") ?: ""
+        val studyIdString = settings.getString(STUDY_ID, "") ?: ""
+        participantId = settings.getString(PARTICIPANT_ID, "") ?: ""
 
         if ( Utils.isValidUUID(orgIdStr) && Utils.isValidUUID(studyIdString) && participantId.isNotBlank()) {
             studyId = UUID.fromString(studyIdString)
