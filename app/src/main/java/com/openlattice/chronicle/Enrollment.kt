@@ -1,16 +1,20 @@
 package com.openlattice.chronicle
 
+import android.content.Context
 import android.content.Intent
+import android.inputmethodservice.InputMethodService
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
+import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.common.base.Optional
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.api.ChronicleApi
@@ -20,7 +24,7 @@ import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils
-import java.lang.IllegalArgumentException
+import kotlinx.android.synthetic.main.activity_enrollment.*
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -29,9 +33,34 @@ class Enrollment : AppCompatActivity() {
     private val mHandler = object : Handler(Looper.getMainLooper()) {}
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
+    private lateinit var orgIdText: TextInputEditText
+    private lateinit var studyIdText: TextInputEditText
+    private lateinit var participantIdText: TextInputEditText
+    private lateinit var statusMessageText: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var submitBtn: MaterialButton
+    private lateinit var doneBtn: MaterialButton
+    private lateinit var studyIdTextLayout: TextInputLayout
+    private lateinit var orgIdTextLayout: TextInputLayout
+    private lateinit var participantIdTextLayout: TextInputLayout
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enrollment)
+
+        orgIdText = findViewById(R.id.orgIdText)
+        studyIdText = findViewById(R.id.studyIdText)
+        participantIdText = findViewById(R.id.participantIdText)
+        statusMessageText = findViewById(R.id.statusMessage)
+        progressBar = findViewById(R.id.enrollmentProgress)
+        submitBtn = findViewById(R.id.button)
+        doneBtn = findViewById(R.id.doneButton)
+
+        studyIdTextLayout = findViewById(R.id.studyIdTextLayout)
+        orgIdTextLayout = findViewById(R.id.orgIdTextLayout)
+        participantIdTextLayout = findViewById(R.id.participantIdTextLayout)
+
         handleIntent(intent)
     }
 
@@ -46,8 +75,6 @@ class Enrollment : AppCompatActivity() {
         val appLinkData = appLinkIntent.data
 
         if (Intent.ACTION_VIEW == appLinkAction && appLinkData != null) {
-            val studyIdText = findViewById<EditText>(R.id.studyIdText)
-            val participantIdText = findViewById<EditText>(R.id.participantIdText)
             val studyId = appLinkData.getQueryParameter("studyId")
             val participantId = appLinkData.getQueryParameter("participantId")
             studyIdText.setText(studyId)
@@ -64,42 +91,49 @@ class Enrollment : AppCompatActivity() {
         finish()
     }
 
-    private fun validateInput(orgId: String, studyId: String, participantId: String): String {
-        var errorMessage = ""
+    private fun validateInput(orgId: String, studyId: String, participantId: String): Boolean {
+        var error = false
+
         if (orgId.isBlank()) {
-            errorMessage = getString(R.string.invalid_org_id_blank)
+            orgIdText.error = getString(R.string.invalid_org_id_blank)
+            error = true
         } else if (!Utils.isValidUUID(orgId)) {
-            errorMessage = getString(R.string.invalid_org_id_format)
-        } else if (studyId.isBlank()) {
-            errorMessage = getString(R.string.invalid_study_id_blank)
-        } else if (!Utils.isValidUUID(studyId)) {
-            errorMessage = getString(R.string.invalid_study_id_format)
-        } else if (participantId.isBlank()) {
-            errorMessage = getString(R.string.invalid_participant)
+            orgIdText.error = getString(R.string.invalid_org_id_format)
+            error = true
         }
 
-        return errorMessage;
+        if (studyId.isBlank()) {
+            studyIdText.error = getString(R.string.invalid_study_id_blank)
+            error = true
+        } else if (!Utils.isValidUUID(studyId)) {
+            studyIdText.error = getString(R.string.invalid_study_id_format)
+            error = true
+        }
+
+        if (participantId.isBlank()) {
+            participantIdText.error = getString(R.string.invalid_participant)
+            error = true
+        }
+
+        return error
+    }
+
+    private fun closeKeyBoard() {
+        val view = this.currentFocus
+        if (view != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 
     private fun doEnrollment() {
-
-        val orgIdText = findViewById<EditText>(R.id.orgIdText)
-        val studyIdText = findViewById<EditText>(R.id.studyIdText)
-        val participantIdText = findViewById<EditText>(R.id.participantIdText)
-        val statusMessageText = findViewById<TextView>(R.id.statusMessage)
-        val progressBar = findViewById<ProgressBar>(R.id.enrollmentProgress)
-        val submitBtn = findViewById<Button>(R.id.button)
-        val doneBtn = findViewById<Button>(R.id.doneButton)
 
         val orgIdStr: String = orgIdText.text.toString().trim()
         val studyIdStr: String = studyIdText.text.toString().trim()
         val participantId: String = participantIdText.text.toString().trim()
 
-        val errorMessage = validateInput(orgIdStr, studyIdStr, participantId)
-        if (errorMessage.isNotBlank()) {
-            // validation failed
-            statusMessageText.text = errorMessage
-            statusMessageText.visibility = View.VISIBLE
+        val error = validateInput(orgIdStr, studyIdStr, participantId)
+        if (error) {
             return
         }
 
@@ -111,13 +145,14 @@ class Enrollment : AppCompatActivity() {
             statusMessageText.visibility = View.INVISIBLE
             submitBtn.visibility = View.INVISIBLE
             progressBar.visibility = View.VISIBLE
+            closeKeyBoard()
 
             executor.execute {
                 val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
 
                 var chronicleId: UUID? = null
                 try {
-                    chronicleId = chronicleApi.enroll( orgId, studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                    chronicleId = chronicleApi.enroll(orgId, studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
                 } catch (e: Exception) {
                     crashlytics.log("caught exception - orgId: \"$orgId\" ; studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     FirebaseCrashlytics.getInstance().recordException(e)
@@ -134,9 +169,9 @@ class Enrollment : AppCompatActivity() {
                         enrollmentSettings.setOrganizationId(orgId)
 
                         // hide text fields, progress bar, and enroll button
-                        studyIdText.visibility = View.GONE
-                        participantIdText.visibility = View.GONE
-                        orgIdText.visibility = View.GONE
+                        studyIdTextLayout.visibility = View.GONE
+                        participantIdTextLayout.visibility = View.GONE
+                        orgIdTextLayout.visibility = View.GONE
                         progressBar.visibility = View.GONE
                         submitBtn.visibility = View.GONE
                         // show success message and done button
@@ -162,7 +197,7 @@ class Enrollment : AppCompatActivity() {
             submitBtn.visibility = View.VISIBLE
             doneBtn.visibility = View.INVISIBLE
             FirebaseCrashlytics.getInstance().recordException(e)
-            Log.e( javaClass.canonicalName, "unable to enroll", e)
+            Log.e(javaClass.canonicalName, "unable to enroll", e)
         }
     }
 }
