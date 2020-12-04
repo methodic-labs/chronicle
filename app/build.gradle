@@ -73,7 +73,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation('com.openlattice:chronicle-api:0.0.12') {
+    implementation('com.openlattice:chronicle-api:0.0.14') {
         exclude module: 'guava'
     }
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

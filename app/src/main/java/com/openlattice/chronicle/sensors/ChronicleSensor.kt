@@ -1,23 +1,24 @@
 package com.openlattice.chronicle.sensors
 
 import com.google.common.collect.SetMultimap
+import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
 
-const val IMPORTANCE = "ol.recordtype"
-const val GENERAL_NAME = "general.fullname"
-const val APP_NAME = "ol.title"
-const val TIMESTAMP = "ol.datelogged"
-const val DURATION = "general.Duration"
-const val START_TIME = "ol.datetimestart"
-const val END_TIME = "general.EndTime"
-const val ALTITUDE = "location.altitude"
-const val LONGITUDE = "location.longitude"
-const val LATITUDE = "location.latitude"
-const val ID = "general.stringid"
-const val TIMEZONE = "ol.timezone"
-const val RECURRENCE_RULE = "ol.rrule"
-const val NAME = "ol.name"
-const val ACTIVE = "ol.active"
+val IMPORTANCE = FullQualifiedName("ol.recordtype")
+val GENERAL_NAME = FullQualifiedName("general.fullname")
+val APP_NAME = FullQualifiedName("ol.title")
+val TIMESTAMP = FullQualifiedName("ol.datelogged")
+val DURATION = FullQualifiedName("general.Duration")
+val START_TIME = FullQualifiedName("ol.datetimestart")
+val END_TIME = FullQualifiedName("general.EndTime")
+val ALTITUDE = FullQualifiedName("location.altitude")
+val LONGITUDE = FullQualifiedName("location.longitude")
+val LATITUDE = FullQualifiedName("location.latitude")
+val ID = FullQualifiedName("general.stringid")
+val TIMEZONE = FullQualifiedName("ol.timezone")
+val RECURRENCE_RULE = FullQualifiedName("ol.rrule")
+val NAME = FullQualifiedName("ol.name")
+val ACTIVE = FullQualifiedName("ol.active")
 
 val PROPERTY_TYPES = setOf(
         IMPORTANCE,
@@ -37,5 +38,5 @@ val PROPERTY_TYPES = setOf(
         NAME)
 
 interface ChronicleSensor {
-    fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>>
+    fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<SetMultimap<UUID, Any>>
 }

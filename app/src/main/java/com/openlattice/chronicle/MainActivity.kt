@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         if (hasUsageSettingPermission(this)) {
             val enrollment = EnrollmentSettings(this)
-            if (enrollment.enrolled) {
+            if (enrollment.isEnrolled()) {
                 val studyIdText = findViewById<TextView>(R.id.studyId)
                 val participantIdText = findViewById<TextView>(R.id.participantId)
                 val orgIdTextView = findViewById<TextView>(R.id.orgId)

@@ -13,10 +13,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.openlattice.chronicle.ChronicleApi
 import com.openlattice.chronicle.ChronicleStudyApi
+import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.constants.Jobs.UPLOAD_JOB_ID
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.serialization.JsonSerializer
@@ -42,13 +43,15 @@ const val UPLOAD_PERIOD_MILLIS = 15 * 60 * 1000L
 class UploadJobService : JobService() {
     private val executor = Executors.newSingleThreadExecutor()
     private val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
-    private val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
+    private val legacyChronicleApi = createRetrofitAdapter(PRODUCTION).create(com.openlattice.chronicle.ChronicleApi::class.java)
+    private val legacyChronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
     private val serviceId = Random().nextLong()
     private val limiter = com.google.common.util.concurrent.RateLimiter.create(10.0)
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var settings: EnrollmentSettings
+    private lateinit var orgId: UUID
     private lateinit var studyId: UUID
     private lateinit var participantId: String
     private lateinit var deviceId: String
@@ -69,12 +72,21 @@ class UploadJobService : JobService() {
             chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java!!, "chronicle").build()
             deviceId = getDeviceId(this)
             settings = EnrollmentSettings(applicationContext)
+            orgId = settings.getOrganizationId()
             studyId = settings.getStudyId()
             participantId = settings.getParticipantId()
-            dataSink = BrokerDataSink(
-                    mutableSetOf(
-                            OpenLatticeSink(studyId, participantId, deviceId, chronicleApi),
-                            ConsoleSink()))
+
+            dataSink = when (orgId) {
+                INVALID_ORG_ID -> BrokerDataSink(
+                        mutableSetOf(
+                                OpenLatticeSink(studyId, participantId, deviceId, legacyChronicleApi),
+                                ConsoleSink()))
+                else -> BrokerDataSink(
+                        mutableSetOf(
+                                OpenLatticeSink(orgId, studyId, participantId, deviceId, chronicleApi),
+                                ConsoleSink()))
+            }
+
             Log.i("${javaClass.name}-$serviceId", "Job service is initialized")
             latch.countDown()
         }
@@ -84,26 +96,25 @@ class UploadJobService : JobService() {
 
         executor.execute {
             if (chronicleApi.isRunning == true) {
-                val deviceId = getDeviceId(applicationContext)
-                val studyId = settings.getStudyId()
-                val participantId = settings.getParticipantId()
-
                 if (deviceId.isNullOrBlank() || studyId == null || participantId.isNullOrBlank()) {
                     crashlytics.log("studyId: \"$studyId\" ; participantId: \"$participantId\" ; deviceId: \"$deviceId\"")
                 }
 
-                var isKnown = false
                 var chronicleId: UUID? = null
                 try {
-                    isKnown = chronicleStudyApi.isKnownDatasource(studyId, participantId, deviceId)
-                    chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+
+                    chronicleId = when (orgId) {
+                        INVALID_ORG_ID ->  legacyChronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                        else -> chronicleApi.enroll(orgId, studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                    }
+
                 } catch (e: Exception) {
-                    crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
+                    addLogMessage()
                     FirebaseCrashlytics.getInstance().recordException(e)
                 }
 
                 //Only run the upload job if the device is already enrolled or we are able to properly enroll.
-                if (isKnown || chronicleId != null) {
+                if (chronicleId != null) {
 
                     val queue = chronicleDb.queueEntryData()
                     var nextEntries = queue.getNextEntries(BATCH_SIZE)
@@ -132,6 +143,14 @@ class UploadJobService : JobService() {
             }
         }
         return true
+    }
+
+    private fun addLogMessage() {
+        if (orgId == INVALID_ORG_ID) {
+            crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
+        } else {
+            crashlytics.log("caught exception - orgId: \"$orgId\"; studyId: \"$studyId\" ; participantId: \"$participantId\"")
+        }
     }
 }
 

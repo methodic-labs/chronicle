@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.common.base.Optional
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
@@ -112,11 +113,11 @@ class Enrollment : AppCompatActivity() {
             progressBar.visibility = View.VISIBLE
 
             executor.execute {
-                val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
+                val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
 
                 var chronicleId: UUID? = null
                 try {
-                    chronicleId = chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                    chronicleId = chronicleApi.enroll( orgId, studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
                 } catch (e: Exception) {
                     crashlytics.log("caught exception - orgId: \"$orgId\" ; studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     FirebaseCrashlytics.getInstance().recordException(e)
@@ -130,10 +131,12 @@ class Enrollment : AppCompatActivity() {
 
                         enrollmentSettings.setStudyId(studyId)
                         enrollmentSettings.setParticipantId(participantId)
+                        enrollmentSettings.setOrganizationId(orgId)
 
                         // hide text fields, progress bar, and enroll button
                         studyIdText.visibility = View.GONE
                         participantIdText.visibility = View.GONE
+                        orgIdText.visibility = View.GONE
                         progressBar.visibility = View.GONE
                         submitBtn.visibility = View.GONE
                         // show success message and done button
