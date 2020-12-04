@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.constants.NotificationType
+import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.services.notifications.NotificationEntry
 import java.util.*
 
@@ -40,8 +41,10 @@ object Utils {
         return false
     }
 
-    fun createNotificationTargetUrl(notificationEntry: NotificationEntry, studyId: String, participantId: String) :String{
+    fun createNotificationTargetUrl(notificationEntry: NotificationEntry, orgIdStr: String, studyId: String, participantId: String) :String{
+        val orgId = UUID.fromString(orgIdStr)
         val uriBuilder: Uri.Builder = Uri.Builder()
+
         uriBuilder
                 .scheme("https")
                 .encodedAuthority("openlattice.com")
@@ -49,15 +52,24 @@ object Utils {
                 .appendEncodedPath("#")
 
         if (notificationEntry.type === NotificationType.QUESTIONNAIRE) {
+            uriBuilder.appendPath("questionnaire")
+
+            if (orgId != INVALID_ORG_ID) {
+                uriBuilder.appendQueryParameter("organizationId", orgIdStr)
+            }
             uriBuilder
-                    .appendPath("questionnaire")
                     .appendQueryParameter("studyId", studyId)
                     .appendQueryParameter("participantId", participantId)
                     .appendQueryParameter("questionnaireId", notificationEntry.id)
         }
         if (notificationEntry.type === NotificationType.AWARENESS) {
+            uriBuilder.appendPath("survey")
+
+            if (orgId != INVALID_ORG_ID) {
+                uriBuilder.appendQueryParameter("organizationId", orgIdStr)
+            }
+
             uriBuilder
-                    .appendPath("survey")
                     .appendQueryParameter("studyId", studyId)
                     .appendQueryParameter("participantId", participantId)
         }
