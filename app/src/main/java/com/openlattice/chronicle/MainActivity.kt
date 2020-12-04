@@ -5,22 +5,31 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.StrictMode
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.services.notifications.createNotificationChannel
 import com.openlattice.chronicle.services.status.scheduleEnrollmentStatusJob
 import com.openlattice.chronicle.services.upload.getLastUpload
 import com.openlattice.chronicle.services.upload.scheduleUploadJob
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringJob
+import java.util.*
 
 const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
 
 class MainActivity : AppCompatActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
+
+    private lateinit var enrollmentSettings: EnrollmentSettings
+    private lateinit var orgId: UUID
+    private lateinit var studyId :UUID
+    private lateinit var participantId :String
+    private lateinit var participationStatus: ParticipationStatus
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -35,17 +44,29 @@ class MainActivity : AppCompatActivity() {
         createNotificationChannel(this)
 
         if (hasUsageSettingPermission(this)) {
-            val enrollment = EnrollmentSettings(this)
-            if (enrollment.isEnrolled()) {
+            enrollmentSettings = EnrollmentSettings(this)
+            orgId = enrollmentSettings.getOrganizationId()
+            studyId = enrollmentSettings.getStudyId()
+            participantId = enrollmentSettings.getParticipantId()
+            participationStatus = enrollmentSettings.getParticipationStatus()
+
+            if (enrollmentSettings.isEnrolled()) {
                 val studyIdText = findViewById<TextView>(R.id.studyId)
                 val participantIdText = findViewById<TextView>(R.id.participantId)
                 val orgIdTextView = findViewById<TextView>(R.id.orgId)
+                val orgIdLabel :TextView = findViewById(R.id.orgIdLabel)
 
-                studyIdText.text = enrollment.getStudyId().toString()
-                participantIdText.text = enrollment.getParticipantId()
-                orgIdTextView.text = enrollment.getOrganizationId().toString()
+                studyIdText.text = studyId.toString()
+                participantIdText.text = participantId
 
-                if (enrollment.getParticipationStatus() == ParticipationStatus.ENROLLED) {
+                if (orgId != INVALID_ORG_ID) {
+                    orgIdTextView.text = orgId.toString()
+                } else {
+                    orgIdTextView.visibility = View.GONE
+                    orgIdLabel.visibility = View.GONE
+                }
+
+                if (participationStatus == ParticipationStatus.ENROLLED) {
                     scheduleUploadJob(this)
                     scheduleUsageMonitoringJob(this)
                 }
