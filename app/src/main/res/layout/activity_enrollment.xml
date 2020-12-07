@@ -7,6 +7,47 @@
     tools:context=".Enrollment"
     tools:layout_editor_absoluteY="81dp">
 
+    <TextView
+        android:id="@+id/use_org_id_prompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textSize="18sp"
+        android:text="@string/organization_id_prompt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+    </TextView>
+    <RadioGroup
+        android:id="@+id/use_org_id_choice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:checkedButton="@id/use_org_id"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/use_org_id_prompt"
+        >
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/use_org_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/colorPrimary"
+            android:text="@string/yes" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/omit_org_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/colorPrimary"
+            android:text="@string/no" />
+
+    </RadioGroup>
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/orgIdTextLayout"
         android:layout_width="match_parent"
@@ -19,7 +60,7 @@
         app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/use_org_id_choice"
         >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/orgIdText"
