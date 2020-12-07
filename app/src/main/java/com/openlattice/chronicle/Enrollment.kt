@@ -185,6 +185,8 @@ class Enrollment : AppCompatActivity() {
                         orgIdText.visibility = View.GONE
                         progressBar.visibility = View.GONE
                         submitBtn.visibility = View.GONE
+                        useOrgIdChoice.visibility = View.GONE
+
                         // show success message and done button
                         statusMessageText.text = getString(R.string.device_enroll_success)
                         statusMessageText.visibility = View.VISIBLE
