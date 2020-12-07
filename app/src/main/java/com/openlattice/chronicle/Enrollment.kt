@@ -35,6 +35,7 @@ class Enrollment : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var submitBtn: Button
     private lateinit var doneBtn: Button
+    private lateinit var useOrgIdPrompt :TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +51,7 @@ class Enrollment : AppCompatActivity() {
         doneBtn = findViewById(R.id.doneButton)
         useOrgId = findViewById(R.id.use_org_id)
         omitOrgId = findViewById(R.id.omit_org_id)
+        useOrgIdPrompt = findViewById(R.id.use_org_id_prompt)
 
         useOrgIdChoice = findViewById(R.id.use_org_id_choice)
         useOrgIdChoice.setOnCheckedChangeListener { _, checkedId ->
@@ -186,6 +188,7 @@ class Enrollment : AppCompatActivity() {
                         progressBar.visibility = View.GONE
                         submitBtn.visibility = View.GONE
                         useOrgIdChoice.visibility = View.GONE
+                        useOrgIdPrompt.visibility = View.GONE
 
                         // show success message and done button
                         statusMessageText.text = getString(R.string.device_enroll_success)
