@@ -48,7 +48,6 @@ class Enrollment : AppCompatActivity() {
     private lateinit var useOrgId: RadioButton
     private lateinit var omitOrgId: RadioButton
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enrollment)
@@ -66,6 +65,7 @@ class Enrollment : AppCompatActivity() {
         participantIdTextLayout = findViewById(R.id.participantIdTextLayout)
         useOrgId = findViewById(R.id.use_org_id)
         omitOrgId = findViewById(R.id.omit_org_id)
+        useOrgIdPrompt = findViewById(R.id.use_org_id_prompt)
 
         useOrgIdChoice = findViewById(R.id.use_org_id_choice)
         useOrgIdChoice.setOnCheckedChangeListener { _, checkedId ->
@@ -210,6 +210,9 @@ class Enrollment : AppCompatActivity() {
                         orgIdTextLayout.visibility = View.GONE
                         progressBar.visibility = View.GONE
                         submitBtn.visibility = View.GONE
+                        useOrgIdChoice.visibility = View.GONE
+                        useOrgIdPrompt.visibility = View.GONE
+
                         // show success message and done button
                         statusMessageText.text = getString(R.string.device_enroll_success)
                         statusMessageText.visibility = View.VISIBLE
