@@ -1,11 +1,13 @@
 package com.openlattice.chronicle
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.common.base.Optional
@@ -137,6 +139,14 @@ class Enrollment : AppCompatActivity() {
         return orgIdText.error.isNullOrBlank() && studyIdText.error.isNullOrBlank() && participantIdText.error.isNullOrBlank()
     }
 
+    private fun closeKeyBoard() {
+        val view = this.currentFocus
+        if (view != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+    }
+    
     private fun doEnrollment() {
 
         val orgIdStr: String = orgIdText.text.toString().trim()
@@ -156,6 +166,7 @@ class Enrollment : AppCompatActivity() {
             statusMessageText.visibility = View.INVISIBLE
             submitBtn.visibility = View.INVISIBLE
             progressBar.visibility = View.VISIBLE
+            closeKeyBoard()
 
             executor.execute {
                 val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
