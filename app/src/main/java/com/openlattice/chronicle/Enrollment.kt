@@ -43,10 +43,10 @@ class Enrollment : AppCompatActivity() {
     private lateinit var studyIdTextLayout: TextInputLayout
     private lateinit var orgIdTextLayout: TextInputLayout
     private lateinit var participantIdTextLayout: TextInputLayout
-
     private lateinit var useOrgIdChoice: RadioGroup
     private lateinit var useOrgId: RadioButton
     private lateinit var omitOrgId: RadioButton
+    private lateinit var useOrgIdPrompt :TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
