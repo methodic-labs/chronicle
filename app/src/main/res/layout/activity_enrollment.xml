@@ -165,7 +165,6 @@
         android:layout_marginTop="32dp"
         android:onClick="handleOnClickDone"
         android:text="Done"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

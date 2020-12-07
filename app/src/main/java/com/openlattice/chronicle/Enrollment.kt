@@ -2,7 +2,6 @@ package com.openlattice.chronicle
 
 import android.content.Context
 import android.content.Intent
-import android.inputmethodservice.InputMethodService
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,6 +9,8 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
@@ -24,7 +25,6 @@ import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils
-import kotlinx.android.synthetic.main.activity_enrollment.*
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -91,7 +91,7 @@ class Enrollment : AppCompatActivity() {
             }
         }
 
-        orgIdText.visibility = visibility
+        orgIdTextLayout.visibility = visibility
     }
 
     private fun handleIntent(intent: Intent) {
