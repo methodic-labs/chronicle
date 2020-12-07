@@ -182,10 +182,14 @@ class Enrollment : AppCompatActivity() {
 
             executor.execute {
                 val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
+                val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
 
                 var chronicleId: UUID? = null
                 try {
-                    chronicleId = chronicleApi.enroll(orgId, studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                    chronicleId = when (orgId) {
+                        null -> chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                        else -> chronicleApi.enroll(orgId, studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
+                    }
                 } catch (e: Exception) {
                     crashlytics.log("caught exception - orgId: \"$orgId\" ; studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     FirebaseCrashlytics.getInstance().recordException(e)
