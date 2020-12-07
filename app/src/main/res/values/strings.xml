@@ -36,5 +36,8 @@
     <string name="channel_description"> Channel for chronicle survey daily notifications</string>
     <string name="channel_name"> Chronicle </string>
     <string name="notification_text">Tap to complete survey</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="organization_id_prompt">Do you have an organization Id?</string>
 
 </resources>
