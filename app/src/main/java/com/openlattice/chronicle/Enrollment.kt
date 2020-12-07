@@ -44,6 +44,10 @@ class Enrollment : AppCompatActivity() {
     private lateinit var orgIdTextLayout: TextInputLayout
     private lateinit var participantIdTextLayout: TextInputLayout
 
+    private lateinit var useOrgIdChoice: RadioGroup
+    private lateinit var useOrgId: RadioButton
+    private lateinit var omitOrgId: RadioButton
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +64,13 @@ class Enrollment : AppCompatActivity() {
         studyIdTextLayout = findViewById(R.id.studyIdTextLayout)
         orgIdTextLayout = findViewById(R.id.orgIdTextLayout)
         participantIdTextLayout = findViewById(R.id.participantIdTextLayout)
+        useOrgId = findViewById(R.id.use_org_id)
+        omitOrgId = findViewById(R.id.omit_org_id)
+
+        useOrgIdChoice = findViewById(R.id.use_org_id_choice)
+        useOrgIdChoice.setOnCheckedChangeListener { _, checkedId ->
+            handleOrgChoice(checkedId)
+        }
 
         handleIntent(intent)
     }
@@ -67,6 +78,20 @@ class Enrollment : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
+    }
+
+    private fun handleOrgChoice(checkedId: Int) {
+        var visibility = View.VISIBLE
+        when (checkedId) {
+            R.id.omit_org_id -> {
+                visibility = if (omitOrgId.isChecked) View.GONE else View.VISIBLE
+            }
+            R.id.use_org_id -> {
+                visibility = if (useOrgId.isChecked) View.VISIBLE else View.GONE
+            }
+        }
+
+        orgIdText.visibility = visibility
     }
 
     private fun handleIntent(intent: Intent) {
@@ -77,8 +102,18 @@ class Enrollment : AppCompatActivity() {
         if (Intent.ACTION_VIEW == appLinkAction && appLinkData != null) {
             val studyId = appLinkData.getQueryParameter("studyId")
             val participantId = appLinkData.getQueryParameter("participantId")
+            val orgId = appLinkData.getQueryParameter("organizationId")
+
             studyIdText.setText(studyId)
             participantIdText.setText(participantId)
+
+            // legacy enroll: without organizationId
+            if (orgId.isNullOrBlank()) {
+                useOrgIdChoice.check(R.id.omit_org_id)
+            } else {
+                useOrgIdChoice.check(R.id.use_org_id)
+                orgIdText.setText(orgId)
+            }
         }
     }
 
@@ -92,30 +127,28 @@ class Enrollment : AppCompatActivity() {
     }
 
     private fun validateInput(orgId: String, studyId: String, participantId: String): Boolean {
-        var error = false
 
-        if (orgId.isBlank()) {
-            orgIdText.error = getString(R.string.invalid_org_id_blank)
-            error = true
-        } else if (!Utils.isValidUUID(orgId)) {
-            orgIdText.error = getString(R.string.invalid_org_id_format)
-            error = true
+        if (useOrgId.isChecked) {
+            if (orgId.isBlank()) {
+                orgIdText.error = getString(R.string.invalid_org_id_blank)
+
+            } else if (!Utils.isValidUUID(orgId)) {
+                orgIdText.error = getString(R.string.invalid_org_id_format)
+            }
         }
 
         if (studyId.isBlank()) {
             studyIdText.error = getString(R.string.invalid_study_id_blank)
-            error = true
+
         } else if (!Utils.isValidUUID(studyId)) {
             studyIdText.error = getString(R.string.invalid_study_id_format)
-            error = true
         }
 
         if (participantId.isBlank()) {
             participantIdText.error = getString(R.string.invalid_participant)
-            error = true
         }
 
-        return error
+        return orgIdText.error.isNullOrBlank() && studyIdText.error.isNullOrBlank() && participantIdText.error.isNullOrBlank()
     }
 
     private fun closeKeyBoard() {
@@ -132,13 +165,13 @@ class Enrollment : AppCompatActivity() {
         val studyIdStr: String = studyIdText.text.toString().trim()
         val participantId: String = participantIdText.text.toString().trim()
 
-        val error = validateInput(orgIdStr, studyIdStr, participantId)
-        if (error) {
+        val isValidInput = validateInput(orgIdStr, studyIdStr, participantId)
+        if (!isValidInput) {
             return
         }
 
         try {
-            val orgId = UUID.fromString(orgIdStr)
+            val orgId = if (useOrgId.isChecked) UUID.fromString(orgIdStr) else null
             val studyId = UUID.fromString(studyIdStr)
             val deviceId = getDeviceId(applicationContext)
 
@@ -166,7 +199,10 @@ class Enrollment : AppCompatActivity() {
 
                         enrollmentSettings.setStudyId(studyId)
                         enrollmentSettings.setParticipantId(participantId)
-                        enrollmentSettings.setOrganizationId(orgId)
+
+                        if (orgId != null) {
+                            enrollmentSettings.setOrganizationId(orgId)
+                        }
 
                         // hide text fields, progress bar, and enroll button
                         studyIdTextLayout.visibility = View.GONE
