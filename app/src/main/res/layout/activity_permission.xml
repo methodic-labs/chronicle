@@ -19,11 +19,10 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button2"
+        android:id="@+id/open_settings_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="handleGetUsageAccessSettings"
-        android:text="Open Settings"
+        android:text="@string/open_settings"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

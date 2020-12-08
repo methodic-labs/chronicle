@@ -72,7 +72,25 @@ class Enrollment : AppCompatActivity() {
             handleOrgChoice(checkedId)
         }
 
-        handleIntent(intent)
+        doneBtn.setOnClickListener {
+            handleOnClickDone()
+        }
+
+        submitBtn.setOnClickListener {
+            doEnrollment()
+        }
+
+        // ensure usage usage permission is granted before enrolling
+        if (hasUsageSettingPermission(this)) {
+            handleIntent(intent)
+        } else {
+            val permissionIntent = Intent(this, PermissionActivity::class.java).apply {
+                action = intent.action
+                data = intent.data
+            }
+
+            startActivity(permissionIntent)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -117,12 +135,11 @@ class Enrollment : AppCompatActivity() {
         }
     }
 
-    fun enrollDevice(view: View) {
-        doEnrollment()
-    }
-
-    fun handleOnClickDone(view: View) {
-        doMainActivity(this)
+    private fun handleOnClickDone() {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        startActivity(intent)
         finish()
     }
 
@@ -131,10 +148,12 @@ class Enrollment : AppCompatActivity() {
         if (useOrgId.isChecked) {
             if (orgId.isBlank()) {
                 orgIdText.error = getString(R.string.invalid_org_id_blank)
-
             } else if (!Utils.isValidUUID(orgId)) {
                 orgIdText.error = getString(R.string.invalid_org_id_format)
             }
+        } else {
+            // remove error state if previously set
+            orgIdText.error = null
         }
 
         if (studyId.isBlank()) {

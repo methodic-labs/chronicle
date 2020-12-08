@@ -123,7 +123,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:onClick="enrollDevice"
         android:text="@string/action_start_collection"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/participantIdTextLayout" />
@@ -163,7 +162,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:onClick="handleOnClickDone"
         android:text="Done"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"

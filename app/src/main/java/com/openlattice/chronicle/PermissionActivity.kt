@@ -8,27 +8,34 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class PermissionActivity : AppCompatActivity() {
 
+    private lateinit var openSettingsBtn: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_permission)
         if (hasUsageSettingPermission(this)) {
-            doMainActivity(this)
+            doMainActivity(this, intent)
             finish()
+        }
+
+        openSettingsBtn = findViewById(R.id.open_settings_btn)
+        openSettingsBtn.setOnClickListener{
+            handleGetUsageAccessSettings()
         }
     }
 
-
-    fun handleGetUsageAccessSettings(view: View) {
+    private fun handleGetUsageAccessSettings() {
         getUsageAccessSettings()
         waitOnUsageSettingPermission()
     }
 
-    fun getUsageAccessSettings() {
+    private fun getUsageAccessSettings() {
         val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
@@ -38,7 +45,7 @@ class PermissionActivity : AppCompatActivity() {
         }
     }
 
-    fun waitOnUsageSettingPermission() {
+    private fun waitOnUsageSettingPermission() {
         val packageManager = applicationContext.packageManager
         val applicationInfo = packageManager.getApplicationInfo(applicationContext.packageName, 0)
         val appOpsManager = applicationContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -47,17 +54,20 @@ class PermissionActivity : AppCompatActivity() {
                 applicationInfo.packageName,
                 { op, packageName ->
                     Log.i(packageName, "Usage stats settings changed detected launching main class")
-                    doMainActivity(applicationContext)
+                    doMainActivity(applicationContext, intent)
                     finish()
                 })
     }
 }
 
+fun doMainActivity(context: Context, intent: Intent) {
+    val newActivityIntent = Intent(context, MainActivity::class.java).apply {
+        action = intent.action
+        data = intent.data
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    }
 
-fun doMainActivity(context: Context) {
-    val intent = Intent(context, MainActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    context.startActivity(intent)
+    context.startActivity(newActivityIntent)
 }
 
 fun hasUsageSettingPermission(context: Context): Boolean {
