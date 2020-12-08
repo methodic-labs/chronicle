@@ -92,4 +92,12 @@ class MainActivity : AppCompatActivity() {
         lastUploadText.text = getLastUpload(this)
         handler.postDelayed(this::updateLastUpload, LAST_UPLOAD_REFRESH_INTERVAL)
     }
+
+    override fun onBackPressed() {
+        val intent = Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_HOME)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        startActivity(intent)
+    }
 }
