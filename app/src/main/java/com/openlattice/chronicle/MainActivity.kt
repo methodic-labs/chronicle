@@ -73,11 +73,16 @@ class MainActivity : AppCompatActivity() {
                 scheduleEnrollmentStatusJob(this)
                 handler.post(this::updateLastUpload)
             } else {
-                startActivity(Intent(this, Enrollment::class.java))
+
+                val enrollmentIntent = Intent(this, Enrollment::class.java).apply {
+                    data = intent.data
+                    action = intent.action
+                }
+
+                startActivity(enrollmentIntent)
             }
         } else {
             startActivity(Intent(this, PermissionActivity::class.java))
-            return
         }
 
     }
