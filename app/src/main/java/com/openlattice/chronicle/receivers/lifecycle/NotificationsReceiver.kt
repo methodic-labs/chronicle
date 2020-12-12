@@ -46,7 +46,7 @@ class NotificationsReceiver : BroadcastReceiver() {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_notification)
-                .setColor(ContextCompat.getColor(context, R.color.purple_dark))
+                .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                 .setCustomContentView(notificationLayout)
                 .setCustomBigContentView(notificationLayout)
                 .setPriority(NotificationCompat.PRIORITY_HIGH) //support android 7.1
