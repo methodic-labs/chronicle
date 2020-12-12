@@ -8,8 +8,14 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.ProgressBar
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.common.base.Optional
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.api.ChronicleApi
@@ -27,23 +33,25 @@ class Enrollment : AppCompatActivity() {
     private val mHandler = object : Handler(Looper.getMainLooper()) {}
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
+    private lateinit var orgIdText: TextInputEditText
+    private lateinit var studyIdText: TextInputEditText
+    private lateinit var participantIdText: TextInputEditText
+    private lateinit var statusMessageText: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var submitBtn: MaterialButton
+    private lateinit var doneBtn: MaterialButton
+    private lateinit var studyIdTextLayout: TextInputLayout
+    private lateinit var orgIdTextLayout: TextInputLayout
+    private lateinit var participantIdTextLayout: TextInputLayout
     private lateinit var useOrgIdChoice: RadioGroup
     private lateinit var useOrgId: RadioButton
     private lateinit var omitOrgId: RadioButton
-    private lateinit var orgIdText: EditText
-    private lateinit var studyIdText: EditText
-    private lateinit var participantIdText: EditText
-    private lateinit var statusMessageText: TextView
-    private lateinit var progressBar: ProgressBar
-    private lateinit var submitBtn: Button
-    private lateinit var doneBtn: Button
-    private lateinit var useOrgIdPrompt: TextView
+    private lateinit var useOrgIdPrompt :TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enrollment)
 
-        orgIdText = findViewById(R.id.orgIdText)
         orgIdText = findViewById(R.id.orgIdText)
         studyIdText = findViewById(R.id.studyIdText)
         participantIdText = findViewById(R.id.participantIdText)
@@ -51,6 +59,10 @@ class Enrollment : AppCompatActivity() {
         progressBar = findViewById(R.id.enrollmentProgress)
         submitBtn = findViewById(R.id.button)
         doneBtn = findViewById(R.id.doneButton)
+
+        studyIdTextLayout = findViewById(R.id.studyIdTextLayout)
+        orgIdTextLayout = findViewById(R.id.orgIdTextLayout)
+        participantIdTextLayout = findViewById(R.id.participantIdTextLayout)
         useOrgId = findViewById(R.id.use_org_id)
         omitOrgId = findViewById(R.id.omit_org_id)
         useOrgIdPrompt = findViewById(R.id.use_org_id_prompt)
@@ -97,7 +109,7 @@ class Enrollment : AppCompatActivity() {
             }
         }
 
-        orgIdText.visibility = visibility
+        orgIdTextLayout.visibility = visibility
     }
 
     private fun handleIntent(intent: Intent) {
@@ -216,9 +228,9 @@ class Enrollment : AppCompatActivity() {
                         }
 
                         // hide text fields, progress bar, and enroll button
-                        studyIdText.visibility = View.GONE
-                        participantIdText.visibility = View.GONE
-                        orgIdText.visibility = View.GONE
+                        studyIdTextLayout.visibility = View.GONE
+                        participantIdTextLayout.visibility = View.GONE
+                        orgIdTextLayout.visibility = View.GONE
                         progressBar.visibility = View.GONE
                         submitBtn.visibility = View.GONE
                         useOrgIdChoice.visibility = View.GONE

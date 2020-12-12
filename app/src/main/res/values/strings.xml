@@ -18,7 +18,7 @@
     <string name="already_enrolled">Device already enrolled</string>
     <string name="invalid_participant">Invalid participant id.</string>
     <string name="invalid_study_id_format">Invalid study id format.</string>
-    <string name="device_enroll_failure">Failed to enroll device. Please double check that the Study ID and the Participant ID are correct. If the problem persists, please contact your study administrator.</string>
+    <string name="device_enroll_failure">Failed to enroll device. Please double check that the Organization ID, Study ID and the Participant ID are correct. If the problem persists, please contact your study administrator.</string>
     <string name="device_enroll_success">Your device has been enrolled! Thank you for participating in our study!\n\nYou have successfully installed Chronicle and may now close the application. Chronicle will continue to function as a background process on your device while the application is closed. To stop sending information to the researchers - for instance, at the end of the study - simply uninstall this app. If you have questions or concerns, please contact a member of your research team.</string>
     <string name="invalid_study_id_blank">Invalid study id.</string>
     <string name="invalid_org_id_blank">Invalid organization id.</string>
@@ -36,6 +36,7 @@
     <string name="channel_description"> Channel for chronicle survey daily notifications</string>
     <string name="channel_name"> Chronicle </string>
     <string name="notification_text">Tap to complete survey</string>
+    <string name="usage_settings_permission">This application requires usage settings permission in order to function.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="organization_id_prompt">Do you have an organization Id?</string>
