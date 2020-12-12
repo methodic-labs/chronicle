@@ -149,7 +149,7 @@ class UploadJobService : JobService() {
         if (orgId == INVALID_ORG_ID) {
             crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
         } else {
-            crashlytics.log("caught exception - orgId: \"$orgId\"; studyId: \"$studyId\" ; participantId: \"$participantId\"")
+            crashlytics.log("caught exception - orgId: \"$orgId\" ; studyId: \"$studyId\" ; participantId: \"$participantId\"")
         }
     }
 }
