@@ -29,12 +29,14 @@ import com.openlattice.chronicle.util.RetrofitBuilders
 import com.openlattice.chronicle.util.RetrofitBuilders.*
 import com.openlattice.chronicle.utils.Utils.isJobServiceScheduled
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import retrofit2.Retrofit
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+const val LAST_UPLOADED_PLACEHOLDER = "Never"
 const val PRODUCTION = "https://api.openlattice.com/"
 const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
@@ -163,8 +165,15 @@ fun setLastUpload(context: Context) {
 }
 
 fun getLastUpload(context: Context): String {
+
     val settings = PreferenceManager.getDefaultSharedPreferences(context)
-    return settings.getString(LAST_UPDATED_SETTING, "Never")
+    val lastUpdated = settings.getString(LAST_UPDATED_SETTING, LAST_UPLOADED_PLACEHOLDER)
+
+    if (lastUpdated != LAST_UPLOADED_PLACEHOLDER) {
+        return DateTime.parse(lastUpdated).toString(DateTimeFormat.mediumDateTime())
+    }
+
+    return lastUpdated
 }
 
 fun createRetrofitAdapter(baseUrl: String): Retrofit {
