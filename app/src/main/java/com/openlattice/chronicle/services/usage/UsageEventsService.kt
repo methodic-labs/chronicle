@@ -15,7 +15,7 @@ import android.util.Log
 import android.view.Display
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableMap
-import com.openlattice.chronicle.ChronicleApi
+import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.sensors.ChronicleSensor
 import com.openlattice.chronicle.sensors.PROPERTY_TYPES
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
@@ -26,6 +26,7 @@ import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
+import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -47,7 +48,7 @@ class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
     private val rand = Random()
     private val serviceId = rand.nextLong()
 
-    private lateinit var propertyTypeIds: Map<String, UUID>
+    private lateinit var propertyTypeIds: Map<FullQualifiedName, UUID>
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
     private lateinit var sensors: Set<ChronicleSensor>
@@ -144,7 +145,7 @@ class UsageEventsService : IntentService(USAGE_EVENTS_MONITORING_SERVICE) {
         }
     }
 
-    private fun getPropertyTypeIds(): Map<String, UUID> {
+    private fun getPropertyTypeIds(): Map<FullQualifiedName, UUID> {
         return chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?: ImmutableMap.of()
     }
 }

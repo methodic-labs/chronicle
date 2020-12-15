@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
 import com.openlattice.chronicle.utils.Utils.getAppFullName
+import org.apache.olingo.commons.api.edm.FullQualifiedName
 import org.joda.time.DateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -25,7 +26,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val appContext = context
 
     @Synchronized
-    override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>> {
+    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<SetMultimap<UUID, Any>> {
         if (propertyTypeIds.isEmpty()) {
             Log.w(UsageEventsChronicleSensor::class.java.name, "Property type ids is empty!")
             return ImmutableList.of()

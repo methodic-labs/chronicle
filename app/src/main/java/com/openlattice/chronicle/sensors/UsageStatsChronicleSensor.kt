@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
 import com.openlattice.chronicle.utils.Utils.getAppFullName
+import org.apache.olingo.commons.api.edm.FullQualifiedName
 import org.joda.time.DateMidnight
 import org.joda.time.DateTime
 import java.util.*
@@ -17,7 +18,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
     private val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
     @Synchronized
-    override fun poll(propertyTypeIds: Map<String, UUID>): List<SetMultimap<UUID, Any>> {
+    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<SetMultimap<UUID, Any>> {
         if (propertyTypeIds.isEmpty()) {
             return ImmutableList.of()
         }

@@ -17,30 +17,37 @@ import java.util.*
 const val PARTICIPANT_ID = "participantId"
 const val AWARENESS_NOTIFICATIONS_ENABLED = "notificationsEnabled"
 const val STUDY_ID = "studyId"
+const val ORGANIZATION_ID = "organizationId"
 const val DEVICE_ID = "deviceId"
 const val PARTICIPATION_STATUS = "participationStatus"
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
 
 val INVALID_STUDY_ID = UUID(0, 0)
+val INVALID_ORG_ID = INVALID_STUDY_ID;
 
 class EnrollmentSettings(private val context: Context) {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
 
     private var participantId: String
     private var studyId: UUID
-    var enrolled: Boolean = true
+    private var organizationId: UUID
 
     init {
-        val studyIdString = settings.getString(STUDY_ID, "")
-        participantId = settings.getString(PARTICIPANT_ID, "")
-        if (Utils.isValidUUID(studyIdString) && participantId.isNotBlank()) {
-            studyId = UUID.fromString(studyIdString)
+        val orgIdStr = settings.getString(ORGANIZATION_ID, "") ?: ""
+        val studyIdString = settings.getString(STUDY_ID, "") ?: ""
+        participantId = settings.getString(PARTICIPANT_ID, "") ?: ""
+
+        studyId = if (Utils.isValidUUID(studyIdString)) UUID.fromString(studyIdString) else INVALID_STUDY_ID
+        organizationId = if (Utils.isValidUUID(orgIdStr)) UUID.fromString(orgIdStr) else INVALID_ORG_ID
+
+        if (isEnrolled()) {
             setCrashlyticsUser(participantId)
-            setCrashlyticsState(studyId, getDeviceId(context))
-        } else {
-            studyId = INVALID_STUDY_ID
+            setCrashlyticsState(organizationId, studyId, getDeviceId(context))
         }
-        updateEnrolled()
+    }
+
+    fun isEnrolled(): Boolean {
+        return !( studyId.equals(INVALID_STUDY_ID) || participantId.isBlank())
     }
 
     fun getParticipantId(): String {
@@ -56,7 +63,17 @@ class EnrollmentSettings(private val context: Context) {
         settings.edit()
                 .putString(PARTICIPANT_ID, _participantId)
                 .apply()
-        updateEnrolled()
+    }
+
+    fun getOrganizationId(): UUID {
+        return organizationId
+    }
+
+    fun setOrganizationId(orgId: UUID) {
+        organizationId = orgId;
+        settings.edit()
+                .putString(ORGANIZATION_ID, orgId.toString())
+                .apply()
     }
 
     fun setStudyId(_studyId: UUID) {
@@ -64,7 +81,6 @@ class EnrollmentSettings(private val context: Context) {
         settings.edit()
                 .putString(STUDY_ID, _studyId.toString())
                 .apply()
-        updateEnrolled()
     }
 
     fun setAwarenessNotificationsEnabled(notificationsEnabled: Boolean) {
@@ -75,10 +91,6 @@ class EnrollmentSettings(private val context: Context) {
 
     fun getAwarenessNotificationsEnabled(): Boolean {
         return settings.getBoolean(AWARENESS_NOTIFICATIONS_ENABLED, false)
-    }
-
-    fun updateEnrolled() {
-        enrolled = !(studyId.equals(INVALID_STUDY_ID) || participantId.isBlank())
     }
 
     fun setPropertyTypeIds(propertyTypeIds: Map<String, UUID>) {
@@ -119,9 +131,12 @@ fun setCrashlyticsUser(participantId: String) {
 
     crashlytics.setUserId(participantId)
 }
-fun setCrashlyticsState(studyId: UUID, deviceId: String) {
+fun setCrashlyticsState(orgId: UUID, studyId: UUID, deviceId: String) {
     val crashlytics = FirebaseCrashlytics.getInstance()
 
     crashlytics.setCustomKey(DEVICE_ID, deviceId)
     crashlytics.setCustomKey(STUDY_ID, studyId.toString())
+    if (orgId != INVALID_ORG_ID) {
+        crashlytics.setCustomKey(ORGANIZATION_ID, orgId.toString())
+    }
 }
