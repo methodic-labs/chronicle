@@ -14,6 +14,7 @@ import com.google.gson.Gson
 import com.openlattice.chronicle.R
 import com.openlattice.chronicle.constants.Jobs
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.ORGANIZATION_ID
 import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.NotificationsReceiver
@@ -112,6 +113,7 @@ class NotificationsService : JobIntentService() {
             putExtra(NOTIFICATION_ENTRY, notificationEntry)
             putExtra(STUDY_ID, settings.getStudyId().toString())
             putExtra(PARTICIPANT_ID, settings.getParticipantId())
+            putExtra(ORGANIZATION_ID, settings.getOrganizationId().toString())
         }
     }
 }

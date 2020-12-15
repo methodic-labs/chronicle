@@ -11,9 +11,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import android.text.format.DateUtils
+import android.util.Log
 import android.widget.RemoteViews
 import com.google.gson.Gson
 import com.openlattice.chronicle.R
+import com.openlattice.chronicle.preferences.ORGANIZATION_ID
 import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
@@ -26,12 +28,13 @@ class NotificationsReceiver : BroadcastReceiver() {
 
         val participantId = intent.getStringExtra(PARTICIPANT_ID)
         val studyId = intent.getStringExtra(STUDY_ID)
+        val organizationId = intent.getStringExtra(ORGANIZATION_ID)
         val notificationEntry = intent.getStringExtra(NOTIFICATION_ENTRY)
 
         val notification = Gson().fromJson(notificationEntry, com.openlattice.chronicle.services.notifications.NotificationEntry::class.java)
 
         // intent to launch survey in browser
-        val targetUrl = createNotificationTargetUrl(notification, studyId, participantId)
+        val targetUrl = createNotificationTargetUrl(notification, organizationId, studyId, participantId)
         val notifyIntent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
@@ -43,7 +46,7 @@ class NotificationsReceiver : BroadcastReceiver() {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_notification)
-                .setColor(ContextCompat.getColor(context, R.color.purple_dark))
+                .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                 .setCustomContentView(notificationLayout)
                 .setCustomBigContentView(notificationLayout)
                 .setPriority(NotificationCompat.PRIORITY_HIGH) //support android 7.1
