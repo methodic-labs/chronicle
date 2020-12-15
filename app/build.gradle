@@ -21,7 +21,7 @@ android {
     defaultConfig {
         applicationId "com.openlattice.chronicle"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 12
         versionName "2020-10-05"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
