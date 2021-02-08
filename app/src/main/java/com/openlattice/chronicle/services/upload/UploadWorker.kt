@@ -97,14 +97,6 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         closeDb()
     }
 
-    private fun addLogMessage(message: String) {
-        if (orgId == INVALID_ORG_ID) {
-            Log.i(TAG, "$message - studyId: \"$studyId\" ; participantId: \"$participantId\"")
-        } else {
-            Log.i(TAG, "$message- orgId: \"$orgId\" ; studyId: \"$studyId\" ; participantId: \"$participantId\"")
-        }
-    }
-
     private fun closeDb() {
         if (chronicleDb.isOpen) {
             chronicleDb.close()
