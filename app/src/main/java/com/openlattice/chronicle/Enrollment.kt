@@ -23,8 +23,8 @@ import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.services.upload.PRODUCTION
-import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils
+import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import java.util.*
 import java.util.concurrent.Executors
 
