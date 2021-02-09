@@ -164,7 +164,7 @@ fun scheduleUploadWork(context: Context) {
                     .build()
 
     WorkManager.getInstance(context).enqueueUniquePeriodicWork("upload",
-            ExistingPeriodicWorkPolicy.REPLACE, // cancel cancelling
+            ExistingPeriodicWorkPolicy.REPLACE,
             workRequest
     )
 }

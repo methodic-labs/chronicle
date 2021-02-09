@@ -126,7 +126,7 @@ fun scheduleNotificationsWorker(context: Context) {
                     .build()
 
     WorkManager.getInstance(context).enqueueUniquePeriodicWork("notifications",
-            ExistingPeriodicWorkPolicy.REPLACE, // cancel cancelling
+            ExistingPeriodicWorkPolicy.REPLACE,
             workRequest
     )
 }

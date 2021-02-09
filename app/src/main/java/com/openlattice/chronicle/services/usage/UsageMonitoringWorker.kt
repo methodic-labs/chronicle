@@ -121,8 +121,9 @@ fun scheduleUsageMonitoringWork(context: Context) {
                     .build()
 
     WorkManager.getInstance(context).enqueueUniquePeriodicWork("usage",
-            ExistingPeriodicWorkPolicy.REPLACE, // avoid cancelling
+            ExistingPeriodicWorkPolicy.REPLACE,
             workRequest
     )
 }
+
 
