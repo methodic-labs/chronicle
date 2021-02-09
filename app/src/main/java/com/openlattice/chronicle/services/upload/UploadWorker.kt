@@ -1,6 +1,7 @@
 package com.openlattice.chronicle.services.upload
 
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import androidx.room.Room
 import androidx.work.*
@@ -12,6 +13,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.api.ChronicleApi
+import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.INVALID_ORG_ID
@@ -78,13 +80,12 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                                 ConsoleSink()))
             }
 
-            Log.i(TAG, "usage upload worker started")
-
             uploadData()
             closeDb()
         } catch (e: Exception) {
             closeDb()
             crashlytics.recordException(e)
+            firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_FAILURE, null)
             Log.i(TAG, "usage upload failed")
             return Result.failure()
         }
@@ -112,6 +113,9 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
     }
 
     private fun uploadData() {
+
+        Log.i(TAG, "usage upload worker started")
+        firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_START, null)
 
         if (participationStatus != ParticipationStatus.ENROLLED) {
             Log.i(TAG, "participant not enrolled. exiting data upload.")
@@ -144,6 +148,10 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                         queue.deleteEntries(nextEntries)
                         nextEntries = queue.getNextEntries(BATCH_SIZE)
                         notEmptied = nextEntries.size == BATCH_SIZE
+
+                        firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_SUCCESS, Bundle().apply {
+                            putInt("size", data.size)
+                        })
 
                     } else {
                         throw Exception("exception when uploading usage data")

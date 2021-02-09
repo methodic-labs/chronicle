@@ -12,11 +12,9 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.openlattice.chronicle.api.ChronicleApi
+import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.preferences.ORGANIZATION_ID
-import com.openlattice.chronicle.preferences.PARTICIPANT_ID
-import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.sensors.ChronicleSensor
 import com.openlattice.chronicle.sensors.PROPERTY_TYPES
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
@@ -26,11 +24,8 @@ import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
 import com.openlattice.chronicle.utils.Utils
-import kotlinx.coroutines.coroutineScope
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 val TAG = UsageMonitoringWorker::class.java.simpleName
@@ -40,10 +35,10 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
     private val rand = Random()
     private val serviceId = rand.nextLong()
 
-    private val crashlytics = FirebaseCrashlytics.getInstance()
-
     private var chronicleApi = Utils.createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
 
+    private lateinit var crashlytics: FirebaseCrashlytics
+    private lateinit var analytics: FirebaseAnalytics
     private lateinit var propertyTypeIds: Map<FullQualifiedName, UUID>
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
@@ -58,16 +53,16 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
             storageQueue = chronicleDb.queueEntryData()
             sensors = mutableSetOf(
                     UsageEventsChronicleSensor(applicationContext))
-
-            Log.i(TAG, "usage monitoring worker initialized")
+            analytics = Firebase.analytics
+            crashlytics = FirebaseCrashlytics.getInstance()
 
             monitorUsage()
-
             closeDb()
 
         } catch (e: Exception) {
             crashlytics.recordException(e)
             Log.i(TAG, "usage monitoring worker failed with an exception")
+            analytics.logEvent(FirebaseAnalyticsEvents.USAGE_FAILURE, null)
             closeDb()
             return Result.failure()
         }
@@ -87,8 +82,11 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
 
     private fun monitorUsage() {
 
+        Log.i(TAG, "usage monitoring worker initialized")
+        analytics.logEvent(FirebaseAnalyticsEvents.USAGE_START, null)
+
         if (settings.getParticipationStatus() != ParticipationStatus.ENROLLED) {
-            Log.i(TAG,"participant not enrolled. exiting usage monitoring")
+            Log.i(TAG, "participant not enrolled. exiting usage monitoring")
             return
         }
 
@@ -105,6 +103,9 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         queueEntry.asSequence().chunked(1000).forEach { chunk ->
             storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), JsonSerializer.serializeQueueEntry(chunk)))
             Log.d(javaClass.name, "Persisting ${chunk.size} usage information elements took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
+            analytics.logEvent(FirebaseAnalyticsEvents.USAGE_SUCCESS, Bundle().apply {
+                putInt("size", chunk.size)
+            })
         }
     }
 

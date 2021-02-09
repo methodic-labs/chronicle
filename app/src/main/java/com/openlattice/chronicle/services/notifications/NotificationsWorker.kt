@@ -4,10 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.work.*
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.api.ChronicleApi
+import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -15,7 +19,6 @@ import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.sensors.ACTIVE
 import com.openlattice.chronicle.sensors.NAME
 import com.openlattice.chronicle.sensors.RECURRENCE_RULE
-import com.openlattice.chronicle.services.notifications.NotificationsService
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.utils.Utils
 import org.apache.olingo.commons.api.edm.FullQualifiedName
@@ -30,6 +33,7 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
     private val legacyChronicleStudyApi = Utils.createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java) // legacy studies
 
     private lateinit var crashlytics: FirebaseCrashlytics
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var enrollmentSettings: EnrollmentSettings
     private lateinit var studyId: UUID
     private lateinit var participantId: String
@@ -41,8 +45,6 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
 
     override fun doWork(): Result {
 
-        Log.i( TAG,"Notifications worker started")
-
         try {
             enrollmentSettings = EnrollmentSettings(applicationContext)
             studyId = enrollmentSettings.getStudyId()
@@ -51,16 +53,21 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             participationStatus = enrollmentSettings.getParticipationStatus()
             notificationsEnabled = enrollmentSettings.getAwarenessNotificationsEnabled()
             crashlytics = FirebaseCrashlytics.getInstance()
+            firebaseAnalytics = Firebase.analytics
 
             workHelper()
         } catch (e: Exception) {
             crashlytics.recordException(e)
+            firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.NOTIFICATIONS_FAILURE, null)
             return Result.failure()
         }
         return Result.success()
     }
 
     private fun workHelper() {
+
+        Log.i(TAG, "Notifications worker started")
+        firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.NOTIFICATIONS_START, null)
 
         if (orgId == INVALID_ORG_ID) {
             participationStatus = legacyChronicleStudyApi.getParticipationStatus(studyId, participantId)
