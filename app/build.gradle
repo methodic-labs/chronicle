@@ -39,7 +39,7 @@ android {
         debug {
             applicationIdSuffix ".debug"
             debuggable true
-//            signingConfig signingConfigs.chronicle
+            signingConfig signingConfigs.chronicle
         }
         release {
             minifyEnabled false
