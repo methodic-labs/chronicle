@@ -222,11 +222,11 @@ class Enrollment : AppCompatActivity() {
                 // TODO: actually retrieve device id
                 if (chronicleId != null) {
                     Log.i(javaClass.canonicalName, "Chronicle id: " + chronicleId.toString())
-                    analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_SUCCESS) {
-                        param(PARTICIPANT_ID, participantId)
-                        param(ORGANIZATION_ID, orgId.toString())
-                        param(STUDY_ID, studyId.toString())
-                    }
+                    analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_SUCCESS, Bundle().apply {
+                        putString(PARTICIPANT_ID, participantId)
+                        putString(ORGANIZATION_ID, orgId.toString())
+                        putString(STUDY_ID, studyId.toString())
+                    })
                     mHandler.post {
                         val enrollmentSettings = EnrollmentSettings(applicationContext)
 
@@ -253,11 +253,11 @@ class Enrollment : AppCompatActivity() {
                     }
                 } else {
                     crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")
-                    analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_FAILURE) {
-                        param(PARTICIPANT_ID, participantId)
-                        param(ORGANIZATION_ID, orgId.toString())
-                        param(STUDY_ID, studyId.toString())
-                    }
+                    analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_FAILURE, Bundle().apply {
+                        putString(PARTICIPANT_ID, participantId)
+                        putString(ORGANIZATION_ID, orgId.toString())
+                        putString(STUDY_ID, studyId.toString())
+                    })
                     Log.e(javaClass.canonicalName, "unable to enroll device.")
                     mHandler.post {
                         progressBar.visibility = View.INVISIBLE
