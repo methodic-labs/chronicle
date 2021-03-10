@@ -169,6 +169,8 @@ if [ "$(uname)" = "Darwin" ] && [ "$HOME" = "$PWD" ]; then
   cd "$(dirname "$0")"
 fi
 
+# accept license
+# https://github.com/jitpack/jitpack.io/issues/3687#issuecomment-455885806
 yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;28.0.3"
 
 exec "$JAVACMD" "$@"
