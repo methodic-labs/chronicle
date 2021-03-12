@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "02",
+    "firebase_url": "foo",
+    "project_id": "foo",
+    "storage_bucket": "foo"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "foo",
+        "android_client_info": {
+          "package_name": "com.openlattice.chronicle.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "foo",
+          "client_type": 223
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "foo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "foo",
+              "client_type": 3223
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
