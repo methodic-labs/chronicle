@@ -101,8 +101,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             startActivity(enrollmentIntent)
             return
         }
-
-        requestBatteryOptimizationExemption()
     }
 
     private suspend fun updateLastUpload() {
@@ -121,14 +119,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    // check that devices with android 6.0 (api 23) are exempt from Doze and App Standby optimizations
-    // https://developer.android.com/training/monitoring-device-state/doze-standby
-    private fun requestBatteryOptimizationExemption() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasIgnoreBatteryOptimization(this)) {
-            startActivity(Intent(this, BatteryOptimizationExemption::class.java))
-        }
-    }
-
     override fun onBackPressed() {
         val intent = Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_HOME)
@@ -137,6 +127,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         startActivity(intent)
     }
 
+    // check that devices with android 6.0 (api 23) are exempt from Doze and App Standby optimizations
+    // https://developer.android.com/training/monitoring-device-state/doze-standby
+    override fun onResume() {
+        super.onResume()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasIgnoreBatteryOptimization(this)) {
+            BatteryOptimizationExemptionDialog().show(supportFragmentManager, "batteryExemption")
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()

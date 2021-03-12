@@ -44,10 +44,6 @@
             android:name=".PermissionActivity"
             android:parentActivityName=".MainActivity" />
 
-        <activity
-            android:name=".BatteryOptimizationExemption"
-            android:parentActivityName=".MainActivity" />
-
         <receiver
             android:name=".receivers.lifecycle.StartOnBoot"
             android:enabled="true">
