@@ -75,7 +75,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
     }
 
     private fun closeDb() {
-        if (chronicleDb.isOpen) {
+        if (this::chronicleDb.isInitialized && chronicleDb.isOpen) {
             chronicleDb.close()
         }
     }

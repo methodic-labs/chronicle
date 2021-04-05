@@ -99,7 +99,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
     }
 
     private fun closeDb() {
-        if (chronicleDb.isOpen) {
+        if (this::chronicleDb.isInitialized && chronicleDb.isOpen) {
             chronicleDb.close()
         }
     }

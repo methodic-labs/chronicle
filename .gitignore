@@ -10,5 +10,5 @@
 /app/release
 /captures
 .externalNativeBuild
-google-services.json
+app/google-services.json
 chronicle.jks

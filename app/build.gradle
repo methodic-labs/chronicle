@@ -65,6 +65,7 @@ android {
 }
 
 ext.jackson_version = '2.6.5'
+ext.activity_version = '1.2.2'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -75,6 +76,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+
+    implementation "androidx.activity:activity-ktx:$activity_version"
 
     // WorkManager
     implementation "androidx.work:work-runtime-ktx:$work_version"
