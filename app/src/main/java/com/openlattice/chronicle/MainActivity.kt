@@ -28,7 +28,7 @@ import java.util.*
 
 const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
 
-class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var enrollmentSettings: EnrollmentSettings
     private lateinit var orgId: UUID
@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             finish()
         }
 
+        // observer
         uploadStatusModel.outputWorkInfo.observe(this, workInfoObserver())
 
         if (enrollmentSettings.isEnrolled()) {
@@ -95,7 +96,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 orgIdLabel.visibility = View.GONE
             }
 
-            launch(Dispatchers.Default) {
+            GlobalScope.launch(Dispatchers.Default) {
                 updateLastUpload()
             }
 
@@ -166,10 +167,5 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasIgnoreBatteryOptimization(this)) {
             BatteryOptimizationExemptionDialog().show(supportFragmentManager, "batteryExemption")
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cancel()
     }
 }
