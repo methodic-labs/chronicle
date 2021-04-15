@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                 orgIdLabel.visibility = View.GONE
             }
 
-            GlobalScope.launch(Dispatchers.Default) {
+            GlobalScope.launch(Dispatchers.Main) {
                 updateLastUpload()
             }
 
