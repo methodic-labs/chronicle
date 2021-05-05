@@ -4,13 +4,18 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.work.WorkInfo
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.openlattice.chronicle.data.ParticipationStatus
+import com.openlattice.chronicle.models.UploadStatusModel
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.services.notifications.createNotificationChannel
@@ -23,7 +28,7 @@ import java.util.*
 
 const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
 
-class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var enrollmentSettings: EnrollmentSettings
     private lateinit var orgId: UUID
@@ -37,6 +42,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private lateinit var participantIdText: TextView
     private lateinit var orgIdTextView: TextView
     private lateinit var orgIdLabel: TextView
+    private lateinit var uploadProgressView: LinearLayout
+
+    private val uploadStatusModel: UploadStatusModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -55,6 +63,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         participantIdText = findViewById(R.id.participantId)
         orgIdTextView = findViewById(R.id.orgId)
         orgIdLabel = findViewById(R.id.orgIdLabel)
+        uploadProgressView = findViewById(R.id.uploadProgressView)
+
+        uploadProgressView.visibility = View.GONE
 
         // disable crashlytics in debug
         if (BuildConfig.DEBUG) {
@@ -67,6 +78,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             startActivity(Intent(this, PermissionActivity::class.java))
             finish()
         }
+
+        // observer
+        uploadStatusModel.outputWorkInfo.observe(this, workInfoObserver())
 
         if (enrollmentSettings.isEnrolled()) {
 
@@ -82,7 +96,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 orgIdLabel.visibility = View.GONE
             }
 
-            launch(Dispatchers.Default) {
+            GlobalScope.launch(Dispatchers.Main) {
                 updateLastUpload()
             }
 
@@ -100,6 +114,25 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
             startActivity(enrollmentIntent)
             return
+        }
+    }
+
+    private fun workInfoObserver(): Observer<List<WorkInfo>> {
+        return Observer { listOfWorkInfo ->
+
+            // if there is no matching work info, do nothing
+            if (listOfWorkInfo.isNullOrEmpty()) {
+                return@Observer
+            }
+
+            val workInfo = listOfWorkInfo[0]
+
+            if (workInfo.state.name == WorkInfo.State.RUNNING.name) {
+                uploadProgressView.visibility = View.VISIBLE
+            } else {
+                uploadProgressView.visibility = View.GONE
+            }
+
         }
     }
 
@@ -134,10 +167,5 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasIgnoreBatteryOptimization(this)) {
             BatteryOptimizationExemptionDialog().show(supportFragmentManager, "batteryExemption")
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cancel()
     }
 }
