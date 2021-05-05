@@ -17,14 +17,17 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.base.Optional
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.ktx.Firebase
 import com.openlattice.chronicle.api.ChronicleApi
-import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.preferences.getDevice
-import com.openlattice.chronicle.preferences.getDeviceId
+import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
+import com.openlattice.chronicle.preferences.*
 import com.openlattice.chronicle.services.upload.PRODUCTION
-import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils
+import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -33,6 +36,7 @@ class Enrollment : AppCompatActivity() {
     private val mHandler = object : Handler(Looper.getMainLooper()) {}
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
+    private lateinit var analytics: FirebaseAnalytics
     private lateinit var orgIdText: TextInputEditText
     private lateinit var studyIdText: TextInputEditText
     private lateinit var participantIdText: TextInputEditText
@@ -52,6 +56,7 @@ class Enrollment : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enrollment)
 
+        analytics = Firebase.analytics
         orgIdText = findViewById(R.id.orgIdText)
         studyIdText = findViewById(R.id.studyIdText)
         participantIdText = findViewById(R.id.participantIdText)
@@ -217,6 +222,11 @@ class Enrollment : AppCompatActivity() {
                 // TODO: actually retrieve device id
                 if (chronicleId != null) {
                     Log.i(javaClass.canonicalName, "Chronicle id: " + chronicleId.toString())
+                    analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_SUCCESS, Bundle().apply {
+                        putString(PARTICIPANT_ID, participantId)
+                        putString(ORGANIZATION_ID, orgId.toString())
+                        putString(STUDY_ID, studyId.toString())
+                    })
                     mHandler.post {
                         val enrollmentSettings = EnrollmentSettings(applicationContext)
 
@@ -243,6 +253,11 @@ class Enrollment : AppCompatActivity() {
                     }
                 } else {
                     crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")
+                    analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_FAILURE, Bundle().apply {
+                        putString(PARTICIPANT_ID, participantId)
+                        putString(ORGANIZATION_ID, orgId.toString())
+                        putString(STUDY_ID, studyId.toString())
+                    })
                     Log.e(javaClass.canonicalName, "unable to enroll device.")
                     mHandler.post {
                         progressBar.visibility = View.INVISIBLE

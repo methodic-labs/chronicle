@@ -4,10 +4,18 @@ import android.app.job.JobScheduler
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.preference.PreferenceManager
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.services.notifications.NotificationEntry
+import com.openlattice.chronicle.services.upload.LAST_UPDATED_SETTING
+import com.openlattice.chronicle.services.upload.LAST_UPLOADED_PLACEHOLDER
+import com.openlattice.chronicle.util.RetrofitBuilders
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import retrofit2.Retrofit
 import java.util.*
 
 object Utils {
@@ -41,7 +49,7 @@ object Utils {
         return false
     }
 
-    fun createNotificationTargetUrl(notificationEntry: NotificationEntry, orgIdStr: String, studyId: String, participantId: String) :String{
+    fun createNotificationTargetUrl(notificationEntry: NotificationEntry, orgIdStr: String, studyId: String, participantId: String): String {
         val orgId = UUID.fromString(orgIdStr)
         val uriBuilder: Uri.Builder = Uri.Builder()
 
@@ -76,4 +84,32 @@ object Utils {
 
         return uriBuilder.build().toString()
     }
+
+
+    fun setLastUpload(context: Context) {
+        val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        with(settings.edit()) {
+            putString(LAST_UPDATED_SETTING, DateTime.now().toString())
+            apply()
+        }
+    }
+
+    fun getLastUpload(context: Context): String {
+
+        val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        val lastUpdated = settings.getString(LAST_UPDATED_SETTING, LAST_UPLOADED_PLACEHOLDER)
+
+        if (lastUpdated != LAST_UPLOADED_PLACEHOLDER) {
+            return DateTime.parse(lastUpdated).toString(DateTimeFormat.mediumDateTime())
+        }
+
+        return lastUpdated
+    }
+
+    fun createRetrofitAdapter(baseUrl: String): Retrofit {
+        RetrofitBuilders.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        val httpClient = RetrofitBuilders.okHttpClient().build()
+        return RetrofitBuilders.decorateWithRhizomeFactories(RetrofitBuilders.createBaseChronicleRetrofitBuilder(baseUrl, httpClient)).build()
+    }
+
 }

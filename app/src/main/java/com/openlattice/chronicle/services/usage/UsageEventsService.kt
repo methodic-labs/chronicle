@@ -5,7 +5,6 @@ import android.app.Notification
 import android.app.Notification.PRIORITY_LOW
 import android.app.NotificationChannel
 import android.app.PendingIntent
-import androidx.room.Room
 import android.content.Context
 import android.content.Intent
 import android.hardware.display.DisplayManager
@@ -13,6 +12,7 @@ import android.os.Build
 import android.os.Handler
 import android.util.Log
 import android.view.Display
+import androidx.room.Room
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableMap
 import com.openlattice.chronicle.api.ChronicleApi
@@ -22,10 +22,10 @@ import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
 import com.openlattice.chronicle.sensors.UsageStatsChronicleSensor
 import com.openlattice.chronicle.serialization.JsonSerializer.serializeQueueEntry
 import com.openlattice.chronicle.services.upload.PRODUCTION
-import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
+import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
 import java.util.concurrent.CountDownLatch
