@@ -41,5 +41,8 @@
     <string name="no">No</string>
     <string name="organization_id_prompt">Do you have an organization Id?</string>
     <string name="open_settings">Open Settings</string>
+    <string name="battery_optimization_exemption">To ensure chronicle works more reliably in the background, please open Battery optimization settings, click on chronicle, and select \"Don\'t Optimize\""</string>
+    <string name="settings">Settings</string>
+    <string name="uploading_data">Uploading data</string>
 
 </resources>

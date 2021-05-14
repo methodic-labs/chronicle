@@ -4,12 +4,15 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 
 class PermissionActivity : AppCompatActivity() {
@@ -77,6 +80,18 @@ fun hasUsageSettingPermission(context: Context): Boolean {
         val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, applicationInfo.uid, applicationInfo.packageName)
         mode == AppOpsManager.MODE_ALLOWED
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.M)
+fun hasIgnoreBatteryOptimization(context: Context): Boolean {
+    return try {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager;
+        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+
     } catch (e: PackageManager.NameNotFoundException) {
         false
     }

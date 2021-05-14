@@ -19,10 +19,10 @@ import com.openlattice.chronicle.sensors.PROPERTY_TYPES
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
 import com.openlattice.chronicle.serialization.JsonSerializer.serializeQueueEntry
 import com.openlattice.chronicle.services.upload.PRODUCTION
-import com.openlattice.chronicle.services.upload.createRetrofitAdapter
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
+import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils.isJobServiceScheduled
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
@@ -59,6 +59,8 @@ class UsageMonitoringJobService : JobService() {
         }
         latch.await()
         Log.i(javaClass.name, "Usage service is running.")
+
+
 
         doWork()
 

@@ -113,7 +113,9 @@ class EnrollmentSettings(private val context: Context) {
     }
 
     fun getParticipationStatus(): ParticipationStatus {
-        return ParticipationStatus.valueOf(settings.getString(PARTICIPATION_STATUS, ParticipationStatus.UNKNOWN.toString()))
+        val status = settings.getString(PARTICIPATION_STATUS, ParticipationStatus.UNKNOWN.name) ?:ParticipationStatus.UNKNOWN.name
+
+        return ParticipationStatus.valueOf(status)
     }
 
 }
