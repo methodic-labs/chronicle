@@ -12,6 +12,7 @@ import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropert
 import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds
 import com.openlattice.chronicle.sources.AndroidDevice
 import com.openlattice.chronicle.utils.Utils
+import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
 
 const val PARTICIPANT_ID = "participantId"
@@ -93,14 +94,14 @@ class EnrollmentSettings(private val context: Context) {
         return settings.getBoolean(AWARENESS_NOTIFICATIONS_ENABLED, false)
     }
 
-    fun setPropertyTypeIds(propertyTypeIds: Map<String, UUID>) {
+    fun setPropertyTypeIds(propertyTypeIds: Map<FullQualifiedName, UUID>) {
         settings
                 .edit()
                 .putString(PROPERTY_TYPE_IDS, serializePropertyTypeIds(propertyTypeIds))
                 .apply()
     }
 
-    fun getPropertyTypeIds(): Map<String, UUID> {
+    fun getPropertyTypeIds(): Map<FullQualifiedName, UUID> {
         return deserializePropertyTypeIds(settings.getString(PROPERTY_TYPE_IDS, ""))
                 ?: ImmutableMap.of()
     }

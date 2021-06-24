@@ -111,7 +111,15 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
     }
 
     private fun getPropertyTypeIds(): Map<FullQualifiedName, UUID> {
-        return chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?: ImmutableMap.of()
+        // try retrieving cached values first
+        var propertyTypeIds  = settings.getPropertyTypeIds()
+
+        if (propertyTypeIds.isEmpty()) {
+            propertyTypeIds = chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?:ImmutableMap.of()
+            settings.setPropertyTypeIds(propertyTypeIds)
+        }
+
+        return propertyTypeIds
     }
 }
 
