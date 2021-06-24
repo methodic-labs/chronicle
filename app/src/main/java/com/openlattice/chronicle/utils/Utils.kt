@@ -21,10 +21,10 @@ import java.util.*
 object Utils {
 
     fun isValidUUID(possibleUUID: String): Boolean {
-        if (possibleUUID.isEmpty()) {
-            return false
-        }
         try {
+            if (possibleUUID.isEmpty()) {
+                return false
+            }
             UUID.fromString(possibleUUID)
         } catch (e: IllegalArgumentException) {
             FirebaseCrashlytics.getInstance().recordException(e)
