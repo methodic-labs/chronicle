@@ -85,8 +85,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         Log.i(TAG, "usage monitoring worker initialized")
         analytics.logEvent(FirebaseAnalyticsEvents.USAGE_START, null)
 
-        // only stop monitoring if data collection has been explicitly turned off
-        if (settings.getParticipationStatus() == ParticipationStatus.NOT_ENROLLED) {
+        if (settings.getParticipationStatus() != ParticipationStatus.ENROLLED) {
             Log.i(TAG, "participant not enrolled. exiting usage monitoring")
             return
         }
@@ -111,15 +110,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
     }
 
     private fun getPropertyTypeIds(): Map<FullQualifiedName, UUID> {
-        // try retrieving cached values first
-        var propertyTypeIds  = settings.getPropertyTypeIds()
-
-        if (propertyTypeIds.isEmpty()) {
-            propertyTypeIds = chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?:ImmutableMap.of()
-            settings.setPropertyTypeIds(propertyTypeIds)
-        }
-
-        return propertyTypeIds
+        return chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?: ImmutableMap.of()
     }
 }
 

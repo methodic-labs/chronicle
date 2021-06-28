@@ -20,17 +20,13 @@ import java.util.*
 
 object Utils {
 
-    fun isValidUUID(possibleUUID: String): Boolean {
-        try {
-            if (possibleUUID.isEmpty()) {
-                return false
-            }
-            UUID.fromString(possibleUUID)
-        } catch (e: IllegalArgumentException) {
-            FirebaseCrashlytics.getInstance().recordException(e)
-            return false
-        }
-        return true
+    fun isValidUUID(possibleUUID: String): Boolean = try {
+        val uuid = UUID.fromString(possibleUUID)
+        val uuidAsString = uuid.toString()
+        uuidAsString == possibleUUID
+    } catch (e: IllegalArgumentException) {
+        FirebaseCrashlytics.getInstance().recordException(e)
+        false
     }
 
     fun getAppFullName(context: Context, packageName: String): String {
@@ -39,7 +35,7 @@ object Utils {
             val applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
             packageManager.getApplicationLabel(applicationInfo).toString()
         } catch (e: Exception) {
-            packageName
+            packageName;
         }
 
     }

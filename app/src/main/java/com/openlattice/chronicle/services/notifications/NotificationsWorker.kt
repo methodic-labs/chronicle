@@ -38,10 +38,10 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
     private lateinit var studyId: UUID
     private lateinit var participantId: String
     private lateinit var orgId: UUID
+    private lateinit var participationStatus: ParticipationStatus
+    private lateinit var studyQuestionnaires: Map<UUID, Map<FullQualifiedName, Set<Any>>>
 
-    private var participationStatus: ParticipationStatus? = ParticipationStatus.UNKNOWN
-    private var studyQuestionnaires: Map<UUID, Map<FullQualifiedName, Set<Any>>>? = mapOf()
-    private var notificationsEnabled: Boolean? = false
+    private var notificationsEnabled = false
 
     override fun doWork(): Result {
 
@@ -50,6 +50,8 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             studyId = enrollmentSettings.getStudyId()
             participantId = enrollmentSettings.getParticipantId()
             orgId = enrollmentSettings.getOrganizationId()
+            participationStatus = enrollmentSettings.getParticipationStatus()
+            notificationsEnabled = enrollmentSettings.getAwarenessNotificationsEnabled()
             crashlytics = FirebaseCrashlytics.getInstance()
             firebaseAnalytics = Firebase.analytics
 
@@ -90,13 +92,13 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
         )
         var intent = Intent(applicationContext, NotificationsService::class.java).apply {
             putExtra(NOTIFICATION_ENTRY, Gson().toJson(notification))
-            putExtra(NOTIFICATIONS_ENABLED, participationStatus == ParticipationStatus.ENROLLED && notificationsEnabled == true)
+            putExtra(NOTIFICATIONS_ENABLED, participationStatus == ParticipationStatus.ENROLLED && notificationsEnabled)
         }
 
         NotificationsService.enqueueWork(applicationContext, intent)
 
         // schedule notifications for active questionnaires
-        for ((key, value) in (studyQuestionnaires ?: mapOf())) {
+        for ((key, value) in studyQuestionnaires) {
             val recurrenceRuleSet = value[RECURRENCE_RULE]?.iterator()?.next()?.toString()
             val name = value[NAME]?.iterator()?.next()?.toString()
             val active = value[ACTIVE]?.iterator()?.next()?.equals(true)
@@ -119,8 +121,8 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             }
         }
 
-        enrollmentSettings.setParticipationStatus(participationStatus ?: ParticipationStatus.UNKNOWN)
-        enrollmentSettings.setAwarenessNotificationsEnabled(notificationsEnabled ?: false)
+        enrollmentSettings.setParticipationStatus(participationStatus)
+        enrollmentSettings.setAwarenessNotificationsEnabled(notificationsEnabled)
     }
 }
 

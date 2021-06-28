@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit
 
 const val LAST_UPLOADED_PLACEHOLDER = "Never"
 const val PRODUCTION = "https://api.openlattice.com/"
-const val BATCH_SIZE = 10
+const val BATCH_SIZE = 100 // 24 * 60 * 60 / 5 //17280
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_INTERVAL_MIN = 15L
 

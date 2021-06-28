@@ -10,8 +10,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
 import com.openlattice.chronicle.util.RetrofitBuilders;
 
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +37,7 @@ public class JsonSerializer {
         }
     }
 
-    public static String serializePropertyTypeIds(Map<FullQualifiedName, UUID> propertyTypeIds) {
+    public static String serializePropertyTypeIds(Map<String, UUID> propertyTypeIds) {
         try {
             return mapper.writeValueAsString(propertyTypeIds);
         } catch (JsonProcessingException e) {
@@ -48,9 +46,9 @@ public class JsonSerializer {
         }
     }
 
-    public static Map<FullQualifiedName, UUID> deserializePropertyTypeIds(String json) {
+    public static Map<String, UUID> deserializePropertyTypeIds(String json) {
         try {
-            return mapper.readValue(json, new TypeReference<Map<FullQualifiedName, UUID>>() {
+            return mapper.readValue(json, new TypeReference<Map<String, UUID>>() {
             });
         } catch (IOException e) {
             Log.e(JsonSerializer.class.getName(), "Unable tode serialize property type ids.");
