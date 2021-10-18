@@ -1,12 +1,9 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <PreferenceCategory app:title="@string/identification_header">
-
         <SwitchPreferenceCompat
             app:key="@string/identify_user"
             app:summary="Receive notification to identify user when device is unlocked"
             app:title="Identify device user" />
-
         <ListPreference
             app:defaultValue="@string/user_unassigned"
             app:entries="@array/device_users_entries"
@@ -14,7 +11,5 @@
             app:key="@string/current_user"
             app:title="Device user"
             app:useSimpleSummaryProvider="true" />?
-
     </PreferenceCategory>
-
 </PreferenceScreen>
