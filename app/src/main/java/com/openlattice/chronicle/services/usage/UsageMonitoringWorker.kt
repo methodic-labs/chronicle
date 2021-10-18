@@ -61,7 +61,8 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
 
         } catch (e: Exception) {
             crashlytics.recordException(e)
-            Log.i(TAG, "usage monitoring worker failed with an exception")
+
+            Log.i(TAG, "usage monitoring worker failed with an exception", e)
             analytics.logEvent(FirebaseAnalyticsEvents.USAGE_FAILURE, null)
             closeDb()
             return Result.failure()
@@ -114,7 +115,8 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         // try retrieving cached values first
         var propertyTypeIds  = settings.getPropertyTypeIds()
 
-        if (propertyTypeIds.isEmpty()) {
+        if (propertyTypeIds.size != PROPERTY_TYPES.size) {
+            Log.i(javaClass.name, "Refresh property types cache")
             propertyTypeIds = chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?:ImmutableMap.of()
             settings.setPropertyTypeIds(propertyTypeIds)
         }
