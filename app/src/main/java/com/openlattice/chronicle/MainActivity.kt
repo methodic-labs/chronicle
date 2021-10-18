@@ -3,6 +3,10 @@ package com.openlattice.chronicle
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -18,6 +22,7 @@ import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.models.UploadStatusModel
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.INVALID_ORG_ID
+import com.openlattice.chronicle.services.notifications.UnlockPhoneService
 import com.openlattice.chronicle.services.notifications.createNotificationChannel
 import com.openlattice.chronicle.services.notifications.scheduleNotificationsWorker
 import com.openlattice.chronicle.services.upload.scheduleUploadWork
@@ -73,6 +78,10 @@ class MainActivity : AppCompatActivity() {
         }
         // create notification channel
         createNotificationChannel(this)
+
+        //start screen unlock service
+        val intent = Intent(this, UnlockPhoneService::class.java)
+        startService(intent)
 
         if (!hasUsageSettingPermission(this)) {
             startActivity(Intent(this, PermissionActivity::class.java))
@@ -166,6 +175,24 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasIgnoreBatteryOptimization(this)) {
             BatteryOptimizationExemptionDialog().show(supportFragmentManager, "batteryExemption")
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // handle menu selection
+        return when (item.itemId) {
+            R.id.settings -> {
+                // launch settings
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
