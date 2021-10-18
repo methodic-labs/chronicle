@@ -45,4 +45,27 @@
     <string name="settings">Settings</string>
     <string name="uploading_data">Uploading data</string>
 
+    <!-- Phone wake up notification   -->
+    <string name="on_wake_notification_title">User Identification</string>
+    <string name="on_wake_notification_message">Tap on notification to identify device user</string>
+
+    <!--    User identification-->
+    <string name="select_current_user_prompt">Please select current user:</string>
+    <string name="user_target_child">Target child</string>
+    <string name="user_other">Other</string>
+    <string name="user_unassigned">Not set</string>
+    <string name="save_btn">Save</string>
+    <string name="notification_id">notificationId</string>
+
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="identification_header">User Identification </string>
+
+    <!--    Preference keys -->
+    <string name="current_user"> current_user </string>
+    <string name="identify_user"> identify_user </string>
+    <string name="previous_user"> previous_user</string>
+    <string name="current_user_timestamp">current_user_timestamp</string>
+
 </resources>
