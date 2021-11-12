@@ -63,7 +63,7 @@ class UnlockPhoneReceiver : BroadcastReceiver() {
                 .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                 .setCustomContentView(layout)
                 .setCustomBigContentView(layout)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(createOnDismissedIntent())
                 .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
