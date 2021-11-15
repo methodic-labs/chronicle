@@ -29,6 +29,7 @@ class StartOnBoot : BroadcastReceiver() {
 
                     scheduleUsageMonitoringWork(context)
                     Log.i(TAG, "started usage monitoring worker at boot")
+
                 }
             }
         } else {

@@ -19,6 +19,7 @@ val TIMEZONE = FullQualifiedName("ol.timezone")
 val RECURRENCE_RULE = FullQualifiedName("ol.rrule")
 val NAME = FullQualifiedName("ol.name")
 val ACTIVE = FullQualifiedName("ol.active")
+val USER = FullQualifiedName("ol.user")
 
 val PROPERTY_TYPES = setOf(
         IMPORTANCE,
@@ -35,7 +36,8 @@ val PROPERTY_TYPES = setOf(
         TIMEZONE,
         ACTIVE,
         RECURRENCE_RULE,
-        NAME)
+        NAME,
+        USER)
 
 interface ChronicleSensor {
     fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<SetMultimap<UUID, Any>>

@@ -1,0 +1,12 @@
+<resources>
+    <!--   Device user Preference -->
+    <string-array name="device_users_entries">
+        <item>@string/user_target_child</item>
+        <item>@string/user_other</item>
+    </string-array>
+
+    <string-array name="device_user_values">
+        <item>@string/user_target_child</item>
+        <item>@string/user_other</item>
+    </string-array>
+</resources>

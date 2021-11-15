@@ -8,6 +8,8 @@ import android.util.Log
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
+import com.openlattice.chronicle.R
+import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.utils.Utils.getAppFullName
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import org.joda.time.DateTime
@@ -32,6 +34,12 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
             return ImmutableList.of()
         }
 
+        // get current user
+        val enrollmentSettings = EnrollmentSettings(appContext)
+        val currentUser = enrollmentSettings.getCurrentUser()
+        val previousUser = enrollmentSettings.getPreviousUser()
+        val currentUserTimestamp = enrollmentSettings.getCurrentUserTimestamp()
+
         val usageEventsList: MutableList<UsageEvents.Event> = ArrayList()
 
         val previousPollTimestamp = settings.getLong(LAST_USAGE_QUERY_TIMESTAMP, System.currentTimeMillis() - USAGE_EVENTS_POLL_INTERVAL)
@@ -39,7 +47,6 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
 
         val usageEvents = usageStatsManager.queryEvents(previousPollTimestamp, currentPollTimestamp)
         settings.edit().putLong(LAST_USAGE_QUERY_TIMESTAMP, currentPollTimestamp).apply()
-
 
         while (usageEvents.hasNextEvent()) {
             val event: UsageEvents.Event = UsageEvents.Event()
@@ -56,10 +63,22 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
                             .put(propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType))
                             .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp).toString())
                             .put(propertyTypeIds[TIMEZONE]!!, timezone)
+                            .put(propertyTypeIds[USER]!!, getTargetUser(currentUser, previousUser, it.timeStamp, currentUserTimestamp))
                             .put(propertyTypeIds[APP_NAME]!!, getAppFullName(appContext, it.packageName))
                             .build()
 
                 }
+    }
+
+    // returns device user corresponding to usage event
+    // if the event occurred before the current user was saved, we return previously saved user
+    private fun getTargetUser(currentUser: String?, previousUser: String?, eventTimestamp: Long, currentUserTimestamp: Long): String {
+        var user = if (eventTimestamp >= currentUserTimestamp) currentUser else previousUser
+        if (user == null || user == appContext.getString(R.string.user_unassigned)) {
+            user = ""
+        }
+
+        return user
     }
 
     private fun mapImportance(importance: Int): String {
