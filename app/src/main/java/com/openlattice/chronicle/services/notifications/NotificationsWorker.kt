@@ -151,7 +151,7 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
         )
         handleNotification(
             notification,
-            participationStatus != ParticipationStatus.ENROLLED || notificationsEnabled == false
+            participationStatus == ParticipationStatus.NOT_ENROLLED || notificationsEnabled == false
         )
 
         // handle push notifications for active questionnaires. Notifications should be cancelled if participant is not enrolled, or the questionnaire is marked as inactive
@@ -171,7 +171,7 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
                     )
                     handleNotification(
                         notification,
-                        active == null || !active || participationStatus != ParticipationStatus.ENROLLED
+                        active == null || !active || participationStatus == ParticipationStatus.NOT_ENROLLED
                     )
                 }
             }
