@@ -62,19 +62,13 @@
         <receiver
             android:name=".receivers.lifecycle.UsageCollectionAlarmReceiver"
             android:process=":remote" />
-        <receiver android:name=".receivers.lifecycle.NotificationsReceiver" />
+        <receiver android:name=".receivers.lifecycle.SurveyNotificationsReceiver" />
         <receiver android:name=".receivers.lifecycle.UnlockPhoneReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.USER_PRESENT" />
             </intent-filter>
         </receiver>
-
-        <service
-            android:name=".services.notifications.NotificationsService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service android:name=".services.notifications.UnlockPhoneService" />
     </application>
 
 </manifest>

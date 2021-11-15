@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.text.format.DateUtils
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -52,11 +51,11 @@ class UnlockPhoneReceiver : BroadcastReceiver() {
             )
 
             // create intent to start UserIdentificationActivity
-            val intent = Intent(context, UserIdentificationActivity::class.java).apply {
+            val userIdentificationIntent = Intent(context, UserIdentificationActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
             val pendingIntent =
-                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+                PendingIntent.getActivity(context, 0, userIdentificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
             val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_notification)
