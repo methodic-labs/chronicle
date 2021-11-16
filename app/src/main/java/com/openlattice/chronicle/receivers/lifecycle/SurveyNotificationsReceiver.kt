@@ -38,6 +38,10 @@ class SurveyNotificationsReceiver : BroadcastReceiver() {
         val participantId = intent.getStringExtra(PARTICIPANT_ID)
         val studyId = intent.getStringExtra(STUDY_ID)
         val organizationId = intent.getStringExtra(ORGANIZATION_ID)
+
+        if (participantId.isNullOrBlank() || studyId.isNullOrBlank() || organizationId.isNullOrBlank()) {
+            return
+        }
         val notificationEntry = intent.getStringExtra(NOTIFICATION_DETAILS)
 
         val notification = try {
