@@ -14,14 +14,14 @@ def signingProperties = new Properties()
 signingProperties.load(new FileInputStream(file('signing.properties')))
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     configurations.all {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:1.3.9'
     }
     defaultConfig {
         applicationId "com.openlattice.chronicle"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 15
         versionName "2021-06-28"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
