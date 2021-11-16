@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.preferences.INVALID_ORG_ID
-import com.openlattice.chronicle.services.notifications.NotificationEntry
+import com.openlattice.chronicle.services.notifications.NotificationDetails
 import com.openlattice.chronicle.services.upload.LAST_UPDATED_SETTING
 import com.openlattice.chronicle.services.upload.LAST_UPLOADED_PLACEHOLDER
 import com.openlattice.chronicle.util.RetrofitBuilders
@@ -53,7 +53,7 @@ object Utils {
         return false
     }
 
-    fun createNotificationTargetUrl(notificationEntry: NotificationEntry, orgIdStr: String, studyId: String, participantId: String): String {
+    fun createNotificationTargetUrl(notificationDetails: NotificationDetails, orgIdStr: String, studyId: String, participantId: String): String {
         val orgId = UUID.fromString(orgIdStr)
         val uriBuilder: Uri.Builder = Uri.Builder()
 
@@ -63,7 +63,7 @@ object Utils {
                 .appendPath("chronicle")
                 .appendEncodedPath("#")
 
-        if (notificationEntry.type === NotificationType.QUESTIONNAIRE) {
+        if (notificationDetails.type === NotificationType.QUESTIONNAIRE) {
             uriBuilder.appendPath("questionnaire")
 
             if (orgId != INVALID_ORG_ID) {
@@ -72,9 +72,9 @@ object Utils {
             uriBuilder
                     .appendQueryParameter("studyId", studyId)
                     .appendQueryParameter("participantId", participantId)
-                    .appendQueryParameter("questionnaireId", notificationEntry.id)
+                    .appendQueryParameter("questionnaireId", notificationDetails.id)
         }
-        if (notificationEntry.type === NotificationType.AWARENESS) {
+        if (notificationDetails.type === NotificationType.AWARENESS) {
             uriBuilder.appendPath("survey")
 
             if (orgId != INVALID_ORG_ID) {

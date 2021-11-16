@@ -7,6 +7,7 @@ import android.provider.Settings
 import com.google.common.base.Optional
 import com.google.common.collect.ImmutableMap
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.openlattice.chronicle.R
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropertyTypeIds
 import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds
@@ -117,6 +118,39 @@ class EnrollmentSettings(private val context: Context) {
         val status = settings.getString(PARTICIPATION_STATUS, ParticipationStatus.UNKNOWN.name) ?:ParticipationStatus.UNKNOWN.name
 
         return ParticipationStatus.valueOf(status)
+    }
+
+
+    fun setTargetUser(user: String) {
+        val previousUser = getCurrentUser()
+        settings
+            .edit()
+            .putString(context.getString(R.string.previous_user), previousUser)
+            .apply()
+        settings
+            .edit()
+            .putLong(context.getString(R.string.current_user_timestamp), System.currentTimeMillis())
+            .apply()
+        settings
+            .edit()
+            .putString(context.getString(R.string.current_user), user)
+            .apply()
+    }
+
+    fun getCurrentUser(): String? {
+        return settings.getString(context.getString(R.string.current_user), context.getString(R.string.user_unassigned))
+    }
+
+    fun getCurrentUserTimestamp(): Long {
+        return settings.getLong(context.getString(R.string.current_user_timestamp), 0)
+    }
+
+    fun getPreviousUser(): String? {
+        return settings.getString(context.getString(R.string.previous_user), context.getString(R.string.user_unassigned))
+    }
+
+    fun isUserIdentificationEnabled(): Boolean {
+        return settings.getBoolean(context.getString(R.string.identify_user), false)
     }
 
 }
