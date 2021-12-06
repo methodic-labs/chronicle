@@ -6,7 +6,7 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-apply from: "https://raw.githubusercontent.com/openlattice/gradles/master/repos.gradle"
+apply from: "https://raw.githubusercontent.com/openlattice/openlattice/main/gradles/repos.gradle"
 
 apply plugin: 'com.google.firebase.crashlytics'
 
