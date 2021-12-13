@@ -9,8 +9,8 @@ import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
 
 class UserIdentificationActivity : AppCompatActivity() {
-    private lateinit var selectUserOptions: RadioGroup
-    private lateinit var saveBtn: Button
+    private lateinit var childUserBtn: Button
+    private lateinit var otherUserBtn: Button
 
     private lateinit var settings: EnrollmentSettings
     private lateinit var targetUser: String
@@ -20,35 +20,21 @@ class UserIdentificationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_user_identification)
 
         settings = EnrollmentSettings(this)
-        saveBtn = findViewById(R.id.save_btn)
-        selectUserOptions = findViewById(R.id.select_user_options)
+        childUserBtn = findViewById(R.id.child_user_btn)
+        otherUserBtn = findViewById(R.id.other_user_btn)
 
         // listeners
-        saveBtn.setOnClickListener {
-            handleOnSave()
+        otherUserBtn.setOnClickListener {
+            handleOnSave(it.id)
         }
 
-        val checkedRadioBtnId = selectUserOptions.checkedRadioButtonId
-        setTargetUser(checkedRadioBtnId)
-
-        selectUserOptions.setOnCheckedChangeListener { _, checkedId ->
-            setTargetUser(checkedId)
+        childUserBtn.setOnClickListener {
+            handleOnSave(it.id)
         }
     }
 
-    private fun setTargetUser(checkedId: Int) {
-        when (checkedId) {
-            R.id.user_target_child -> {
-                targetUser = getString(R.string.user_target_child)
-            }
-
-            R.id.user_other -> {
-                targetUser = getString(R.string.user_other)
-            }
-        }
-    }
-
-    private fun handleOnSave() {
+    private fun handleOnSave(buttonId: Int ) {
+        targetUser = if (buttonId == R.id.other_user_btn) getString(R.string.user_other) else getString(R.string.user_target_child)
         settings.setTargetUser(targetUser)
         scheduleUsageMonitoringWork(this)
         Toast.makeText(this, "Device user has been set to \"$targetUser\"", Toast.LENGTH_SHORT).show()
