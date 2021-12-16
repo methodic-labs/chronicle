@@ -20,6 +20,7 @@ import com.openlattice.chronicle.utils.Utils.createNotificationChannel
 import kotlin.Exception
 
 // This service runs in the foreground to keep alive a broadcast receiver that listens to ACTION_USER_PRESENT intent broadcasts
+// Service only runs when "identify user" setting is enabled
 class InteractivityMonitoringService : Service() {
 
     private lateinit var unlockDeviceReceiver: UnlockDeviceReceiver
