@@ -17,7 +17,7 @@ import com.openlattice.chronicle.SettingsActivity
 import com.openlattice.chronicle.receivers.lifecycle.NotificationDismissedReceiver
 import com.openlattice.chronicle.receivers.lifecycle.UnlockDeviceReceiver
 import com.openlattice.chronicle.utils.Utils.createNotificationChannel
-import kotlin.Exception
+import com.openlattice.chronicle.utils.Utils.isServiceRunning
 
 // This service runs in the foreground to keep alive a broadcast receiver that listens to ACTION_USER_PRESENT intent broadcasts
 // Service only runs when "identify user" setting is enabled
@@ -29,7 +29,11 @@ class InteractivityMonitoringService : Service() {
     companion object {
         const val START_ON_REBOOT_KEY = "startOnReboot"
 
-        fun startOrStopUnlockPhoneService(stop: Boolean, context: Context, startOnReboot: Boolean? = false) {
+        fun startOrStopUnlockPhoneService(
+            stop: Boolean,
+            context: Context,
+            startOnReboot: Boolean? = false
+        ) {
             val intent = Intent(context, InteractivityMonitoringService::class.java)
 
             if (stop) {
@@ -39,6 +43,9 @@ class InteractivityMonitoringService : Service() {
                 )
                 context.stopService(intent)
             } else {
+                // start service if it is not running
+                if (isServiceRunning(context, InteractivityMonitoringService::class.java)) return
+
                 intent.putExtra(START_ON_REBOOT_KEY, startOnReboot)
                 ContextCompat.startForegroundService(context, intent)
             }
@@ -99,17 +106,25 @@ class InteractivityMonitoringService : Service() {
         val intent = Intent(this, SettingsActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
-        val settingsPendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val settingsPendingIntent =
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setCustomContentView(layout)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(getString(R.string.interactivity_monitoring_notification_title))
             .setContentText(getString(R.string.interactivity_monitoring_notification_message))
-            .setStyle(NotificationCompat.BigTextStyle().bigText(getString(R.string.interactivity_monitoring_notification_message)))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(getString(R.string.interactivity_monitoring_notification_message))
+            )
             .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .addAction(android.R.drawable.ic_menu_preferences, getString(R.string.settings), settingsPendingIntent)
+            .addAction(
+                android.R.drawable.ic_menu_preferences,
+                getString(R.string.settings),
+                settingsPendingIntent
+            )
             .build()
     }
 
@@ -119,7 +134,10 @@ class InteractivityMonitoringService : Service() {
         createNotificationChannel(this)
         registerReceivers()
 
-        startForeground(R.integer.unlock_phone_monitoring__notification_id, createForegroundNotification())
+        startForeground(
+            R.integer.unlock_phone_monitoring__notification_id,
+            createForegroundNotification()
+        )
 
         intent?.let {
             val restartOnBoot = it.getBooleanExtra(START_ON_REBOOT_KEY, false)
