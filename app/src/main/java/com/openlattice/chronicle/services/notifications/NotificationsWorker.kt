@@ -12,18 +12,18 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
-import com.openlattice.chronicle.ChronicleStudyApi
-import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.data.ParticipationStatus
-import com.openlattice.chronicle.preferences.*
+import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.ORGANIZATION_ID
+import com.openlattice.chronicle.preferences.PARTICIPANT_ID
+import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.SurveyNotificationsReceiver
 import com.openlattice.chronicle.sensors.ACTIVE
 import com.openlattice.chronicle.sensors.NAME
 import com.openlattice.chronicle.sensors.RECURRENCE_RULE
-import com.openlattice.chronicle.services.upload.PRODUCTION
-import com.openlattice.chronicle.utils.Utils
+import com.openlattice.chronicle.utils.ApiClient
 import com.openlattice.chronicle.utils.Utils.createNotificationChannel
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import org.dmfs.rfc5545.DateTime
@@ -41,13 +41,8 @@ val TAG = NotificationsWorker::class.java.simpleName
 
 class NotificationsWorker(context: Context, workerParameters: WorkerParameters) :
     Worker(context, workerParameters) {
-    private val chronicleApi =
-        Utils.createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
-    private val legacyChronicleStudyApi = Utils.createRetrofitAdapter(PRODUCTION)
-        .create(ChronicleStudyApi::class.java) // legacy studies
-
-    private lateinit var surveyNotificationsReceiver: SurveyNotificationsReceiver
-
+    private val apiClient: ApiClient = ApiClient(context)
+    
     private lateinit var crashlytics: FirebaseCrashlytics
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var enrollmentSettings: EnrollmentSettings
@@ -55,9 +50,9 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
     private lateinit var participantId: String
     private lateinit var orgId: UUID
 
-    private var participationStatus: ParticipationStatus? = ParticipationStatus.UNKNOWN
-    private var studyQuestionnaires: Map<UUID, Map<FullQualifiedName, Set<Any>>>? = mapOf()
-    private var notificationsEnabled: Boolean? = false
+    private var participationStatus: ParticipationStatus = ParticipationStatus.UNKNOWN
+    private var studyQuestionnaires: Map<UUID, Map<FullQualifiedName, Set<Any>>> = mapOf()
+    private var notificationsEnabled: Boolean = false
 
     override fun doWork(): Result {
 
@@ -74,6 +69,7 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
 
             workHelper()
         } catch (e: Exception) {
+            Log.i(javaClass.name, "Exception happened! ", e)
             crashlytics.recordException(e)
             firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.NOTIFICATIONS_FAILURE, null)
             return Result.failure()
@@ -86,24 +82,18 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
         Log.i(TAG, "Notifications worker started")
         firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.NOTIFICATIONS_START, null)
 
-        if (orgId == INVALID_ORG_ID) {
-            participationStatus =
-                legacyChronicleStudyApi.getParticipationStatus(studyId, participantId)
-            notificationsEnabled = legacyChronicleStudyApi.isNotificationsEnabled(studyId)
-            studyQuestionnaires = legacyChronicleStudyApi.getStudyQuestionnaires(studyId)
+        participationStatus = apiClient.getParticipationStatus()
+        notificationsEnabled = apiClient.isNotificationsEnabled()
+        studyQuestionnaires = apiClient.getStudyQuestionnaires()
 
-        } else {
-            participationStatus = chronicleApi.getParticipationStatus(orgId, studyId, participantId)
-            notificationsEnabled = chronicleApi.isNotificationsEnabled(orgId, studyId)
-            studyQuestionnaires = chronicleApi.getStudyQuestionnaires(orgId, studyId)
-        }
         enrollmentSettings.setParticipationStatus(
-            participationStatus ?: ParticipationStatus.UNKNOWN
+            participationStatus
         )
-        enrollmentSettings.setAwarenessNotificationsEnabled(notificationsEnabled ?: false)
+        enrollmentSettings.setAwarenessNotificationsEnabled(notificationsEnabled)
 
         Log.i(javaClass.name, "Participation status: $participationStatus")
         Log.i(javaClass.name, "Study questionnaires: $studyQuestionnaires")
+        Log.i(javaClass.name, "Notification enabled: $notificationsEnabled")
 
         // schedule/cancel daily notifications at 7.00 to redirect to app usage survey. Daily notifications should only be displayed if enabled on study and participant is enrolled
         var notification = NotificationDetails(
@@ -115,11 +105,11 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
         )
         handleNotification(
             notification,
-            participationStatus == ParticipationStatus.NOT_ENROLLED || notificationsEnabled == false
+            participationStatus != ParticipationStatus.ENROLLED || !notificationsEnabled
         )
 
         // handle push notifications for active questionnaires. Notifications should be cancelled if participant is not enrolled, or the questionnaire is marked as inactive
-        for ((key, value) in (studyQuestionnaires ?: mapOf())) {
+        for ((key, value) in studyQuestionnaires) {
             val recurrenceRuleSet = value[RECURRENCE_RULE]?.iterator()?.next()?.toString()
             val name = value[NAME]?.iterator()?.next()?.toString()
             val active = value[ACTIVE]?.iterator()?.next()?.equals(true)
@@ -226,14 +216,6 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             putExtra(ORGANIZATION_ID, enrollmentSettings.getOrganizationId().toString())
             action = SURVEY_NOTIFICATION_ACTION
         }
-    }
-
-    override fun onStopped() {
-        Log.i(javaClass.name, "Notifications worker has stopped")
-        super.onStopped()
-
-        // unregister receivers
-        applicationContext.unregisterReceiver(surveyNotificationsReceiver)
     }
 }
 
