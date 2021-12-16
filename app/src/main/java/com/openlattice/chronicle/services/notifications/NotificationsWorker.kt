@@ -42,7 +42,7 @@ val TAG = NotificationsWorker::class.java.simpleName
 class NotificationsWorker(context: Context, workerParameters: WorkerParameters) :
     Worker(context, workerParameters) {
     private val apiClient: ApiClient = ApiClient(context)
-    
+
     private lateinit var crashlytics: FirebaseCrashlytics
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var enrollmentSettings: EnrollmentSettings
