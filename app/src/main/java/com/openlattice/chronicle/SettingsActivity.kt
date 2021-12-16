@@ -1,8 +1,10 @@
 package com.openlattice.chronicle
 
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.ListPreference
+import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -26,6 +28,7 @@ class SettingsActivity : AppCompatActivity() {
 
     class SettingsFragment : PreferenceFragmentCompat() {
         private lateinit var userIdentificationPreference: SwitchPreferenceCompat
+        private lateinit var batteryOptimizationDialogPreference: SwitchPreferenceCompat
         private lateinit var targetUserPreference: ListPreference
 
         private var settings: EnrollmentSettings? = null
@@ -41,6 +44,7 @@ class SettingsActivity : AppCompatActivity() {
 
             userIdentificationPreference = findPreference(getString(R.string.identify_user))!!
             targetUserPreference = findPreference(getString(R.string.current_user))!!
+            batteryOptimizationDialogPreference = findPreference(getString(R.string.disable_battery_optimization_dialog))!!
 
             settings?.let {
                 targetUserPreference.setDefaultValue(it.getCurrentUser())
@@ -68,6 +72,14 @@ class SettingsActivity : AppCompatActivity() {
 
             targetUserPreference.setOnPreferenceChangeListener { preference, newValue ->
                 activity?.let { scheduleUsageMonitoringWork(it.applicationContext) }
+                true
+            }
+
+            // optionally show battery optimization setting
+            batteryOptimizationDialogPreference.parent?.isVisible  = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+
+            batteryOptimizationDialogPreference.setOnPreferenceChangeListener { _, newValue ->
+                settings?.toggleBatteryOptimizationDialog(newValue as Boolean)
                 true
             }
         }

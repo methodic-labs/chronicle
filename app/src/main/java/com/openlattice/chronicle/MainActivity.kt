@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity() {
     // https://developer.android.com/training/monitoring-device-state/doze-standby
     override fun onResume() {
         super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasIgnoreBatteryOptimization(this)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasIgnoreBatteryOptimization(this) && enrollmentSettings.isBatteryOptimizationDialogEnabled()) {
             BatteryOptimizationExemptionDialog().show(supportFragmentManager, "batteryExemption")
         }
     }
