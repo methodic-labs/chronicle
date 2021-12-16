@@ -15,7 +15,7 @@ import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 import com.openlattice.chronicle.services.notifications.NOTIFICATION_DELETED_ACTION
 
-class InteractivityMonitoringService : BroadcastReceiver() {
+class UnlockDeviceReceiver : BroadcastReceiver() {
 
     private lateinit var appContext: Context
 
