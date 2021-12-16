@@ -1,15 +1,22 @@
 package com.openlattice.chronicle.utils
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.job.JobScheduler
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.preference.PreferenceManager
+import android.util.Log
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.openlattice.chronicle.R
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.preferences.INVALID_ORG_ID
+import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 import com.openlattice.chronicle.services.notifications.NotificationDetails
+import com.openlattice.chronicle.services.notifications.NotificationsWorker
 import com.openlattice.chronicle.services.upload.LAST_UPDATED_SETTING
 import com.openlattice.chronicle.services.upload.LAST_UPLOADED_PLACEHOLDER
 import com.openlattice.chronicle.util.RetrofitBuilders
@@ -116,4 +123,20 @@ object Utils {
         return RetrofitBuilders.decorateWithRhizomeFactories(RetrofitBuilders.createBaseChronicleRetrofitBuilder(baseUrl, httpClient)).build()
     }
 
+    // required by android 8.0 and higher.
+    fun createNotificationChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = context.resources.getString(R.string.channel_name)
+            val channelDescription =
+                context.resources.getString(R.string.channel_description)
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = channelDescription
+            }
+            //register channel
+            val notificationManager: NotificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
 }
