@@ -27,7 +27,9 @@ class InteractivityMonitoringService : Service() {
     private lateinit var notificationDismissedReceiver: NotificationDismissedReceiver
 
     companion object {
-        fun startOrStopUnlockPhoneService(stop: Boolean, context: Context) {
+        const val START_ON_REBOOT_KEY = "startOnReboot"
+
+        fun startOrStopUnlockPhoneService(stop: Boolean, context: Context, startOnReboot: Boolean? = false) {
             val intent = Intent(context, InteractivityMonitoringService::class.java)
 
             if (stop) {
@@ -37,6 +39,7 @@ class InteractivityMonitoringService : Service() {
                 )
                 context.stopService(intent)
             } else {
+                intent.putExtra(START_ON_REBOOT_KEY, startOnReboot)
                 ContextCompat.startForegroundService(context, intent)
             }
         }
@@ -65,7 +68,7 @@ class InteractivityMonitoringService : Service() {
 
     private fun registerReceivers() {
         var intentFilter =
-            createReceiverIntentFilter(setOf(Intent.ACTION_USER_PRESENT, Intent.ACTION_SCREEN_ON))
+            createReceiverIntentFilter(UnlockDeviceReceiver.getValidReceiverActions(this))
         applicationContext.registerReceiver(unlockDeviceReceiver, intentFilter)
         Log.i(javaClass.name, "${UnlockDeviceReceiver::class.java.name} is registered")
 
@@ -117,6 +120,16 @@ class InteractivityMonitoringService : Service() {
         registerReceivers()
 
         startForeground(R.integer.unlock_phone_monitoring__notification_id, createForegroundNotification())
+
+        intent?.let {
+            val restartOnBoot = it.getBooleanExtra(START_ON_REBOOT_KEY, false)
+            if (restartOnBoot) {
+                Intent().also { intent ->
+                    intent.action = this.getString(R.string.action_identify_after_reboot)
+                    sendBroadcast(intent)
+                }
+            }
+        }
         // if service is killed after returning, restart
         return START_STICKY
     }

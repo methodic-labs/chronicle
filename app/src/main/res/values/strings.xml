@@ -70,4 +70,6 @@
     <string name="previous_user"> previous_user</string>
     <string name="current_user_timestamp">current_user_timestamp</string>
 
+  <!-- User-defined Intent actions   -->
+    <string name="action_identify_after_reboot">Identify user after reboot</string>
 </resources>

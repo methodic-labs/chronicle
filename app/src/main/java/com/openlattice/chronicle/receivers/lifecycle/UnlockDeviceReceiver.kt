@@ -19,6 +19,12 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
 
     private lateinit var appContext: Context
 
+    companion object  {
+        fun getValidReceiverActions(context: Context): Set<String> {
+            return setOf(Intent.ACTION_USER_PRESENT, context.getString(R.string.action_identify_after_reboot))
+        }
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
 
         appContext = context
@@ -27,9 +33,9 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
         if (!settings.isUserIdentificationEnabled()) {
             return
         }
+
         val action = intent.action
-        val validActions = setOf(Intent.ACTION_USER_PRESENT, Intent.ACTION_SCREEN_ON)
-        if (!validActions.contains(action)) {
+        if (!getValidReceiverActions(context).contains(action)) {
             return
         }
 

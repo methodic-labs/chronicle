@@ -35,6 +35,7 @@ class SettingsActivity : AppCompatActivity() {
 
             settings = context?.let { EnrollmentSettings(it) }
         }
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
@@ -64,8 +65,6 @@ class SettingsActivity : AppCompatActivity() {
 
                 true
             }
-
-
 
             targetUserPreference.setOnPreferenceChangeListener { preference, newValue ->
                 activity?.let { scheduleUsageMonitoringWork(it.applicationContext) }

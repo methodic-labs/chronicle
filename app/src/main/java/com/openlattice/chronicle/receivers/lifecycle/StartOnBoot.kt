@@ -31,7 +31,7 @@ class StartOnBoot : BroadcastReceiver() {
                     scheduleUsageMonitoringWork(context)
                     Log.i(TAG, "started usage monitoring worker at boot")
 
-                    InteractivityMonitoringService.startOrStopUnlockPhoneService(!settings.isUserIdentificationEnabled(), context)
+                    InteractivityMonitoringService.startOrStopUnlockPhoneService(!settings.isUserIdentificationEnabled(), context, startOnReboot = true)
                 }
             }
         } else {
