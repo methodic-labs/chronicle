@@ -16,40 +16,34 @@
         android:layout_height="wrap_content"
         android:text="@string/select_current_user_prompt"
         android:textAppearance="@android:style/TextAppearance.Material.Body1"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <RadioGroup
-        android:id="@+id/select_user_options"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/child_user_btn"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:checkedButton="@id/user_target_child"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/user_target_child"
+        style="?attr/materialButtonOutlinedStyle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/select_user_prompt">
-
-        <RadioButton
-            android:id="@+id/user_target_child"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/user_target_child"
-            android:textAppearance="@android:style/TextAppearance.Material.Body2" />
-
-        <RadioButton
-            android:id="@+id/user_other"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/user_other"
-            android:textAppearance="@android:style/TextAppearance.Material.Body2" />
-    </RadioGroup>
+        app:layout_constraintEnd_toStartOf="@+id/other_user_btn"
+        app:layout_constraintTop_toBottomOf="@id/select_user_prompt" />
 
     <Button
-        android:id="@+id/save_btn"
-        android:layout_width="wrap_content"
+        android:id="@+id/other_user_btn"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/save_btn"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/user_other"
+        style="?attr/materialButtonOutlinedStyle"
+        app:layout_constraintStart_toEndOf="@+id/child_user_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/select_user_options" />
+        app:layout_constraintTop_toBottomOf="@id/select_user_prompt" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
