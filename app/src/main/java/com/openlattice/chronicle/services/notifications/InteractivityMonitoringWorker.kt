@@ -20,7 +20,7 @@ class InteractivityMonitoringWorker(context: Context, workerParameters: WorkerPa
     private val appContext = context
 
     companion object {
-        private const val REPEAT_INTERVAL = 15L
+        private const val DELAY_DURATION = 15L
         private const val RESTART_ON_BOOT_KEY = "restartOnBoot"
 
         private fun scheduleRequest(
@@ -69,8 +69,7 @@ class InteractivityMonitoringWorker(context: Context, workerParameters: WorkerPa
     }
 
     override fun doWork(): Result {
-        unlockDeviceReceiver = UnlockDeviceReceiver()
-        notificationDismissedReceiver = NotificationDismissedReceiver()
+        Log.i(javaClass.name, "Starting worker")
 
         // register receivers
         registerReceivers()
@@ -84,7 +83,7 @@ class InteractivityMonitoringWorker(context: Context, workerParameters: WorkerPa
         }
 
         // re-schedule worker before returning
-        scheduleRequest(appContext, REPEAT_INTERVAL)
+        scheduleRequest(appContext, DELAY_DURATION)
         return Result.success()
     }
 

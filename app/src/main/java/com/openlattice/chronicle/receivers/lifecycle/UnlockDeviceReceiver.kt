@@ -67,7 +67,7 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
                 context,
                 0,
                 userIdentificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_CANCEL_CURRENT
             )
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -78,7 +78,7 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
             .setDeleteIntent(createOnDismissedIntent())
-            .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+//            .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
             .setAutoCancel(true) // remove when user taps on notification
 
         with(NotificationManagerCompat.from(context)) {
