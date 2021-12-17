@@ -7,7 +7,7 @@ import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.util.Log
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.services.notifications.InteractivityMonitoringService
+import com.openlattice.chronicle.services.notifications.InteractivityMonitoringWorker
 import com.openlattice.chronicle.services.notifications.scheduleNotificationsWorker
 import com.openlattice.chronicle.services.upload.scheduleUploadWork
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
@@ -31,7 +31,7 @@ class StartOnBoot : BroadcastReceiver() {
                     scheduleUsageMonitoringWork(context)
                     Log.i(TAG, "started usage monitoring worker at boot")
 
-                    InteractivityMonitoringService.startOrStopUnlockPhoneService(!settings.isUserIdentificationEnabled(), context, startOnReboot = true)
+                    InteractivityMonitoringWorker.startWorker(context, restartOnBoot = true)
                 }
             }
         } else {

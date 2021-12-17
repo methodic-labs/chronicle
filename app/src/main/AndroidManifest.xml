@@ -72,7 +72,6 @@
                 <action android:name="android.intent.action.USER_PRESENT" />
             </intent-filter>
         </receiver>
-        <service android:name=".services.notifications.InteractivityMonitoringService" />
     </application>
 
 </manifest>

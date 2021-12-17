@@ -21,7 +21,7 @@ import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.models.UploadStatusModel
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.INVALID_ORG_ID
-import com.openlattice.chronicle.services.notifications.InteractivityMonitoringService
+import com.openlattice.chronicle.services.notifications.InteractivityMonitoringWorker
 import com.openlattice.chronicle.services.notifications.scheduleNotificationsWorker
 import com.openlattice.chronicle.services.upload.scheduleUploadWork
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
                 updateLastUpload()
             }
 
-            InteractivityMonitoringService.startOrStopUnlockPhoneService(!enrollmentSettings.isUserIdentificationEnabled(), this)
+            InteractivityMonitoringWorker.startWorker(this)
 
             // start workers
             scheduleUploadWork(this)

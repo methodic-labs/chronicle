@@ -7,7 +7,6 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.services.notifications.InteractivityMonitoringService
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
 
 class SettingsActivity : AppCompatActivity() {
@@ -61,10 +60,6 @@ class SettingsActivity : AppCompatActivity() {
                         targetUserPreference.value = it.getString(R.string.user_unassigned)
                         activity?.let { it1 -> scheduleUsageMonitoringWork(it1.applicationContext) }
                     }
-                }
-
-                context?.let {
-                    InteractivityMonitoringService.startOrStopUnlockPhoneService(!isChecked, it)
                 }
 
                 true

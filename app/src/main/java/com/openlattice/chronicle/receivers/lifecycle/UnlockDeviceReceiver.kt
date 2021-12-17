@@ -96,5 +96,3 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
         return PendingIntent.getBroadcast(appContext, 0, intent, 0)
     }
 }
-
-
