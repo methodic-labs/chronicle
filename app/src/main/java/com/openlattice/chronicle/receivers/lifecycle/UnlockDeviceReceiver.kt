@@ -67,7 +67,7 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
                 context,
                 0,
                 userIdentificationIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT
             )
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
