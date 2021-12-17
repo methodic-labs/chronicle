@@ -69,12 +69,12 @@ class InteractivityMonitoringWorker(context: Context, workerParameters: WorkerPa
     }
 
     override fun doWork(): Result {
-        Log.i(javaClass.name, "Starting worker")
+        val restartOnBoot = inputData.getBoolean(RESTART_ON_BOOT_KEY, false)
+        Log.i(javaClass.name, "Starting worker with restartOnBoot: $restartOnBoot")
 
         // register receivers
         registerReceivers()
 
-        val restartOnBoot = inputData.getBoolean(RESTART_ON_BOOT_KEY, false)
         if (restartOnBoot) {
             Intent().also { intent ->
                 intent.action = appContext.getString(R.string.action_identify_after_reboot)
