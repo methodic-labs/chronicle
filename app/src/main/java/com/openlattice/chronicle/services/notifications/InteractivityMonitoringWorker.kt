@@ -8,11 +8,12 @@ import androidx.work.*
 import com.openlattice.chronicle.R
 import com.openlattice.chronicle.receivers.lifecycle.NotificationDismissedReceiver
 import com.openlattice.chronicle.receivers.lifecycle.UnlockDeviceReceiver
+import com.openlattice.chronicle.sensors.TIMESTAMP
 import java.util.concurrent.TimeUnit
 
 // Schedule work requests to context register the receiver that listen for "user present" intent
 class InteractivityMonitoringWorker(context: Context, workerParameters: WorkerParameters) :
-    Worker(context, workerParameters) {
+    CoroutineWorker(context, workerParameters) {
 
     private var unlockDeviceReceiver = UnlockDeviceReceiver()
     private var notificationDismissedReceiver = NotificationDismissedReceiver()
@@ -25,13 +26,15 @@ class InteractivityMonitoringWorker(context: Context, workerParameters: WorkerPa
 
         private fun scheduleRequest(
             context: Context,
-            delayInMinutes: Long = 0L,
+            delayInMinutes: Long? = null,
             data: Data = workDataOf()
         ) {
 
             val workRequest: WorkRequest =
                 OneTimeWorkRequestBuilder<InteractivityMonitoringWorker>().apply {
-                    setInitialDelay(delayInMinutes, TimeUnit.MINUTES)
+                    delayInMinutes?.let {
+                        setInitialDelay(delayInMinutes, TimeUnit.MINUTES);
+                    }
                     setInputData(data)
                 }.build()
 
@@ -60,15 +63,15 @@ class InteractivityMonitoringWorker(context: Context, workerParameters: WorkerPa
 
         var intentFilter =
             createReceiverIntentFilter(UnlockDeviceReceiver.getValidReceiverActions(appContext))
-        applicationContext.registerReceiver(unlockDeviceReceiver, intentFilter)
+        appContext.registerReceiver(unlockDeviceReceiver, intentFilter)
         Log.i(javaClass.name, "${UnlockDeviceReceiver::class.java.canonicalName} is registered")
 
         intentFilter = createReceiverIntentFilter(setOf(NOTIFICATION_DELETED_ACTION))
-        applicationContext.registerReceiver(notificationDismissedReceiver, intentFilter)
+        appContext.registerReceiver(notificationDismissedReceiver, intentFilter)
         Log.i(javaClass.name, "${NotificationDismissedReceiver::class.java.canonicalName} is registered")
     }
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result {
         val restartOnBoot = inputData.getBoolean(RESTART_ON_BOOT_KEY, false)
         Log.i(javaClass.name, "Starting worker with restartOnBoot: $restartOnBoot")
 
@@ -85,13 +88,6 @@ class InteractivityMonitoringWorker(context: Context, workerParameters: WorkerPa
         // re-schedule worker before returning
         scheduleRequest(appContext, DELAY_DURATION)
         return Result.success()
-    }
-
-    override fun onStopped() {
-
-        // unregister receivers
-        appContext.unregisterReceiver(notificationDismissedReceiver)
-        appContext.unregisterReceiver(notificationDismissedReceiver)
     }
 }
 
