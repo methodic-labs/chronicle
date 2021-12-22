@@ -30,6 +30,7 @@
             android:taskAffinity="" />
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,6 +39,7 @@
         </activity>
         <activity
             android:name=".Enrollment"
+            android:exported="true"
             android:parentActivityName=".MainActivity">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -57,6 +59,7 @@
 
         <receiver
             android:name=".receivers.lifecycle.StartOnBoot"
+            android:exported="true"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -67,6 +70,7 @@
             android:process=":remote" />
         <receiver android:name=".receivers.lifecycle.SurveyNotificationsReceiver" />
         <receiver android:name=".receivers.lifecycle.UnlockDeviceReceiver"
+            android:exported="true"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.USER_PRESENT" />
