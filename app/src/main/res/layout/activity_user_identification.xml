@@ -28,14 +28,17 @@
         android:layout_marginTop="20dp"
         android:layout_marginEnd="8dp"
         android:text="@string/user_target_child"
-        style="?attr/materialButtonOutlinedStyle"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        app:icon="@drawable/star"
+        app:iconTint="@null"
+        app:iconSize="28sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/other_user_btn"
         app:layout_constraintTop_toBottomOf="@id/select_user_prompt" />
 
     <Button
         android:id="@+id/other_user_btn"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginStart="8dp"

@@ -48,8 +48,8 @@
     <!-- Phone wake up notification   -->
     <string name="on_wake_notification_title">User Identification</string>
     <string name="on_wake_notification_message">Tap to identify device user</string>
-    <string name="interactivity_monitoring_notification_title">Interactivity Monitoring</string>
-    <string name="interactivity_monitoring_notification_message">Turn off "User Identification" setting to stop monitoring device interactivity</string>
+    <string name="interactivity_monitoring_notification_title">Device unlock monitoring</string>
+    <string name="interactivity_monitoring_notification_message">Touch to stop monitoring device unlock</string>
 
     <!--    User identification-->
     <string name="select_current_user_prompt">Please select current user:</string>

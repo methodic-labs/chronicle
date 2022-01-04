@@ -7,6 +7,7 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.services.notifications.DeviceUnlockMonitoringService
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
 
 class SettingsActivity : AppCompatActivity() {
@@ -54,11 +55,14 @@ class SettingsActivity : AppCompatActivity() {
                 val isChecked = newValue as Boolean
                 targetUserPreference.isEnabled = isChecked
 
-                if (!isChecked) {
-                    context?.let {
-                        settings?.setTargetUser(it.getString(R.string.user_unassigned))
-                        targetUserPreference.value = it.getString(R.string.user_unassigned)
-                        activity?.let { it1 -> scheduleUsageMonitoringWork(it1.applicationContext) }
+                context?.let { context ->
+                    if (isChecked) {
+                        DeviceUnlockMonitoringService.startService(context)
+                    } else {
+                        settings?.setTargetUser(context.getString(R.string.user_unassigned))
+                        targetUserPreference.value = context.getString(R.string.user_unassigned)
+                        scheduleUsageMonitoringWork(context)
+                        DeviceUnlockMonitoringService.stopService(context)
                     }
                 }
 
