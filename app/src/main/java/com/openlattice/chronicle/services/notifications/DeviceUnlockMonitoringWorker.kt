@@ -12,12 +12,12 @@ class DeviceUnlockMonitoringWorker(context: Context, workerParameters: WorkerPar
     private val appContext = context
 
     companion object {
-        private const val DELAY_DURATION = 15L
+        private const val INTERVAL = 15L
 
         fun startWorker(context: Context) {
 
             val workRequest =
-                PeriodicWorkRequestBuilder<DeviceUnlockMonitoringWorker>(DELAY_DURATION, TimeUnit.MINUTES).build()
+                PeriodicWorkRequestBuilder<DeviceUnlockMonitoringWorker>(INTERVAL, TimeUnit.MINUTES).build()
 
             WorkManager.getInstance(context).enqueue(workRequest)
         }
