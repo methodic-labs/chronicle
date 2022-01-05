@@ -22,7 +22,6 @@ import com.openlattice.chronicle.models.UploadStatusModel
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.services.notifications.DeviceUnlockMonitoringService
-import com.openlattice.chronicle.services.notifications.DeviceUnlockMonitoringWorker
 import com.openlattice.chronicle.services.notifications.scheduleNotificationsWorker
 import com.openlattice.chronicle.services.upload.scheduleUploadWork
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
@@ -104,7 +103,6 @@ class MainActivity : AppCompatActivity() {
 
             if (enrollmentSettings.isUserIdentificationEnabled()) {
                 DeviceUnlockMonitoringService.startService(this)
-                DeviceUnlockMonitoringWorker.startWorker(this)
             }
 
             // start workers

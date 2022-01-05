@@ -49,8 +49,10 @@ class DeviceUnlockMonitoringService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
         val restartOnBoot = intent?.getBooleanExtra(RESTART_ON_BOOT_KEY, false)
+
+        Log.i(javaClass.name, "unlock monitoring service started with restartOnBoot = $restartOnBoot")
+
         if (restartOnBoot == true) {
             Intent().also {
                 intent.action = applicationContext.getString(R.string.action_identify_after_reboot)
