@@ -21,7 +21,7 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
 
     companion object  {
         fun getValidReceiverActions(context: Context): Set<String> {
-            return setOf(Intent.ACTION_USER_PRESENT, context.getString(R.string.action_identify_after_reboot))
+            return setOf(Intent.ACTION_USER_PRESENT, Intent.ACTION_SCREEN_ON, context.getString(R.string.action_identify_after_reboot))
         }
     }
 
