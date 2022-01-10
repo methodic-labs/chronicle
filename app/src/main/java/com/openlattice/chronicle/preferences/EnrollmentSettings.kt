@@ -153,6 +153,17 @@ class EnrollmentSettings(private val context: Context) {
         return settings.getBoolean(context.getString(R.string.identify_user), false)
     }
 
+    fun toggleBatteryOptimizationDialog(enable: Boolean) {
+        settings
+            .edit()
+            .putBoolean(context.getString(R.string.disable_battery_optimization_dialog), enable)
+            .apply()
+    }
+
+    fun isBatteryOptimizationDialogEnabled(): Boolean {
+        return settings.getBoolean(context.getString(R.string.disable_battery_optimization_dialog), false)
+    }
+
 }
 
 fun getDeviceId(context: Context): String {
