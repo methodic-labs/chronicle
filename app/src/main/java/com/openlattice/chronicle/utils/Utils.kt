@@ -3,6 +3,7 @@ package com.openlattice.chronicle.utils
 import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.job.JobScheduler
 import android.content.Context
 import android.content.pm.PackageManager
@@ -145,5 +146,13 @@ object Utils {
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         return manager.getRunningServices(Integer.MAX_VALUE)
             .any { it.service.className == serviceClass.name }
+    }
+
+    fun getPendingIntentMutabilityFlag(flags: Int): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_IMMUTABLE or flags
+        } else {
+            flags
+        }
     }
 }

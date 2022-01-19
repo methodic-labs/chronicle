@@ -24,6 +24,7 @@ import com.openlattice.chronicle.services.notifications.NOTIFICATION_DETAILS
 import com.openlattice.chronicle.services.notifications.NotificationDetails
 import com.openlattice.chronicle.services.notifications.SURVEY_NOTIFICATION_ACTION
 import com.openlattice.chronicle.utils.Utils.createNotificationTargetUrl
+import com.openlattice.chronicle.utils.Utils.getPendingIntentMutabilityFlag
 
 class SurveyNotificationsReceiver : BroadcastReceiver() {
 
@@ -59,7 +60,7 @@ class SurveyNotificationsReceiver : BroadcastReceiver() {
             createNotificationTargetUrl(notification, organizationId, studyId, participantId)
         val notifyIntent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
         val pendingIntent: PendingIntent =
-            PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getActivity(context, 0, notifyIntent, getPendingIntentMutabilityFlag(PendingIntent.FLAG_UPDATE_CURRENT))
 
         // layout to use in custom notification
         val notificationLayout = RemoteViews(context.packageName, R.layout.notification)

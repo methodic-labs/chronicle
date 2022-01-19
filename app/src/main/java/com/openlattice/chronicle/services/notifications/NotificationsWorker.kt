@@ -25,6 +25,7 @@ import com.openlattice.chronicle.sensors.NAME
 import com.openlattice.chronicle.sensors.RECURRENCE_RULE
 import com.openlattice.chronicle.utils.ApiClient
 import com.openlattice.chronicle.utils.Utils.createNotificationChannel
+import com.openlattice.chronicle.utils.Utils.getPendingIntentMutabilityFlag
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import org.dmfs.rfc5545.DateTime
 import org.dmfs.rfc5545.recur.RecurrenceRule
@@ -148,7 +149,7 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             applicationContext,
             notification.hashCode(),
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            getPendingIntentMutabilityFlag(PendingIntent.FLAG_UPDATE_CURRENT)
         )
 
         try {
@@ -184,7 +185,7 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             applicationContext,
             notification.hashCode(),
             intent,
-            PendingIntent.FLAG_NO_CREATE
+            getPendingIntentMutabilityFlag(PendingIntent.FLAG_NO_CREATE)
         )
 
         val alarmManager: AlarmManager =
