@@ -2,7 +2,6 @@ package com.openlattice.chronicle
 
 import android.os.Bundle
 import android.widget.Button
-import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.openlattice.chronicle.preferences.EnrollmentSettings

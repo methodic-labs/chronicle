@@ -14,6 +14,7 @@ import com.openlattice.chronicle.UserIdentificationActivity
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 import com.openlattice.chronicle.services.notifications.NOTIFICATION_DELETED_ACTION
+import com.openlattice.chronicle.utils.Utils.getPendingIntentMutabilityFlag
 
 class UnlockDeviceReceiver : BroadcastReceiver() {
 
@@ -67,7 +68,7 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
                 context,
                 0,
                 userIdentificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                getPendingIntentMutabilityFlag(PendingIntent.FLAG_UPDATE_CURRENT)
             )
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -93,6 +94,6 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
         val notificationId = resources.getInteger(R.integer.dismiss_target_user_notification_id)
         intent.putExtra(appContext.getString(R.string.notification_id), notificationId)
 
-        return PendingIntent.getBroadcast(appContext, 0, intent, 0)
+        return PendingIntent.getBroadcast(appContext, 0, intent, getPendingIntentMutabilityFlag(0))
     }
 }

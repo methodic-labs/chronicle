@@ -13,6 +13,7 @@ import com.openlattice.chronicle.R
 import com.openlattice.chronicle.SettingsActivity
 import com.openlattice.chronicle.receivers.lifecycle.NotificationDismissedReceiver
 import com.openlattice.chronicle.receivers.lifecycle.UnlockDeviceReceiver
+import com.openlattice.chronicle.utils.Utils.getPendingIntentMutabilityFlag
 
 // A "forever running" service to monitor device unlock. A workaround for devices running version >= 8.0
 // since we can no longer register ACTION_USER_PRESENT intent in manifest
@@ -68,7 +69,7 @@ class DeviceUnlockMonitoringService : Service() {
 
         val pendingIntent: PendingIntent =
             Intent(applicationContext, SettingsActivity::class.java).let {
-                PendingIntent.getActivity(applicationContext, 0, it, 0)
+                PendingIntent.getActivity(applicationContext, 0, it, getPendingIntentMutabilityFlag(0))
             }
 
         val channelId = getString(R.string.channel_name)
