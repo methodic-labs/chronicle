@@ -62,7 +62,7 @@
 
                 <data
                     android:host="getmethodic.com"
-                    android:pathPattern="/chronicle/enroll"
+                    android:pathPattern="/enroll"
                     android:scheme="https" />
             </intent-filter>
         </activity>
