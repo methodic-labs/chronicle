@@ -20,7 +20,6 @@ import com.google.firebase.ktx.Firebase
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.models.UploadStatusModel
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.services.notifications.DeviceUnlockMonitoringService
 import com.openlattice.chronicle.services.notifications.scheduleNotificationsWorker
 import com.openlattice.chronicle.services.upload.scheduleUploadWork
