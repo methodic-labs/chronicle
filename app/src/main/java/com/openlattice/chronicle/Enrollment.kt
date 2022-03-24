@@ -9,8 +9,6 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
-import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
@@ -19,10 +17,8 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.common.base.Optional
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
-import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.preferences.*
 import com.openlattice.chronicle.services.upload.PRODUCTION
@@ -37,7 +33,6 @@ class Enrollment : AppCompatActivity() {
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
     private lateinit var analytics: FirebaseAnalytics
-    private lateinit var orgIdText: TextInputEditText
     private lateinit var studyIdText: TextInputEditText
     private lateinit var participantIdText: TextInputEditText
     private lateinit var statusMessageText: TextView
@@ -45,19 +40,14 @@ class Enrollment : AppCompatActivity() {
     private lateinit var submitBtn: MaterialButton
     private lateinit var doneBtn: MaterialButton
     private lateinit var studyIdTextLayout: TextInputLayout
-    private lateinit var orgIdTextLayout: TextInputLayout
     private lateinit var participantIdTextLayout: TextInputLayout
-    private lateinit var useOrgIdChoice: RadioGroup
-    private lateinit var useOrgId: RadioButton
-    private lateinit var omitOrgId: RadioButton
-    private lateinit var useOrgIdPrompt :TextView
+    private lateinit var useOrgIdPrompt: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enrollment)
 
         analytics = Firebase.analytics
-        orgIdText = findViewById(R.id.orgIdText)
         studyIdText = findViewById(R.id.studyIdText)
         participantIdText = findViewById(R.id.participantIdText)
         statusMessageText = findViewById(R.id.statusMessage)
@@ -66,16 +56,7 @@ class Enrollment : AppCompatActivity() {
         doneBtn = findViewById(R.id.doneButton)
 
         studyIdTextLayout = findViewById(R.id.studyIdTextLayout)
-        orgIdTextLayout = findViewById(R.id.orgIdTextLayout)
         participantIdTextLayout = findViewById(R.id.participantIdTextLayout)
-        useOrgId = findViewById(R.id.use_org_id)
-        omitOrgId = findViewById(R.id.omit_org_id)
-        useOrgIdPrompt = findViewById(R.id.use_org_id_prompt)
-
-        useOrgIdChoice = findViewById(R.id.use_org_id_choice)
-        useOrgIdChoice.setOnCheckedChangeListener { _, checkedId ->
-            handleOrgChoice(checkedId)
-        }
 
         doneBtn.setOnClickListener {
             handleOnClickDone()
@@ -103,20 +84,6 @@ class Enrollment : AppCompatActivity() {
         handleIntent(intent)
     }
 
-    private fun handleOrgChoice(checkedId: Int) {
-        var visibility = View.VISIBLE
-        when (checkedId) {
-            R.id.omit_org_id -> {
-                visibility = if (omitOrgId.isChecked) View.GONE else View.VISIBLE
-            }
-            R.id.use_org_id -> {
-                visibility = if (useOrgId.isChecked) View.VISIBLE else View.GONE
-            }
-        }
-
-        orgIdTextLayout.visibility = visibility
-    }
-
     private fun handleIntent(intent: Intent) {
         val appLinkIntent = intent
         val appLinkAction = appLinkIntent.action
@@ -125,18 +92,9 @@ class Enrollment : AppCompatActivity() {
         if (Intent.ACTION_VIEW == appLinkAction && appLinkData != null) {
             val studyId = appLinkData.getQueryParameter("studyId")
             val participantId = appLinkData.getQueryParameter("participantId")
-            val orgId = appLinkData.getQueryParameter("organizationId")
 
             studyIdText.setText(studyId)
             participantIdText.setText(participantId)
-
-            // legacy enroll: without organizationId
-            if (orgId.isNullOrBlank()) {
-                useOrgIdChoice.check(R.id.omit_org_id)
-            } else {
-                useOrgIdChoice.check(R.id.use_org_id)
-                orgIdText.setText(orgId)
-            }
         }
     }
 
@@ -148,18 +106,7 @@ class Enrollment : AppCompatActivity() {
         finish()
     }
 
-    private fun validateInput(orgId: String, studyId: String, participantId: String): Boolean {
-
-        if (useOrgId.isChecked) {
-            if (orgId.isBlank()) {
-                orgIdText.error = getString(R.string.invalid_org_id_blank)
-            } else if (!Utils.isValidUUID(orgId)) {
-                orgIdText.error = getString(R.string.invalid_org_id_format)
-            }
-        } else {
-            // remove error state if previously set
-            orgIdText.error = null
-        }
+    private fun validateInput(studyId: String, participantId: String): Boolean {
 
         if (studyId.isBlank()) {
             studyIdText.error = getString(R.string.invalid_study_id_blank)
@@ -172,7 +119,7 @@ class Enrollment : AppCompatActivity() {
             participantIdText.error = getString(R.string.invalid_participant)
         }
 
-        return orgIdText.error.isNullOrBlank() && studyIdText.error.isNullOrBlank() && participantIdText.error.isNullOrBlank()
+        return studyIdText.error.isNullOrBlank() && participantIdText.error.isNullOrBlank()
     }
 
     private fun closeKeyBoard() {
@@ -185,17 +132,15 @@ class Enrollment : AppCompatActivity() {
 
     private fun doEnrollment() {
 
-        val orgIdStr: String = orgIdText.text.toString().trim()
         val studyIdStr: String = studyIdText.text.toString().trim()
         val participantId: String = participantIdText.text.toString().trim()
 
-        val isValidInput = validateInput(orgIdStr, studyIdStr, participantId)
+        val isValidInput = validateInput(studyIdStr, participantId)
         if (!isValidInput) {
             return
         }
 
         try {
-            val orgId = if (useOrgId.isChecked) UUID.fromString(orgIdStr) else null
             val studyId = UUID.fromString(studyIdStr)
             val deviceId = getDeviceId(applicationContext)
 
@@ -205,17 +150,20 @@ class Enrollment : AppCompatActivity() {
             closeKeyBoard()
 
             executor.execute {
-                val chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
-                val chronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
+                val chronicleStudyApi =
+                    createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
 
                 var chronicleId: UUID? = null
                 try {
-                    chronicleId = when (orgId) {
-                        null -> chronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
-                        else -> chronicleApi.enroll(orgId, studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
-                    }
+                    chronicleId = chronicleStudyApi.enrollSource(
+                        studyId,
+                        participantId,
+                        deviceId,
+                        Optional.of(getDevice(deviceId))
+                    )
+
                 } catch (e: Exception) {
-                    crashlytics.log("caught exception - orgId: \"$orgId\" ; studyId: \"$studyId\" ; participantId: \"$participantId\"")
+                    crashlytics.log("caught exception - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     FirebaseCrashlytics.getInstance().recordException(e)
                 }
 
@@ -224,7 +172,6 @@ class Enrollment : AppCompatActivity() {
                     Log.i(javaClass.canonicalName, "Chronicle id: " + chronicleId.toString())
                     analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_SUCCESS, Bundle().apply {
                         putString(PARTICIPANT_ID, participantId)
-                        putString(ORGANIZATION_ID, orgId.toString())
                         putString(STUDY_ID, studyId.toString())
                     })
                     mHandler.post {
@@ -233,17 +180,11 @@ class Enrollment : AppCompatActivity() {
                         enrollmentSettings.setStudyId(studyId)
                         enrollmentSettings.setParticipantId(participantId)
 
-                        if (orgId != null) {
-                            enrollmentSettings.setOrganizationId(orgId)
-                        }
-
                         // hide text fields, progress bar, and enroll button
                         studyIdTextLayout.visibility = View.GONE
                         participantIdTextLayout.visibility = View.GONE
-                        orgIdTextLayout.visibility = View.GONE
                         progressBar.visibility = View.GONE
                         submitBtn.visibility = View.GONE
-                        useOrgIdChoice.visibility = View.GONE
                         useOrgIdPrompt.visibility = View.GONE
 
                         // show success message and done button
@@ -255,7 +196,6 @@ class Enrollment : AppCompatActivity() {
                     crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_FAILURE, Bundle().apply {
                         putString(PARTICIPANT_ID, participantId)
-                        putString(ORGANIZATION_ID, orgId.toString())
                         putString(STUDY_ID, studyId.toString())
                     })
                     Log.e(javaClass.canonicalName, "unable to enroll device.")

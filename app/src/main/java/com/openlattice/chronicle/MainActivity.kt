@@ -34,7 +34,6 @@ const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
 class MainActivity : AppCompatActivity() {
 
     private lateinit var enrollmentSettings: EnrollmentSettings
-    private lateinit var orgId: UUID
     private lateinit var studyId: UUID
     private lateinit var participantId: String
     private lateinit var participationStatus: ParticipationStatus
@@ -43,8 +42,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var lastUploadText: TextView
     private lateinit var studyIdText: TextView
     private lateinit var participantIdText: TextView
-    private lateinit var orgIdTextView: TextView
-    private lateinit var orgIdLabel: TextView
     private lateinit var uploadProgressView: LinearLayout
 
     private val uploadStatusModel: UploadStatusModel by viewModels()
@@ -57,15 +54,12 @@ class MainActivity : AppCompatActivity() {
         lastUploadText = findViewById(R.id.lastUploadValue)
         firebaseAnalytics = Firebase.analytics
         enrollmentSettings = EnrollmentSettings(this)
-        orgId = enrollmentSettings.getOrganizationId()
         studyId = enrollmentSettings.getStudyId()
         participantId = enrollmentSettings.getParticipantId()
         participationStatus = enrollmentSettings.getParticipationStatus()
 
         studyIdText = findViewById(R.id.studyId)
         participantIdText = findViewById(R.id.participantId)
-        orgIdTextView = findViewById(R.id.orgId)
-        orgIdLabel = findViewById(R.id.orgIdLabel)
         uploadProgressView = findViewById(R.id.uploadProgressView)
 
         uploadProgressView.visibility = View.GONE
@@ -85,17 +79,11 @@ class MainActivity : AppCompatActivity() {
 
         if (enrollmentSettings.isEnrolled()) {
 
-            firebaseAnalytics.setUserId("${orgId}_${studyId}_${participantId}")
+            firebaseAnalytics.setUserId("${studyId}_${participantId}")
 
             studyIdText.text = studyId.toString()
             participantIdText.text = participantId
 
-            if (orgId != INVALID_ORG_ID) {
-                orgIdTextView.text = orgId.toString()
-            } else {
-                orgIdTextView.visibility = View.GONE
-                orgIdLabel.visibility = View.GONE
-            }
 
             GlobalScope.launch(Dispatchers.Main) {
                 updateLastUpload()

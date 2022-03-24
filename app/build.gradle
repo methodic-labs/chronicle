@@ -97,6 +97,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:${jackson_version}") {
         exclude module: 'guava'
     }
+
     implementation 'org.slf4j:slf4j-android:1.7.25'
     implementation 'com.google.guava:guava:22.0-android'
     implementation 'org.dmfs:lib-recur:0.11.6'

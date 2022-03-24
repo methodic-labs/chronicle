@@ -4,86 +4,33 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+    android:layout_marginStart="@dimen/activity_horizontal_margin"
     tools:context=".Enrollment"
     tools:layout_editor_absoluteY="81dp">
 
     <TextView
-        android:id="@+id/use_org_id_prompt"
+        android:id="@+id/studyIdTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:textSize="18sp"
-        android:text="@string/organization_id_prompt"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/study_id"
+        style="@android:style/TextAppearance.Material.Medium"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-    </TextView>
-    <RadioGroup
-        android:id="@+id/use_org_id_choice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:checkedButton="@id/use_org_id"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/use_org_id_prompt"
-        >
-        <com.google.android.material.radiobutton.MaterialRadioButton
-            android:id="@+id/use_org_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:buttonTint="@color/colorPrimary"
-            android:text="@string/yes" />
-
-        <com.google.android.material.radiobutton.MaterialRadioButton
-            android:id="@+id/omit_org_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:buttonTint="@color/colorPrimary"
-            android:text="@string/no" />
-
-    </RadioGroup>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/orgIdTextLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/prompt_org_id"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        app:errorEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/use_org_id_choice"
-        >
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/orgIdText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            style="@style/Enrollment.InputText"
-    />
-
-    </com.google.android.material.textfield.TextInputLayout>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/studyIdTextLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/prompt_study_id"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:hint="@string/prompt_study_id"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
         app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/orgIdTextLayout">
+        app:layout_constraintTop_toBottomOf="@id/studyIdTextView">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/studyIdText"
@@ -94,6 +41,15 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <TextView
+        android:id="@+id/participantIdTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/participant_id"
+        style="@android:style/TextAppearance.Material.Medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/studyIdTextLayout" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/participantIdTextLayout"
@@ -101,13 +57,10 @@
         android:layout_height="wrap_content"
         android:hint="@string/prompt_participant_id"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/studyIdTextLayout">
+        app:layout_constraintTop_toBottomOf="@+id/participantIdTextView">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/participantIdText"
@@ -122,7 +75,6 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:text="@string/action_start_collection"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/participantIdTextLayout" />
