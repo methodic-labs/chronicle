@@ -20,4 +20,11 @@
             app:summary="Display dialog to disable battery optimization"
             app:defaultValue="false" />
     </PreferenceCategory>
+    <PreferenceCategory app:title="@string/notification_access">
+        <SwitchPreferenceCompat
+            app:key="@string/enable_notification_access"
+            app:title="Enable notification access"
+            app:summary="Allow app to read posted notifications"
+            app:defaultValue="false" />
+    </PreferenceCategory>
 </PreferenceScreen>
