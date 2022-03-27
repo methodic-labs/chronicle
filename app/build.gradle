@@ -90,13 +90,13 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation('com.openlattice:chronicle-api:0.0.14') {
-        exclude module: 'guava'
-    }
+    implementation 'com.methodic:chronicle-api:0.0.17-SNAPSHOT'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:${jackson_version}") {
         exclude module: 'guava'
     }
+    implementation 'org.apache.olingo:odata-commons-api:4.2.0'
+    implementation 'joda-time:joda-time:2.10.8'
 
     implementation 'org.slf4j:slf4j-android:1.7.25'
     implementation 'com.google.guava:guava:22.0-android'

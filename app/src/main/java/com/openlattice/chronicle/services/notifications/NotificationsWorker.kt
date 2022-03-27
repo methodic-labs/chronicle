@@ -12,18 +12,19 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
+import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.preferences.ORGANIZATION_ID
 import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.receivers.lifecycle.SurveyNotificationsReceiver
 import com.openlattice.chronicle.sensors.ACTIVE
 import com.openlattice.chronicle.sensors.NAME
 import com.openlattice.chronicle.sensors.RECURRENCE_RULE
-import com.openlattice.chronicle.utils.ApiClient
+import com.openlattice.chronicle.services.upload.PRODUCTION
+import com.openlattice.chronicle.utils.Utils
 import com.openlattice.chronicle.utils.Utils.createNotificationChannel
 import com.openlattice.chronicle.utils.Utils.getPendingIntentMutabilityFlag
 import org.apache.olingo.commons.api.edm.FullQualifiedName
@@ -42,18 +43,18 @@ val TAG = NotificationsWorker::class.java.simpleName
 
 class NotificationsWorker(context: Context, workerParameters: WorkerParameters) :
     Worker(context, workerParameters) {
-    private val apiClient: ApiClient = ApiClient(context)
 
     private lateinit var crashlytics: FirebaseCrashlytics
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var enrollmentSettings: EnrollmentSettings
     private lateinit var studyId: UUID
     private lateinit var participantId: String
-    private lateinit var orgId: UUID
 
     private var participationStatus: ParticipationStatus = ParticipationStatus.UNKNOWN
     private var studyQuestionnaires: Map<UUID, Map<FullQualifiedName, Set<Any>>> = mapOf()
     private var notificationsEnabled: Boolean = false
+
+    private var chronicleApi = Utils.createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
 
     override fun doWork(): Result {
 
@@ -64,7 +65,6 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             enrollmentSettings = EnrollmentSettings(applicationContext)
             studyId = enrollmentSettings.getStudyId()
             participantId = enrollmentSettings.getParticipantId()
-            orgId = enrollmentSettings.getOrganizationId()
             crashlytics = FirebaseCrashlytics.getInstance()
             firebaseAnalytics = Firebase.analytics
 
@@ -83,9 +83,10 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
         Log.i(TAG, "Notifications worker started")
         firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.NOTIFICATIONS_START, null)
 
-        participationStatus = apiClient.getParticipationStatus()
-        notificationsEnabled = apiClient.isNotificationsEnabled()
-        studyQuestionnaires = apiClient.getStudyQuestionnaires()
+        participationStatus = chronicleApi.getParticipationStatus(null, studyId, participantId)
+            ?: ParticipationStatus.UNKNOWN
+        notificationsEnabled = chronicleApi.isNotificationsEnabled(null, studyId) ?: false
+        studyQuestionnaires = chronicleApi.getStudyQuestionnaires(null, studyId) ?: mapOf()
 
         enrollmentSettings.setParticipationStatus(
             participationStatus
@@ -214,7 +215,6 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             putExtra(NOTIFICATION_DETAILS, Gson().toJson(notification))
             putExtra(STUDY_ID, enrollmentSettings.getStudyId().toString())
             putExtra(PARTICIPANT_ID, enrollmentSettings.getParticipantId())
-            putExtra(ORGANIZATION_ID, enrollmentSettings.getOrganizationId().toString())
             action = SURVEY_NOTIFICATION_ACTION
         }
     }

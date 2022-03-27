@@ -10,15 +10,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.preference.PreferenceManager
-import android.util.Log
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.openlattice.chronicle.R
 import com.openlattice.chronicle.constants.NotificationType
-import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 import com.openlattice.chronicle.services.notifications.NotificationDetails
-import com.openlattice.chronicle.services.notifications.NotificationsWorker
 import com.openlattice.chronicle.services.upload.LAST_UPDATED_SETTING
 import com.openlattice.chronicle.services.upload.LAST_UPLOADED_PLACEHOLDER
 import com.openlattice.chronicle.util.RetrofitBuilders
@@ -45,7 +42,8 @@ object Utils {
     fun getAppFullName(context: Context, packageName: String): String {
         return try {
             val packageManager = context.applicationContext.packageManager
-            val applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            val applicationInfo =
+                packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
             packageManager.getApplicationLabel(applicationInfo).toString()
         } catch (e: Exception) {
             packageName
@@ -62,37 +60,32 @@ object Utils {
         return false
     }
 
-    fun createNotificationTargetUrl(notificationDetails: NotificationDetails, orgIdStr: String, studyId: String, participantId: String): String {
-        val orgId = UUID.fromString(orgIdStr)
+    fun createNotificationTargetUrl(
+        notificationDetails: NotificationDetails,
+        studyId: String,
+        participantId: String
+    ): String {
         val uriBuilder: Uri.Builder = Uri.Builder()
 
         uriBuilder
-                .scheme("https")
-                .encodedAuthority("openlattice.com")
-                .appendPath("chronicle")
-                .appendEncodedPath("#")
+            .scheme("https")
+            .encodedAuthority("app.getmethodic.com")
+            .appendPath("chronicle")
+            .appendEncodedPath("#")
 
         if (notificationDetails.type === NotificationType.QUESTIONNAIRE) {
             uriBuilder.appendPath("questionnaire")
 
-            if (orgId != INVALID_ORG_ID) {
-                uriBuilder.appendQueryParameter("organizationId", orgIdStr)
-            }
             uriBuilder
-                    .appendQueryParameter("studyId", studyId)
-                    .appendQueryParameter("participantId", participantId)
-                    .appendQueryParameter("questionnaireId", notificationDetails.id)
+                .appendQueryParameter("studyId", studyId)
+                .appendQueryParameter("participantId", participantId)
+                .appendQueryParameter("questionnaireId", notificationDetails.id)
         }
         if (notificationDetails.type === NotificationType.AWARENESS) {
             uriBuilder.appendPath("survey")
-
-            if (orgId != INVALID_ORG_ID) {
-                uriBuilder.appendQueryParameter("organizationId", orgIdStr)
-            }
-
             uriBuilder
-                    .appendQueryParameter("studyId", studyId)
-                    .appendQueryParameter("participantId", participantId)
+                .appendQueryParameter("studyId", studyId)
+                .appendQueryParameter("participantId", participantId)
         }
 
         return uriBuilder.build().toString()
@@ -122,7 +115,12 @@ object Utils {
     fun createRetrofitAdapter(baseUrl: String): Retrofit {
         RetrofitBuilders.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         val httpClient = RetrofitBuilders.okHttpClient().build()
-        return RetrofitBuilders.decorateWithRhizomeFactories(RetrofitBuilders.createBaseChronicleRetrofitBuilder(baseUrl, httpClient)).build()
+        return RetrofitBuilders.decorateWithRhizomeFactories(
+            RetrofitBuilders.createBaseChronicleRetrofitBuilder(
+                baseUrl,
+                httpClient
+            )
+        ).build()
     }
 
     // required by android 8.0 and higher.

@@ -18,7 +18,8 @@
         style="@android:style/TextAppearance.Material.Medium"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="4dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/studyIdTextLayout"
@@ -26,7 +27,7 @@
         android:layout_height="wrap_content"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:hint="@string/prompt_study_id"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginBottom="20dp"
         app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -49,7 +50,8 @@
         style="@android:style/TextAppearance.Material.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/studyIdTextLayout" />
+        app:layout_constraintTop_toBottomOf="@id/studyIdTextLayout"
+        android:layout_marginBottom="4dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/participantIdTextLayout"

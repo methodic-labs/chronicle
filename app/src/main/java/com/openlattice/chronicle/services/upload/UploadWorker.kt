@@ -5,18 +5,14 @@ import android.os.Bundle
 import android.util.Log
 import androidx.room.Room
 import androidx.work.*
-import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
-import com.openlattice.chronicle.ChronicleStudyApi
-import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.preferences.INVALID_ORG_ID
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.serialization.JsonSerializer
@@ -24,6 +20,7 @@ import com.openlattice.chronicle.services.sinks.BrokerDataSink
 import com.openlattice.chronicle.services.sinks.ConsoleSink
 import com.openlattice.chronicle.services.sinks.OpenLatticeSink
 import com.openlattice.chronicle.storage.ChronicleDb
+import com.openlattice.chronicle.study.StudyApi
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils.setLastUpload
 import java.util.*
@@ -41,14 +38,11 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
 
     private val limiter = com.google.common.util.concurrent.RateLimiter.create(10.0)
 
-    private var chronicleApi = createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
-    private var legacyChronicleApi = createRetrofitAdapter(PRODUCTION).create(com.openlattice.chronicle.ChronicleApi::class.java)
-    private var legacyChronicleStudyApi = createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
+    private var studyApi = createRetrofitAdapter(PRODUCTION).create(StudyApi::class.java)
 
     private lateinit var crashlytics: FirebaseCrashlytics
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var settings: EnrollmentSettings
-    private lateinit var orgId: UUID
     private lateinit var studyId: UUID
     private lateinit var participantId: String
     private lateinit var participationStatus: ParticipationStatus
@@ -58,27 +52,24 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
 
     override fun doWork(): Result {
         try {
-            chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle").build()
+            chronicleDb =
+                Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle")
+                    .build()
             deviceId = getDeviceId(applicationContext)
             settings = EnrollmentSettings(applicationContext)
             firebaseAnalytics = Firebase.analytics
             crashlytics = FirebaseCrashlytics.getInstance()
 
-            orgId = settings.getOrganizationId()
             studyId = settings.getStudyId()
             participantId = settings.getParticipantId()
             participationStatus = settings.getParticipationStatus()
 
-            dataSink = when (orgId) {
-                INVALID_ORG_ID -> BrokerDataSink(
-                        mutableSetOf(
-                                OpenLatticeSink(studyId, participantId, deviceId, legacyChronicleApi),
-                                ConsoleSink()))
-                else -> BrokerDataSink(
-                        mutableSetOf(
-                                OpenLatticeSink(orgId, studyId, participantId, deviceId, chronicleApi),
-                                ConsoleSink()))
-            }
+            dataSink = BrokerDataSink(
+                mutableSetOf(
+                    OpenLatticeSink(studyId, participantId, deviceId, studyApi),
+                    ConsoleSink()
+                )
+            )
 
             uploadData()
             closeDb()
@@ -104,14 +95,6 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         }
     }
 
-    private fun enrollDevice() :UUID? {
-        return if (orgId == INVALID_ORG_ID) {
-            legacyChronicleStudyApi.enrollSource(studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
-        } else {
-            chronicleApi.enroll(orgId, studyId, participantId, deviceId, Optional.of(getDevice(deviceId)))
-        }
-    }
-
     private fun uploadData() {
 
         Log.i(TAG, "usage upload worker started")
@@ -122,43 +105,44 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             return
         }
 
-        if (chronicleApi.isRunning == true) {
+        // If studyApi.enroll(...) fails
+        val chronicleId: UUID =
+            studyApi.enroll(studyId, participantId, deviceId, getDevice(deviceId))
+        Log.i(TAG, "deviceId: $chronicleId")
 
-            val chronicleId: UUID? = enrollDevice()
+        //Only run the upload job if the device is already enrolled or we are able to properly enroll.
+        val queue = chronicleDb.queueEntryData()
+        var nextEntries = queue.getNextEntries(BATCH_SIZE)
+        var notEmptied = nextEntries.isNotEmpty()
+        while (notEmptied) {
+            limiter.acquire()
+            val w = Stopwatch.createStarted()
+            val data = nextEntries
+                .map { qe -> qe.data }
+                .map { qe -> JsonSerializer.deserializeQueueEntry(qe) }
+                .flatMap { it }
+            Log.i(
+                TAG,
+                "Loading ${data.size} items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis"
+            )
+            w.reset()
+            w.start()
+            if (dataSink.submit(data)[OpenLatticeSink::class.java.name] == true) {
+                setLastUpload(applicationContext)
+                Log.i(
+                    TAG,
+                    "Successfully uploaded ${data.size} items in ${w.elapsed(TimeUnit.MILLISECONDS)} millis "
+                )
+                queue.deleteEntries(nextEntries)
+                nextEntries = queue.getNextEntries(BATCH_SIZE)
+                notEmptied = nextEntries.size == BATCH_SIZE
 
-            //Only run the upload job if the device is already enrolled or we are able to properly enroll.
-            if (chronicleId != null) {
+                firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_SUCCESS, Bundle().apply {
+                    putInt("size", data.size)
+                })
 
-                val queue = chronicleDb.queueEntryData()
-                var nextEntries = queue.getNextEntries(BATCH_SIZE)
-                var notEmptied = nextEntries.isNotEmpty()
-                while (notEmptied && chronicleApi.isRunning) {
-                    limiter.acquire()
-                    val w = Stopwatch.createStarted()
-                    val data = nextEntries
-                            .map { qe -> qe.data }
-                            .map { qe -> JsonSerializer.deserializeQueueEntry(qe) }
-                            .flatMap { it }
-                    Log.i(TAG, "Loading ${data.size} items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis")
-                    w.reset()
-                    w.start()
-                    if (dataSink.submit(data)[OpenLatticeSink::class.java.name] == true) {
-                        setLastUpload(applicationContext)
-                        Log.i(TAG, "Successfully uploaded ${data.size} items in ${w.elapsed(TimeUnit.MILLISECONDS)} millis ")
-                        queue.deleteEntries(nextEntries)
-                        nextEntries = queue.getNextEntries(BATCH_SIZE)
-                        notEmptied = nextEntries.size == BATCH_SIZE
-
-                        firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_SUCCESS, Bundle().apply {
-                            putInt("size", data.size)
-                        })
-
-                    } else {
-                        throw Exception("exception when uploading usage data")
-                    }
-                }
             } else {
-                throw Exception("unable to enroll device")
+                throw Exception("exception when uploading usage data")
             }
         }
     }
@@ -168,11 +152,12 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
 fun scheduleUploadWork(context: Context) {
 
     val workRequest: PeriodicWorkRequest =
-            PeriodicWorkRequestBuilder<UploadWorker>(UPLOAD_INTERVAL_MIN, TimeUnit.MINUTES)
-                    .build()
+        PeriodicWorkRequestBuilder<UploadWorker>(UPLOAD_INTERVAL_MIN, TimeUnit.MINUTES)
+            .build()
 
-    WorkManager.getInstance(context).enqueueUniquePeriodicWork("upload",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            workRequest
+    WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        "upload",
+        ExistingPeriodicWorkPolicy.REPLACE,
+        workRequest
     )
 }
