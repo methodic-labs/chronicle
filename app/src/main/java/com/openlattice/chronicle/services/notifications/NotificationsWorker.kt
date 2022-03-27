@@ -12,6 +12,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
+import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.constants.NotificationType
@@ -54,7 +55,7 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
     private var studyQuestionnaires: Map<UUID, Map<FullQualifiedName, Set<Any>>> = mapOf()
     private var notificationsEnabled: Boolean = false
 
-    private var chronicleApi = Utils.createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
+    private var chronicleApi = Utils.createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
 
     override fun doWork(): Result {
 
@@ -83,10 +84,10 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
         Log.i(TAG, "Notifications worker started")
         firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.NOTIFICATIONS_START, null)
 
-        participationStatus = chronicleApi.getParticipationStatus(null, studyId, participantId)
+        participationStatus = chronicleApi.getParticipationStatus(studyId, participantId)
             ?: ParticipationStatus.UNKNOWN
-        notificationsEnabled = chronicleApi.isNotificationsEnabled(null, studyId) ?: false
-        studyQuestionnaires = chronicleApi.getStudyQuestionnaires(null, studyId) ?: mapOf()
+        notificationsEnabled = chronicleApi.isNotificationsEnabled(studyId) ?: false
+        studyQuestionnaires = chronicleApi.getStudyQuestionnaires(studyId) ?: mapOf()
 
         enrollmentSettings.setParticipationStatus(
             participationStatus

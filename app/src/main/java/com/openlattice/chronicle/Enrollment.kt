@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.google.common.base.Optional
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -22,6 +21,7 @@ import com.google.firebase.ktx.Firebase
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.preferences.*
 import com.openlattice.chronicle.services.upload.PRODUCTION
+import com.openlattice.chronicle.study.StudyApi
 import com.openlattice.chronicle.utils.Utils
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import java.util.*
@@ -35,13 +35,14 @@ class Enrollment : AppCompatActivity() {
     private lateinit var analytics: FirebaseAnalytics
     private lateinit var studyIdText: TextInputEditText
     private lateinit var participantIdText: TextInputEditText
+    private lateinit var studyIdTextView: TextView
+    private lateinit var participantIdTextView: TextView
     private lateinit var statusMessageText: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var submitBtn: MaterialButton
     private lateinit var doneBtn: MaterialButton
     private lateinit var studyIdTextLayout: TextInputLayout
     private lateinit var participantIdTextLayout: TextInputLayout
-    private lateinit var useOrgIdPrompt: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +55,8 @@ class Enrollment : AppCompatActivity() {
         progressBar = findViewById(R.id.enrollmentProgress)
         submitBtn = findViewById(R.id.button)
         doneBtn = findViewById(R.id.doneButton)
+        participantIdTextView = findViewById(R.id.participantIdTextView)
+        studyIdTextView = findViewById(R.id.studyIdTextView)
 
         studyIdTextLayout = findViewById(R.id.studyIdTextLayout)
         participantIdTextLayout = findViewById(R.id.participantIdTextLayout)
@@ -150,16 +153,15 @@ class Enrollment : AppCompatActivity() {
             closeKeyBoard()
 
             executor.execute {
-                val chronicleStudyApi =
-                    createRetrofitAdapter(PRODUCTION).create(ChronicleStudyApi::class.java)
+                val studyApi = createRetrofitAdapter(PRODUCTION).create(StudyApi::class.java)
 
                 var chronicleId: UUID? = null
                 try {
-                    chronicleId = chronicleStudyApi.enrollSource(
+                    chronicleId = studyApi.enroll(
                         studyId,
                         participantId,
                         deviceId,
-                        Optional.of(getDevice(deviceId))
+                        getDevice(deviceId)
                     )
 
                 } catch (e: Exception) {
@@ -185,7 +187,8 @@ class Enrollment : AppCompatActivity() {
                         participantIdTextLayout.visibility = View.GONE
                         progressBar.visibility = View.GONE
                         submitBtn.visibility = View.GONE
-                        useOrgIdPrompt.visibility = View.GONE
+                        studyIdTextView.visibility = View.GONE
+                        participantIdTextView.visibility = View.GONE
 
                         // show success message and done button
                         statusMessageText.text = getString(R.string.device_enroll_success)

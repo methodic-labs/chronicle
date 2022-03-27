@@ -27,7 +27,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val LAST_UPLOADED_PLACEHOLDER = "Never"
-const val PRODUCTION = "https://api.getmethodic.com/"
+const val PRODUCTION = "http://192.168.1.64:8080"
 const val BATCH_SIZE = 10
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_INTERVAL_MIN = 15L
@@ -99,11 +99,6 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
 
         Log.i(TAG, "usage upload worker started")
         firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_START, null)
-
-        if (participationStatus != ParticipationStatus.ENROLLED) {
-            Log.i(TAG, "participant not enrolled. exiting data upload.")
-            return
-        }
 
         // If studyApi.enroll(...) fails
         val chronicleId: UUID =
