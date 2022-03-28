@@ -63,7 +63,7 @@ android {
 
 
     kotlinOptions {
-        jvmTarget = "1.11"
+        jvmTarget = "11"
     }
     lint {
         abortOnError false
