@@ -11,8 +11,11 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
+import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
+import com.openlattice.chronicle.models.ExtractedUsageEvent
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
@@ -127,7 +130,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                 .flatten()
             Log.i(
                 TAG,
-                "Loading ${data.size} items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis"
+                "Processing ${data.size} items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis"
             )
             w.reset()
             w.start()
@@ -151,27 +154,28 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         }
     }
 
-
-    private fun mapToModel(data: MutableList<SetMultimap<UUID, Any>>): List<ChronicleUsageEvent> {
-        return data.map {
-            val appPackageName = getFirstValueOrNull(it, GENERAL_NAME)!!
-            val applicationLabel = getFirstValueOrNull(it, APP_NAME)
-            val timestamp = getFirstValueOrNull(it, TIMESTAMP)!!
-
-            ChronicleUsageEvent(
-                studyId = studyId,
-                participantId = participantId,
-                appPackageName = appPackageName,
-                applicationLabel = applicationLabel ?: appPackageName,
-                timezone = getFirstValueOrNull(it, TIMEZONE)!!,
-                timestamp = OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestamp.toLong()), ZoneOffset.UTC),
-                user = getFirstValueOrNull(it, USER)!!,
-                interactionType = getFirstValueOrNull(it, IMPORTANCE)!!
-            )
+    private fun mapToModel(data: List<ChronicleDataUpload>): List<ChronicleDataUpload> {
+        return data.mapNotNull { datum ->
+            when (datum) {
+                is ExtractedUsageEvent -> ChronicleUsageEvent(
+                    studyId = studyId,
+                    participantId = participantId,
+                    appPackageName = datum.appPackageName,
+                    applicationLabel = datum.applicationLabel,
+                    timezone = datum.timezone,
+                    timestamp = datum.timestamp,
+                    user = datum.user,
+                    interactionType = datum.interactionType
+                )
+                else -> null
+            }
         }
     }
 
-    private fun getFirstValueOrNull(entity: SetMultimap<UUID, Any>, fqn: FullQualifiedName): String? {
+    private fun getFirstValueOrNull(
+        entity: SetMultimap<UUID, Any>,
+        fqn: FullQualifiedName
+    ): String? {
         val ptId = propertyTypeIds.getValue(fqn)
         entity[ptId]?.iterator()?.let {
             if (it.hasNext()) return it.next().toString()
@@ -194,14 +198,3 @@ fun scheduleUploadWork(context: Context) {
     )
 }
 
-// TODO: replace this with pojo from API
-data class ChronicleUsageEvent(
-    val studyId: UUID,
-    val participantId: String,
-    val appPackageName: String,
-    val interactionType: String,
-    val timestamp: OffsetDateTime,
-    val timezone: String,
-    val user: String,
-    val applicationLabel: String,
-)
