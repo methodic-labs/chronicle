@@ -2,6 +2,7 @@ package com.openlattice.chronicle.services.sinks
 
 import android.util.Log
 import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.study.StudyApi
 import java.util.*
 
@@ -11,7 +12,7 @@ class OpenLatticeSink(
     private var deviceId: String,
     private var studyApi: StudyApi
 ) : DataSink {
-    override fun submit(data: List<ChronicleDataUpload>): Map<String, Boolean> {
+    override fun submit(data: List<ChronicleUsageEvent>): Map<String, Boolean> {
         val written = try {
             studyApi.uploadAndroidUsageEventData( studyId, participantId, deviceId, data)
         } catch (e: Exception) {
