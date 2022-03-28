@@ -11,6 +11,8 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
+import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -193,15 +195,3 @@ fun scheduleUploadWork(context: Context) {
         workRequest
     )
 }
-
-// TODO: replace this with pojo from API
-data class ChronicleUsageEvent(
-    val studyId: UUID,
-    val participantId: String,
-    val appPackageName: String,
-    val interactionType: String,
-    val timestamp: OffsetDateTime,
-    val timezone: String,
-    val user: String,
-    val applicationLabel: String,
-)
