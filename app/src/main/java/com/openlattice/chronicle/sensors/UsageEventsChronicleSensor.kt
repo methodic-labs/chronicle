@@ -12,9 +12,8 @@ import com.openlattice.chronicle.R
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.utils.Utils.getAppFullName
 import org.apache.olingo.commons.api.edm.FullQualifiedName
-import org.joda.time.DateTime
+import org.dmfs.rfc5545.DateTime
 import java.util.*
-import kotlin.collections.ArrayList
 
 const val USAGE_EVENTS_POLL_INTERVAL = 15 * 60 * 1000L
 const val LAST_USAGE_QUERY_TIMESTAMP = "com.openlattice.sensors.LastUsageQueryTimestamp"
