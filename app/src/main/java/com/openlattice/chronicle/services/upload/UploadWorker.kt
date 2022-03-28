@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.room.Room
 import androidx.work.*
 import com.google.common.base.Stopwatch
+import com.google.common.collect.SetMultimap
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -15,6 +16,7 @@ import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
+import com.openlattice.chronicle.sensors.*
 import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.services.sinks.BrokerDataSink
 import com.openlattice.chronicle.services.sinks.ConsoleSink
@@ -23,6 +25,10 @@ import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.study.StudyApi
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils.setLastUpload
+import org.apache.olingo.commons.api.edm.FullQualifiedName
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -49,6 +55,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
     private lateinit var deviceId: String
     private lateinit var dataSink: BrokerDataSink
     private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var propertyTypeIds: Map<FullQualifiedName, UUID>
 
     override fun doWork(): Result {
         try {
@@ -59,6 +66,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             settings = EnrollmentSettings(applicationContext)
             firebaseAnalytics = Firebase.analytics
             crashlytics = FirebaseCrashlytics.getInstance()
+            propertyTypeIds = settings.getPropertyTypeIds()
 
             studyId = settings.getStudyId()
             participantId = settings.getParticipantId()
@@ -115,7 +123,8 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             val data = nextEntries
                 .map { qe -> qe.data }
                 .map { qe -> JsonSerializer.deserializeQueueEntry(qe) }
-                .flatMap { it }
+                .map { qe -> mapToModel(qe)}
+                .flatten()
             Log.i(
                 TAG,
                 "Loading ${data.size} items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis"
@@ -141,6 +150,34 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             }
         }
     }
+
+
+    private fun mapToModel(data: MutableList<SetMultimap<UUID, Any>>): List<ChronicleUsageEvent> {
+        return data.map {
+            val appPackageName = getFirstValueOrNull(it, GENERAL_NAME)!!
+            val applicationLabel = getFirstValueOrNull(it, APP_NAME)
+            val timestamp = getFirstValueOrNull(it, TIMESTAMP)!!
+
+            ChronicleUsageEvent(
+                studyId = studyId,
+                participantId = participantId,
+                appPackageName = appPackageName,
+                applicationLabel = applicationLabel ?: appPackageName,
+                timezone = getFirstValueOrNull(it, TIMEZONE)!!,
+                timestamp = OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestamp.toLong()), ZoneOffset.UTC),
+                user = getFirstValueOrNull(it, USER)!!,
+                interactionType = getFirstValueOrNull(it, IMPORTANCE)!!
+            )
+        }
+    }
+
+    private fun getFirstValueOrNull(entity: SetMultimap<UUID, Any>, fqn: FullQualifiedName): String? {
+        val ptId = propertyTypeIds.getValue(fqn)
+        entity[ptId]?.iterator()?.let {
+            if (it.hasNext()) return it.next().toString()
+        }
+        return null
+    }
 }
 
 
@@ -156,3 +193,15 @@ fun scheduleUploadWork(context: Context) {
         workRequest
     )
 }
+
+// TODO: replace this with pojo from API
+data class ChronicleUsageEvent(
+    val studyId: UUID,
+    val participantId: String,
+    val appPackageName: String,
+    val interactionType: String,
+    val timestamp: OffsetDateTime,
+    val timezone: String,
+    val user: String,
+    val applicationLabel: String,
+)

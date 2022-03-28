@@ -1,8 +1,7 @@
 package com.openlattice.chronicle.services.sinks
 
-import com.google.common.collect.SetMultimap
-import java.util.*
+import com.openlattice.chronicle.services.upload.ChronicleUsageEvent
 
 interface DataSink {
-    fun submit(data: List<SetMultimap<UUID, Any>>) : Map<String, Boolean>
+    fun submit(data: List<ChronicleUsageEvent>): Map<String, Boolean>
 }
