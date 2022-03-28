@@ -2,6 +2,10 @@ package com.openlattice.chronicle.services.sinks
 
 import android.util.Log
 import com.openlattice.chronicle.android.ChronicleDataUpload
+<<<<<<< HEAD
+=======
+import com.openlattice.chronicle.android.ChronicleUsageEvent
+>>>>>>> e7c0ed09476a63cbd6b50ec78d74b7462710a223
 import com.openlattice.chronicle.study.StudyApi
 import java.util.*
 

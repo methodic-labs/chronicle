@@ -78,19 +78,6 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
                 user = getTargetUser(currentUser, previousUser, it.timeStamp, currentUserTimestamp),
             )
         }
-
-
-//                    mapOf(
-//                            .put(propertyTypeIds[ID]!!, UUID.randomUUID())
-//                            .put(propertyTypeIds[GENERAL_NAME]!!, it.packageName)
-//                            .put(propertyTypeIds[IMPORTANCE]!!, mapImportance(it.eventType))
-//                            .put(propertyTypeIds[TIMESTAMP]!!, DateTime(it.timeStamp).toString())
-//                            .put(propertyTypeIds[TIMEZONE]!!, timezone)
-//                            .put(propertyTypeIds[USER]!!, getTargetUser(currentUser, previousUser, it.timeStamp, currentUserTimestamp))
-//                            .put(propertyTypeIds[APP_NAME]!!, getAppFullName(appContext, it.packageName))
-//                            .build() )
-
-//                }
     }
 
     // returns device user corresponding to usage event
@@ -118,7 +105,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
             UsageEvents.Event.USER_INTERACTION -> "User Interaction"
             UsageEvents.Event.NONE -> "None"
             else -> {
-                return "Unknown importance: " + importance.toString()
+                return "Unknown importance: $importance"
             }
         }
     }
