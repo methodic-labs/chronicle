@@ -125,8 +125,15 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             val w = Stopwatch.createStarted()
             val data = nextEntries
                 .map { qe -> qe.data }
-                .map { qe -> JsonSerializer.deserializeQueueEntry(qe) }
-                .map { qe -> mapToModel(qe)}
+                .map { qe ->
+                    //Attempt to deserialize as legacy queue entry on exception.
+                    try {
+                        JsonSerializer.deserializeQueueEntry(qe)
+                    } catch (ex: Exception) {
+                        mapLegacyQueueEntry(JsonSerializer.deserializeLegacyQueueEntry(qe))
+                    }
+                }
+                .map { qe -> mapToModel(qe) }
                 .flatten()
             Log.i(
                 TAG,
@@ -151,6 +158,28 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             } else {
                 throw Exception("exception when uploading usage data")
             }
+        }
+    }
+
+    private fun mapLegacyQueueEntry(data: List<SetMultimap<UUID, Any>>): List<ChronicleDataUpload> {
+        return data.mapNotNull { datum ->
+            val appPackageName = getFirstValueOrNull(datum, GENERAL_NAME)
+            val interactionType = getFirstValueOrNull(datum, IMPORTANCE)
+            val timestamp = getFirstValueOrNull(datum, TIMESTAMP)
+            val timezone = getFirstValueOrNull(datum, TIMEZONE)
+            val user = getFirstValueOrNull(datum, USER)
+            val applicationLabel = getFirstValueOrNull(datum, APP_NAME)
+
+            if (appPackageName != null && interactionType != null && timestamp != null && timezone != null && user != null && applicationLabel != null) {
+                ExtractedUsageEvent(
+                    appPackageName,
+                    interactionType,
+                    OffsetDateTime.parse(timestamp),
+                    timezone,
+                    user,
+                    applicationLabel
+                )
+            } else null
         }
     }
 
@@ -197,7 +226,3 @@ fun scheduleUploadWork(context: Context) {
         workRequest
     )
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> e7c0ed09476a63cbd6b50ec78d74b7462710a223
