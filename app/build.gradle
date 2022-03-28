@@ -103,7 +103,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:${jackson_version}") {
         exclude module: 'guava'
     }
-    implementation 'org.apache.olingo:odata-commons-api:4.2.0'
+
     implementation 'joda-time:joda-time:2.10.8'
 
     implementation 'org.slf4j:slf4j-android:1.7.25'
