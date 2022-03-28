@@ -6,7 +6,7 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
-apply from: "../../methodic/gradles/repos.gradle"
+apply from: "https://raw.githubusercontent.com/methodic-labs/methodic/main/gradles/repos.gradle"
 
 apply plugin: 'com.google.firebase.crashlytics'
 
