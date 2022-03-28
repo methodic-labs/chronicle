@@ -72,13 +72,14 @@ android {
 
 ext.jackson_version = '2.13.2'
 ext.activity_version = '1.4.0'
-
+ext.odata_version='4.5.0'
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
+    implementation "org.apache.olingo:odata-commons-api:${odata_version}"
 
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
