@@ -1,9 +1,6 @@
 package com.openlattice.chronicle.services.sinks
 
-import com.google.common.collect.SetMultimap
 import com.openlattice.chronicle.android.ChronicleDataUpload
-import com.openlattice.chronicle.android.ChronicleUsageEvent
-import java.util.*
 
 
 class BrokerDataSink(private val dataSinks: MutableSet<DataSink>) : DataSink {
