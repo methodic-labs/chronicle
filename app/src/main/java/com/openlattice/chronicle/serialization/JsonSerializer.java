@@ -31,14 +31,9 @@ public class JsonSerializer {
         }
     }
 
-    public static List<SetMultimap<UUID, Object>> deserializeLegacyQueueEntry(byte[] bytes) {
-        try {
-            return mapper.readValue(bytes, new TypeReference<List<SetMultimap<UUID, Object>>>() {
-            });
-        } catch (IOException e) {
-            Log.e(JsonSerializer.class.getName(), "Unable to deserialize queue entry " + new String(bytes));
-            return ImmutableList.of();
-        }
+    public static List<SetMultimap<UUID, Object>> deserializeLegacyQueueEntry(byte[] bytes) throws IOException {
+        return mapper.readValue(bytes, new TypeReference<List<SetMultimap<UUID, Object>>>() {
+        });
     }
 
     public static List<ChronicleDataUpload> deserializeQueueEntry(byte[] bytes) {

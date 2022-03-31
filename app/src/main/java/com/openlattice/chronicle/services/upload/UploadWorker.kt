@@ -29,6 +29,7 @@ import com.openlattice.chronicle.study.StudyApi
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils.setLastUpload
 import org.apache.olingo.commons.api.edm.FullQualifiedName
+import java.io.IOException
 import java.time.OffsetDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -124,10 +125,10 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             val data = nextEntries
                 .map { qe -> qe.data }
                 .map { qe ->
-                    //Attempt to deserialize as legacy queue entry on exception.
+                    //Attempt to deserialize as legacy queue entry on exception. 
                     try {
                         JsonSerializer.deserializeQueueEntry(qe)
-                    } catch (ex: Exception) {
+                    } catch (ex: IOException) {
                         mapLegacyQueueEntry(JsonSerializer.deserializeLegacyQueueEntry(qe))
                     }
                 }
