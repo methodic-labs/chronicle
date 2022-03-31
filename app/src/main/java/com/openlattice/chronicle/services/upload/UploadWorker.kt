@@ -23,15 +23,13 @@ import com.openlattice.chronicle.sensors.*
 import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.services.sinks.BrokerDataSink
 import com.openlattice.chronicle.services.sinks.ConsoleSink
-import com.openlattice.chronicle.services.sinks.OpenLatticeSink
+import com.openlattice.chronicle.services.sinks.MethodicSink
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.study.StudyApi
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils.setLastUpload
 import org.apache.olingo.commons.api.edm.FullQualifiedName
-import java.time.Instant
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -77,7 +75,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
 
             dataSink = BrokerDataSink(
                 mutableSetOf(
-                    OpenLatticeSink(studyId, participantId, deviceId, studyApi),
+                    MethodicSink(studyId, participantId, deviceId, studyApi),
                     ConsoleSink()
                 )
             )
@@ -141,7 +139,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             )
             w.reset()
             w.start()
-            if (dataSink.submit(data)[OpenLatticeSink::class.java.name] == true) {
+            if (dataSink.submit(data)[MethodicSink::class.java.name] == true) {
                 setLastUpload(applicationContext)
                 Log.i(
                     TAG,
