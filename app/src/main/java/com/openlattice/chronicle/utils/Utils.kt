@@ -22,9 +22,15 @@ import com.openlattice.chronicle.util.RetrofitBuilders
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import retrofit2.Retrofit
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 object Utils {
+    fun offsetDateTimeFromEpochMillis( epochMillis: Long ) : OffsetDateTime {
+        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneOffset.UTC)
+    }
 
     fun isValidUUID(possibleUUID: String): Boolean {
         try {

@@ -6,23 +6,31 @@ import android.util.Log
 import androidx.room.Room
 import androidx.work.*
 import com.google.common.base.Stopwatch
+import com.google.common.collect.SetMultimap
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
+import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
+import com.openlattice.chronicle.models.ExtractedUsageEvent
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.getDevice
 import com.openlattice.chronicle.preferences.getDeviceId
+import com.openlattice.chronicle.sensors.*
 import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.services.sinks.BrokerDataSink
 import com.openlattice.chronicle.services.sinks.ConsoleSink
-import com.openlattice.chronicle.services.sinks.OpenLatticeSink
+import com.openlattice.chronicle.services.sinks.MethodicSink
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.study.StudyApi
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import com.openlattice.chronicle.utils.Utils.setLastUpload
+import org.apache.olingo.commons.api.edm.FullQualifiedName
+import java.io.IOException
+import java.time.OffsetDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -49,6 +57,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
     private lateinit var deviceId: String
     private lateinit var dataSink: BrokerDataSink
     private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var propertyTypeIds: Map<FullQualifiedName, UUID>
 
     override fun doWork(): Result {
         try {
@@ -59,6 +68,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             settings = EnrollmentSettings(applicationContext)
             firebaseAnalytics = Firebase.analytics
             crashlytics = FirebaseCrashlytics.getInstance()
+            propertyTypeIds = settings.getPropertyTypeIds()
 
             studyId = settings.getStudyId()
             participantId = settings.getParticipantId()
@@ -66,7 +76,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
 
             dataSink = BrokerDataSink(
                 mutableSetOf(
-                    OpenLatticeSink(studyId, participantId, deviceId, studyApi),
+                    MethodicSink(studyId, participantId, deviceId, studyApi),
                     ConsoleSink()
                 )
             )
@@ -114,15 +124,23 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             val w = Stopwatch.createStarted()
             val data = nextEntries
                 .map { qe -> qe.data }
-                .map { qe -> JsonSerializer.deserializeQueueEntry(qe) }
-                .flatMap { it }
+                .map { qe ->
+                    //Attempt to deserialize as legacy queue entry on exception. 
+                    try {
+                        JsonSerializer.deserializeQueueEntry(qe)
+                    } catch (ex: IOException) {
+                        mapLegacyQueueEntry(JsonSerializer.deserializeLegacyQueueEntry(qe))
+                    }
+                }
+                .map { qe -> mapToModel(qe) }
+                .flatten()
             Log.i(
                 TAG,
-                "Loading ${data.size} items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis"
+                "Processing ${data.size} items from queue took ${w.elapsed(TimeUnit.MILLISECONDS)} millis"
             )
             w.reset()
             w.start()
-            if (dataSink.submit(data)[OpenLatticeSink::class.java.name] == true) {
+            if (dataSink.submit(data)[MethodicSink::class.java.name] == true) {
                 setLastUpload(applicationContext)
                 Log.i(
                     TAG,
@@ -140,6 +158,57 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                 throw Exception("exception when uploading usage data")
             }
         }
+    }
+
+    private fun mapLegacyQueueEntry(data: List<SetMultimap<UUID, Any>>): List<ChronicleDataUpload> {
+        return data.mapNotNull { datum ->
+            val appPackageName = getFirstValueOrNull(datum, GENERAL_NAME)
+            val interactionType = getFirstValueOrNull(datum, IMPORTANCE)
+            val timestamp = getFirstValueOrNull(datum, TIMESTAMP)
+            val timezone = getFirstValueOrNull(datum, TIMEZONE)
+            val user = getFirstValueOrNull(datum, USER)
+            val applicationLabel = getFirstValueOrNull(datum, APP_NAME)
+
+            if (appPackageName != null && interactionType != null && timestamp != null && timezone != null && user != null && applicationLabel != null) {
+                ExtractedUsageEvent(
+                    appPackageName,
+                    interactionType,
+                    OffsetDateTime.parse(timestamp),
+                    timezone,
+                    user,
+                    applicationLabel
+                )
+            } else null
+        }
+    }
+
+    private fun mapToModel(data: List<ChronicleDataUpload>): List<ChronicleDataUpload> {
+        return data.mapNotNull { datum ->
+            when (datum) {
+                is ExtractedUsageEvent -> ChronicleUsageEvent(
+                    studyId = studyId,
+                    participantId = participantId,
+                    appPackageName = datum.appPackageName,
+                    applicationLabel = datum.applicationLabel,
+                    timezone = datum.timezone,
+                    timestamp = datum.timestamp,
+                    user = datum.user,
+                    interactionType = datum.interactionType
+                )
+                else -> null
+            }
+        }
+    }
+
+    private fun getFirstValueOrNull(
+        entity: SetMultimap<UUID, Any>,
+        fqn: FullQualifiedName
+    ): String? {
+        val ptId = propertyTypeIds.getValue(fqn)
+        entity[ptId]?.iterator()?.let {
+            if (it.hasNext()) return it.next().toString()
+        }
+        return null
     }
 }
 
