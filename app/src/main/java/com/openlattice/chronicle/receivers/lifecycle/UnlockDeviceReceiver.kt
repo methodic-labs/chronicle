@@ -83,7 +83,7 @@ class UnlockDeviceReceiver : BroadcastReceiver() {
             .setAutoCancel(true) // remove when user taps on notification
 
         with(NotificationManagerCompat.from(context)) {
-            notify(1, notificationBuilder.build())
+            notify(context.resources.getInteger(R.integer.identify_user_notification_id), notificationBuilder.build())
         }
 
     }

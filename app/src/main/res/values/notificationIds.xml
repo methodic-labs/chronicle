@@ -2,4 +2,5 @@
 <resources>
     <integer name="dismiss_target_user_notification_id">11</integer>
     <integer name="unlock_phone_monitoring_notification_id">12</integer>
+    <integer name="identify_user_notification_id">13</integer>
 </resources>
