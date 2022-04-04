@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
+import com.openlattice.chronicle.android.ChronicleDataUpload;
+import com.openlattice.chronicle.android.ChronicleUsageEvent;
 import com.openlattice.chronicle.util.RetrofitBuilders;
 
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
@@ -20,7 +22,7 @@ import java.util.UUID;
 public class JsonSerializer {
     public static final ObjectMapper mapper = RetrofitBuilders.getMapper();
 
-    public static final byte[] serializeQueueEntry(List<SetMultimap<? extends UUID, ? extends Object>> queueData) {
+    public static final byte[] serializeQueueEntry(List<ChronicleDataUpload> queueData) {
         try {
             return mapper.writeValueAsBytes(queueData);
         } catch (JsonProcessingException e) {
@@ -29,9 +31,14 @@ public class JsonSerializer {
         }
     }
 
-    public static List<SetMultimap<UUID, Object>> deserializeQueueEntry(byte[] bytes) {
+    public static List<SetMultimap<UUID, Object>> deserializeLegacyQueueEntry(byte[] bytes) throws IOException {
+        return mapper.readValue(bytes, new TypeReference<List<SetMultimap<UUID, Object>>>() {
+        });
+    }
+
+    public static List<ChronicleDataUpload> deserializeQueueEntry(byte[] bytes) {
         try {
-            return mapper.readValue(bytes, new TypeReference<List<SetMultimap<UUID, Object>>>() {
+            return mapper.readValue(bytes, new TypeReference<List<ChronicleDataUpload>>() {
             });
         } catch (IOException e) {
             Log.e(JsonSerializer.class.getName(), "Unable to deserialize queue entry " + new String(bytes));

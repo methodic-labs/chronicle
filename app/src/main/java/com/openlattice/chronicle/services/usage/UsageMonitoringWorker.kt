@@ -99,9 +99,12 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         Log.d(javaClass.name, "Collecting Usage Information. Service ${serviceId} has been running for ${sw.elapsed(TimeUnit.SECONDS)} seconds.")
 
         val w = Stopwatch.createStarted()
-        val queueEntry = sensors
-                .flatMap { it.poll(propertyTypeIds) }
-                .filter { !it.isEmpty } //Filter out any empty write entries.
+        val queueEntry = sensors.flatMap { it.poll(propertyTypeIds) }
+        if( queueEntry.isEmpty() ) {
+            Log.i(TAG,"No sensors reported any data since last poll.")
+            return
+        }
+
         queueEntry.asSequence().chunked(1000).forEach { chunk ->
             storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), JsonSerializer.serializeQueueEntry(chunk)))
             Log.d(javaClass.name, "Persisting ${chunk.size} usage information elements took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")

@@ -3,23 +3,19 @@ package com.openlattice.chronicle.sensors
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo.*
 import android.content.Context
-import com.google.common.collect.ImmutableSetMultimap
-import com.google.common.collect.SetMultimap
+import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.models.ExtractedActivities
 import org.apache.olingo.commons.api.edm.FullQualifiedName
-import org.joda.time.DateTime
 import java.util.*
 
 
 class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
-    private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    private val activityManager =
+        context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<SetMultimap<UUID, Any>> {
+    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleDataUpload> {
         return activityManager.runningAppProcesses.map {
-            ImmutableSetMultimap.of(
-                    propertyTypeIds[ID]!!, UUID.randomUUID(),
-                    propertyTypeIds[GENERAL_NAME]!!, it.processName,
-                    propertyTypeIds[IMPORTANCE]!!, mapImportance(it.importance),
-                    propertyTypeIds[TIMESTAMP]!!, DateTime().toString())
+            ExtractedActivities(it.processName, mapImportance(it.importance))
         }
     }
 
@@ -32,7 +28,7 @@ class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
             IMPORTANCE_TOP_SLEEPING -> "Foreground UI - Sleeping"
             IMPORTANCE_VISIBLE -> "Visible - Not In Foreground"
             else -> {
-                return "Unknown importance: " + importance.toString()
+                return "Unknown importance: $importance"
             }
         }
     }

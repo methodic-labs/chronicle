@@ -1,8 +1,6 @@
 package com.openlattice.chronicle.services.sinks
 
-import com.google.common.collect.SetMultimap
-import com.openlattice.chronicle.android.ChronicleUsageEvent
-import java.util.*
+import com.openlattice.chronicle.android.ChronicleDataUpload
 
 
 class BrokerDataSink(private val dataSinks: MutableSet<DataSink>) : DataSink {
@@ -12,7 +10,9 @@ class BrokerDataSink(private val dataSinks: MutableSet<DataSink>) : DataSink {
         dataSinks.add(dataSink)
     }
 
-    override fun submit(data: List<ChronicleUsageEvent>): Map<String, Boolean> {
-        return dataSinks.asSequence().flatMap { it.submit(data).asSequence().map { it.key to it.value } }.toMap()
+    override fun submit(data: List<ChronicleDataUpload>): Map<String, Boolean> {
+        return dataSinks.asSequence()
+            .flatMap { it.submit(data).asSequence() }
+            .associate { it.key to it.value }
     }
 }
