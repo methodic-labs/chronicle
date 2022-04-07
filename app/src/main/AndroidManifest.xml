@@ -61,7 +61,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="getmethodic.com"
+                    android:host="app.getmethodic.com"
                     android:pathPattern="/enroll"
                     android:scheme="https" />
             </intent-filter>
