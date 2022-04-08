@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
 import com.openlattice.chronicle.android.ChronicleDataUpload;
-import com.openlattice.chronicle.android.ChronicleUsageEvent;
 import com.openlattice.chronicle.util.RetrofitBuilders;
 
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
@@ -31,19 +30,18 @@ public class JsonSerializer {
         }
     }
 
-    public static List<SetMultimap<UUID, Object>> deserializeLegacyQueueEntry(byte[] bytes) throws IOException {
-        return mapper.readValue(bytes, new TypeReference<List<SetMultimap<UUID, Object>>>() {
-        });
-    }
-
-    public static List<ChronicleDataUpload> deserializeQueueEntry(byte[] bytes) {
+    public static List<SetMultimap<UUID, Object>> deserializeLegacyQueueEntry(byte[] bytes) {
         try {
-            return mapper.readValue(bytes, new TypeReference<List<ChronicleDataUpload>>() {
+            return mapper.readValue(bytes, new TypeReference<List<SetMultimap<UUID, Object>>>() {
             });
         } catch (IOException e) {
             Log.e(JsonSerializer.class.getName(), "Unable to deserialize queue entry " + new String(bytes));
             return ImmutableList.of();
         }
+    }
+
+    public static List<ChronicleDataUpload> deserializeQueueEntry(byte[] bytes) throws IOException {
+        return mapper.readValue(bytes, new TypeReference<List<ChronicleDataUpload>>() {});
     }
 
     public static String serializePropertyTypeIds(Map<FullQualifiedName, UUID> propertyTypeIds) {
