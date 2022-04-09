@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
 import com.openlattice.chronicle.R
-import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.models.ExtractedUsageEvent
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -34,7 +34,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val appContext = context
 
     @Synchronized
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleDataUpload> {
+    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleSample> {
         if (propertyTypeIds.isEmpty()) {
             Log.w(UsageEventsChronicleSensor::class.java.name, "Property type ids is empty!")
             return ImmutableList.of()

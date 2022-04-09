@@ -11,7 +11,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
-import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
@@ -160,7 +160,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         }
     }
 
-    private fun mapLegacyQueueEntry(data: List<SetMultimap<UUID, Any>>): List<ChronicleDataUpload> {
+    private fun mapLegacyQueueEntry(data: List<SetMultimap<UUID, Any>>): List<ChronicleSample> {
         return data.mapNotNull { datum ->
             val appPackageName = getFirstValueOrNull(datum, GENERAL_NAME)
             val interactionType = getFirstValueOrNull(datum, IMPORTANCE)
@@ -182,7 +182,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         }
     }
 
-    private fun mapToModel(data: List<ChronicleDataUpload>): List<ChronicleDataUpload> {
+    private fun mapToModel(data: List<ChronicleSample>): List<ChronicleSample> {
         return data.mapNotNull { datum ->
             when (datum) {
                 is ExtractedUsageEvent -> ChronicleUsageEvent(

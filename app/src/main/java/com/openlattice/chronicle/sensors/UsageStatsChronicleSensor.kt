@@ -7,7 +7,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.common.collect.ImmutableList
-import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.models.ExtractUsageStat
 import com.openlattice.chronicle.utils.Utils.getAppFullName
 import com.openlattice.chronicle.utils.Utils.offsetDateTimeFromEpochMillis
@@ -22,7 +22,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     @Synchronized
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleDataUpload> {
+    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleSample> {
         if (propertyTypeIds.isEmpty()) {
             return ImmutableList.of()
         }

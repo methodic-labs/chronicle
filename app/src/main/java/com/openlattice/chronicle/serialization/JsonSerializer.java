@@ -8,7 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
-import com.openlattice.chronicle.android.ChronicleDataUpload;
+import com.openlattice.chronicle.android.ChronicleData;
+import com.openlattice.chronicle.android.ChronicleSample;
+import com.openlattice.chronicle.android.LegacyChronicleData;
 import com.openlattice.chronicle.util.RetrofitBuilders;
 
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
@@ -21,7 +23,7 @@ import java.util.UUID;
 public class JsonSerializer {
     public static final ObjectMapper mapper = RetrofitBuilders.getMapper();
 
-    public static final byte[] serializeQueueEntry(List<ChronicleDataUpload> queueData) {
+    public static final byte[] serializeQueueEntry(List<ChronicleSample> queueData) {
         try {
             return mapper.writeValueAsBytes(queueData);
         } catch (JsonProcessingException e) {
@@ -30,18 +32,18 @@ public class JsonSerializer {
         }
     }
 
-    public static List<SetMultimap<UUID, Object>> deserializeLegacyQueueEntry(byte[] bytes) {
+    public static LegacyChronicleData deserializeLegacyQueueEntry(byte[] bytes) {
         try {
-            return mapper.readValue(bytes, new TypeReference<List<SetMultimap<UUID, Object>>>() {
-            });
+            return new LegacyChronicleData(mapper.readValue(bytes, new TypeReference<List<SetMultimap<UUID, Object>>>() {
+            }));
         } catch (IOException e) {
             Log.e(JsonSerializer.class.getName(), "Unable to deserialize queue entry " + new String(bytes));
-            return ImmutableList.of();
+            return new LegacyChronicleData(ImmutableList.of());
         }
     }
 
-    public static List<ChronicleDataUpload> deserializeQueueEntry(byte[] bytes) throws IOException {
-        return mapper.readValue(bytes, new TypeReference<List<ChronicleDataUpload>>() {});
+    public static ChronicleData deserializeQueueEntry(byte[] bytes) throws IOException {
+        return mapper.readValue(bytes, ChronicleData.class);
     }
 
     public static String serializePropertyTypeIds(Map<FullQualifiedName, UUID> propertyTypeIds) {

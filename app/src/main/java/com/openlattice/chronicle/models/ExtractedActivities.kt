@@ -1,6 +1,6 @@
 package com.openlattice.chronicle.models
 
-import com.openlattice.chronicle.android.ChronicleDataUpload
+import com.openlattice.chronicle.android.ChronicleSample
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -9,4 +9,4 @@ data class ExtractedActivities(
     val importance: String,
     val timestamp: OffsetDateTime = OffsetDateTime.now(),
     val timezone: String = TimeZone.getDefault().id
-) : ChronicleDataUpload
+) : ChronicleSample
