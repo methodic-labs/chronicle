@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
 import com.openlattice.chronicle.R
+import com.openlattice.chronicle.android.ChronicleData
 import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.models.ExtractedUsageEvent
@@ -34,10 +35,10 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val appContext = context
 
     @Synchronized
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleSample> {
+    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): ChronicleData {
         if (propertyTypeIds.isEmpty()) {
             Log.w(UsageEventsChronicleSensor::class.java.name, "Property type ids is empty!")
-            return ImmutableList.of()
+            return ChronicleData(ImmutableList.of())
         }
 
         // get current user
@@ -65,7 +66,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
         Log.i(javaClass.name, "Collected ${usageEventsList.size} usage events.")
         val timezone = TimeZone.getDefault().id
 
-        return usageEventsList.map {
+        return ChronicleData(usageEventsList.map {
             ExtractedUsageEvent(
                 appPackageName = it.packageName,
                 interactionType = mapImportance(it.eventType),
@@ -77,7 +78,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
                 applicationLabel = getAppFullName(appContext, it.packageName),
                 user = getTargetUser(currentUser, previousUser, it.timeStamp, currentUserTimestamp),
             )
-        }
+        })
     }
 
     // returns device user corresponding to usage event

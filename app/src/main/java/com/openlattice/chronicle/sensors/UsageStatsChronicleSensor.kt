@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.common.collect.ImmutableList
+import com.openlattice.chronicle.android.ChronicleData
 import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.models.ExtractUsageStat
 import com.openlattice.chronicle.utils.Utils.getAppFullName
@@ -22,9 +23,9 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     @Synchronized
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleSample> {
+    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): ChronicleData {
         if (propertyTypeIds.isEmpty()) {
-            return ImmutableList.of()
+            return ChronicleData(emptyList())
         }
 
         val usageStats = usageStatsManager.queryUsageStats(INTERVAL_BEST, DateMidnight.now().millis, System.currentTimeMillis())
@@ -33,7 +34,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
 
         val timezone = TimeZone.getDefault().id
         //If we start seeing serialization oddities revert to doing DateTime.toString() here
-        return usageStats
+        return ChronicleData(usageStats
                 .map {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         ExtractUsageStat(
@@ -58,7 +59,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
                             applicationLabel = getAppFullName(context, it.packageName)
                         )
                     }
-                }
+                })
     }
 }
 

@@ -3,6 +3,7 @@ package com.openlattice.chronicle.sensors
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo.*
 import android.content.Context
+import com.openlattice.chronicle.android.ChronicleData
 import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.models.ExtractedActivities
 import org.apache.olingo.commons.api.edm.FullQualifiedName
@@ -13,10 +14,10 @@ class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
     private val activityManager =
         context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleSample> {
-        return activityManager.runningAppProcesses.map {
+    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): ChronicleData {
+        return ChronicleData(activityManager.runningAppProcesses.map {
             ExtractedActivities(it.processName, mapImportance(it.importance))
-        }
+        })
     }
 
     private fun mapImportance(importance: Int): String {
