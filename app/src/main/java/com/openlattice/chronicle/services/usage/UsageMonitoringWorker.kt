@@ -11,6 +11,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
+import com.openlattice.chronicle.android.ChronicleData
 import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
@@ -99,7 +100,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         Log.d(javaClass.name, "Collecting Usage Information. Service ${serviceId} has been running for ${sw.elapsed(TimeUnit.SECONDS)} seconds.")
 
         val w = Stopwatch.createStarted()
-        val queueEntry = sensors.flatMap { it.poll(propertyTypeIds) }
+        val queueEntry = ChronicleData( sensors.flatMap { it.poll(propertyTypeIds) } )
         if( queueEntry.isEmpty() ) {
             Log.i(TAG,"No sensors reported any data since last poll.")
             return
