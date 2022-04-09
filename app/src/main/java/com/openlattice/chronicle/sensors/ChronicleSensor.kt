@@ -1,6 +1,7 @@
 package com.openlattice.chronicle.sensors
 
 import com.google.common.collect.SetMultimap
+import com.openlattice.chronicle.android.ChronicleDataUpload
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
 
@@ -40,5 +41,5 @@ val PROPERTY_TYPES = setOf(
         USER)
 
 interface ChronicleSensor {
-    fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<SetMultimap<UUID, Any>>
+    fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): List<ChronicleDataUpload>
 }
