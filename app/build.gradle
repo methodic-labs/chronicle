@@ -101,17 +101,21 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation('com.methodic:chronicle-api:0.1.1-SNAPSHOT') {
         exclude module: 'guava'
+        exclude module: 'slf4j-api'
     }
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava:${jackson_version}") {
         exclude module: 'guava'
     }
+
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson_version}"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson_version}"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jackson_version}"
 
     implementation 'joda-time:joda-time:2.10.8'
 
-    implementation 'org.slf4j:slf4j-android:1.7.25'
+    implementation 'org.slf4j:slf4j-android:1.7.36'
+    implementation 'org.slf4j:slf4j-android:1.7.36'
     implementation 'com.google.guava:guava:24.1-android'
     implementation 'org.dmfs:lib-recur:0.11.6'
 

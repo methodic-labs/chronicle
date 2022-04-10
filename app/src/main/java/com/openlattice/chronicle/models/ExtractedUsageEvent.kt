@@ -4,7 +4,7 @@ import com.openlattice.chronicle.android.ChronicleSample
 import java.time.OffsetDateTime
 import java.util.*
 
-class ExtractedUsageEvent(
+data class ExtractedUsageEvent(
     val appPackageName: String,
     val interactionType: String,
     val timestamp: OffsetDateTime,

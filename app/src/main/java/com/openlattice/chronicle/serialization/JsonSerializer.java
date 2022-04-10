@@ -5,6 +5,7 @@ import android.util.Log;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
@@ -22,6 +23,9 @@ import java.util.UUID;
 
 public class JsonSerializer {
     public static final ObjectMapper mapper = RetrofitBuilders.getMapper();
+    static {
+        mapper.registerModule(new KotlinModule());
+    }
 
     public static final byte[] serializeQueueEntry(List<ChronicleSample> queueData) {
         try {
