@@ -31,12 +31,14 @@ import java.util.concurrent.TimeUnit
 
 val TAG = UsageMonitoringWorker::class.java.simpleName
 
-class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters) : Worker(context, workerParameters) {
+class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters) :
+    Worker(context, workerParameters) {
     private val sw = Stopwatch.createStarted()
     private val rand = Random()
     private val serviceId = rand.nextLong()
 
-    private var chronicleApi = Utils.createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
+    private var chronicleApi =
+        Utils.createRetrofitAdapter(PRODUCTION).create(ChronicleApi::class.java)
 
     private lateinit var crashlytics: FirebaseCrashlytics
     private lateinit var analytics: FirebaseAnalytics
@@ -50,10 +52,13 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         try {
             settings = EnrollmentSettings(applicationContext)
             propertyTypeIds = getPropertyTypeIds()
-            chronicleDb = Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle").build()
+            chronicleDb =
+                Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle")
+                    .build()
             storageQueue = chronicleDb.queueEntryData()
             sensors = mutableSetOf(
-                    UsageEventsChronicleSensor(applicationContext))
+                UsageEventsChronicleSensor(applicationContext)
+            )
             analytics = Firebase.analytics
             crashlytics = FirebaseCrashlytics.getInstance()
 
@@ -97,18 +102,32 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
             return
         }
 
-        Log.d(javaClass.name, "Collecting Usage Information. Service ${serviceId} has been running for ${sw.elapsed(TimeUnit.SECONDS)} seconds.")
+        Log.d(
+            javaClass.name,
+            "Collecting Usage Information. Service ${serviceId} has been running for ${
+                sw.elapsed(TimeUnit.SECONDS)
+            } seconds."
+        )
 
         val w = Stopwatch.createStarted()
-        val queueEntry = ChronicleData( sensors.flatMap { it.poll(propertyTypeIds) } )
-        if( queueEntry.isEmpty() ) {
-            Log.i(TAG,"No sensors reported any data since last poll.")
+        val queueEntry = sensors.flatMap { it.poll(propertyTypeIds) }
+        if (queueEntry.isEmpty()) {
+            Log.i(TAG, "No sensors reported any data since last poll.")
             return
         }
 
         queueEntry.asSequence().chunked(1000).forEach { chunk ->
-            storageQueue.insertEntry(QueueEntry(System.currentTimeMillis(), rand.nextLong(), JsonSerializer.serializeQueueEntry(chunk)))
-            Log.d(javaClass.name, "Persisting ${chunk.size} usage information elements took ${w.elapsed(TimeUnit.MILLISECONDS)} millis.")
+            storageQueue.insertEntry(
+                QueueEntry(
+                    System.currentTimeMillis(),
+                    rand.nextLong(),
+                    JsonSerializer.serializeQueueEntry(ChronicleData(chunk))
+                )
+            )
+            Log.d(
+                javaClass.name,
+                "Persisting ${chunk.size} usage information elements took ${w.elapsed(TimeUnit.MILLISECONDS)} millis."
+            )
             analytics.logEvent(FirebaseAnalyticsEvents.USAGE_SUCCESS, Bundle().apply {
                 putInt("size", chunk.size)
             })
@@ -117,11 +136,11 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
 
     private fun getPropertyTypeIds(): Map<FullQualifiedName, UUID> {
         // try retrieving cached values first
-        var propertyTypeIds  = settings.getPropertyTypeIds()
+        var propertyTypeIds = settings.getPropertyTypeIds()
 
         if (propertyTypeIds.size != PROPERTY_TYPES.size) {
             Log.i(javaClass.name, "Refresh property types cache")
-            propertyTypeIds = chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?:ImmutableMap.of()
+            propertyTypeIds = chronicleApi.getPropertyTypeIds(PROPERTY_TYPES) ?: ImmutableMap.of()
             settings.setPropertyTypeIds(propertyTypeIds)
         }
 
@@ -133,12 +152,13 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
 fun scheduleUsageMonitoringWork(context: Context) {
 
     val workRequest: PeriodicWorkRequest =
-            PeriodicWorkRequestBuilder<UsageMonitoringWorker>(15, TimeUnit.MINUTES)
-                    .build()
+        PeriodicWorkRequestBuilder<UsageMonitoringWorker>(15, TimeUnit.MINUTES)
+            .build()
 
-    WorkManager.getInstance(context).enqueueUniquePeriodicWork("usage",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            workRequest
+    WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        "usage",
+        ExistingPeriodicWorkPolicy.REPLACE,
+        workRequest
     )
 }
 
