@@ -74,7 +74,7 @@ android {
     }
 }
 
-ext.jackson_version = '2.13.2.2'
+ext.jackson_version = '2.13.2'
 ext.activity_version = '1.4.0'
 ext.odata_version='4.5.0'
 dependencies {
@@ -108,6 +108,8 @@ dependencies {
         exclude module: 'guava'
     }
 
+    implementation "com.fasterxml.jackson.core:jackson-core:${jackson_version}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.13.2.2"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson_version}"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson_version}"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jackson_version}"
