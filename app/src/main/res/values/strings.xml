@@ -2,6 +2,10 @@
     <string name="app_name">chronicle</string>
 
     <!-- Strings related to login -->
+    <string name="study_id">Study ID</string>
+    <string name="participant_id">Participant ID</string>
+    <string name="study_id_hint">00010000–0000-0000-8000-000000000c71</string>
+    <string name="participant_id_hint">P1001</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
     <string name="action_sign_in">Sign in or register</string>
@@ -64,6 +68,7 @@
     <!-- Preference Titles -->
     <string name="identification_header">User Identification </string>
     <string name="battery_optimization_header">Battery Optimization</string>
+    <string name="notification_access">Notification access</string>
 
     <!--    Preference keys -->
     <string name="current_user"> current_user </string>
@@ -71,6 +76,7 @@
     <string name="previous_user"> previous_user</string>
     <string name="current_user_timestamp">current_user_timestamp</string>
     <string name="disable_battery_optimization_dialog">disable_battery_optimization_dialog</string>
+    <string name="enable_notification_access">enable_notification_access</string>
 
   <!-- User-defined Intent actions   -->
     <string name="action_identify_after_reboot">Identify user after reboot</string>

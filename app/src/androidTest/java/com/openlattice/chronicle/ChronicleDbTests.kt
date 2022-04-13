@@ -22,7 +22,7 @@ class ChronicleDbTests {
         @JvmStatic
         fun setupChronicleDb() {
             val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-            chronicleDb = Room.databaseBuilder(appContext, ChronicleDb::class.java!!, "chronicle").build()
+            chronicleDb = Room.databaseBuilder(appContext, ChronicleDb::class.java, "chronicle").build()
             storageQueue = chronicleDb.queueEntryData()
             chronicleDb.queueEntryData().deleteEntries(chronicleDb.queueEntryData().getNextEntries(1000))
         }
@@ -30,7 +30,7 @@ class ChronicleDbTests {
     }
 
     @Test
-    fun testchronicleeadWriteSingleQueueEntry() {
+    fun testChronicleReadWriteSingleQueueEntry() {
         val qe = QueueEntry(System.currentTimeMillis(), 1, ByteArray(8, { i -> (i * i).toByte() }))
         ChronicleDbHolder.storageQueue.insertEntry(qe);
         val actual = ChronicleDbHolder.storageQueue.getNextEntries(1)[0]

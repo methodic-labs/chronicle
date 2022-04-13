@@ -16,7 +16,6 @@ import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.openlattice.chronicle.R
-import com.openlattice.chronicle.preferences.ORGANIZATION_ID
 import com.openlattice.chronicle.preferences.PARTICIPANT_ID
 import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
@@ -38,9 +37,8 @@ class SurveyNotificationsReceiver : BroadcastReceiver() {
 
         val participantId = intent.getStringExtra(PARTICIPANT_ID)
         val studyId = intent.getStringExtra(STUDY_ID)
-        val organizationId = intent.getStringExtra(ORGANIZATION_ID)
 
-        if (participantId.isNullOrBlank() || studyId.isNullOrBlank() || organizationId.isNullOrBlank()) {
+        if (participantId.isNullOrBlank() || studyId.isNullOrBlank()) {
             return
         }
         val notificationEntry = intent.getStringExtra(NOTIFICATION_DETAILS)
@@ -57,7 +55,7 @@ class SurveyNotificationsReceiver : BroadcastReceiver() {
 
         // intent to launch survey in browser
         val targetUrl =
-            createNotificationTargetUrl(notification, organizationId, studyId, participantId)
+            createNotificationTargetUrl(notification, studyId, participantId)
         val notifyIntent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
         val pendingIntent: PendingIntent =
             PendingIntent.getActivity(context, 0, notifyIntent, getPendingIntentMutabilityFlag(PendingIntent.FLAG_UPDATE_CURRENT))
