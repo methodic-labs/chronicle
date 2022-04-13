@@ -29,7 +29,7 @@ class SettingsActivity : AppCompatActivity() {
 
     class SettingsFragment : PreferenceFragmentCompat() {
         private lateinit var userIdentificationPreference: SwitchPreferenceCompat
-        private lateinit var batteryOptimizationDialogPreference: SwitchPreferenceCompat
+//        private lateinit var batteryOptimizationDialogPreference: SwitchPreferenceCompat
         private lateinit var notificationAccessPreference: SwitchPreferenceCompat
         private lateinit var targetUserPreference: ListPreference
 
@@ -46,9 +46,9 @@ class SettingsActivity : AppCompatActivity() {
 
             userIdentificationPreference = findPreference(getString(R.string.identify_user))!!
             targetUserPreference = findPreference(getString(R.string.current_user))!!
-            batteryOptimizationDialogPreference =
-                findPreference(getString(R.string.disable_battery_optimization_dialog))!!
-            notificationAccessPreference = findPreference(getString(R.string.enable_notification_access))!!
+//            batteryOptimizationDialogPreference =
+//                findPreference(getString(R.string.disable_battery_optimization_dialog))!!
+//            notificationAccessPreference = findPreference(getString(R.string.enable_notification_access))!!
 
             settings?.let {
                 targetUserPreference.setDefaultValue(it.getCurrentUser())
@@ -79,13 +79,13 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             // optionally show battery optimization setting
-            batteryOptimizationDialogPreference.parent?.isVisible =
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-
-            batteryOptimizationDialogPreference.setOnPreferenceChangeListener { _, newValue ->
-                settings?.toggleBatteryOptimizationDialog(newValue as Boolean)
-                true
-            }
+//            batteryOptimizationDialogPreference.parent?.isVisible =
+//                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+//
+//            batteryOptimizationDialogPreference.setOnPreferenceChangeListener { _, newValue ->
+//                settings?.toggleBatteryOptimizationDialog(newValue as Boolean)
+//                true
+//            }
 
             val enabledPackages = NotificationManagerCompat.getEnabledListenerPackages(requireContext())
             val accessCurrentlyEnabled = enabledPackages.contains(context?.packageName)
