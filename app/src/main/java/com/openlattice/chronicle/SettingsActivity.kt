@@ -48,7 +48,7 @@ class SettingsActivity : AppCompatActivity() {
             targetUserPreference = findPreference(getString(R.string.current_user))!!
 //            batteryOptimizationDialogPreference =
 //                findPreference(getString(R.string.disable_battery_optimization_dialog))!!
-//            notificationAccessPreference = findPreference(getString(R.string.enable_notification_access))!!
+            notificationAccessPreference = findPreference(getString(R.string.enable_notification_access))!!
 
             settings?.let {
                 targetUserPreference.setDefaultValue(it.getCurrentUser())
