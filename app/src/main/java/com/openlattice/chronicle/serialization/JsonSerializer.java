@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class JsonSerializer {
-    public static final ObjectMapper mapper = RetrofitBuilders.getMapper();
+    public static final ObjectMapper mapper = RetrofitBuilders.mapper;
     static {
         mapper.registerModule(new KotlinModule());
     }
