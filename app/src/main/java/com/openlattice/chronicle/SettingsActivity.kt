@@ -1,8 +1,10 @@
 package com.openlattice.chronicle
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
@@ -27,7 +29,8 @@ class SettingsActivity : AppCompatActivity() {
 
     class SettingsFragment : PreferenceFragmentCompat() {
         private lateinit var userIdentificationPreference: SwitchPreferenceCompat
-        private lateinit var batteryOptimizationDialogPreference: SwitchPreferenceCompat
+//        private lateinit var batteryOptimizationDialogPreference: SwitchPreferenceCompat
+        private lateinit var notificationAccessPreference: SwitchPreferenceCompat
         private lateinit var targetUserPreference: ListPreference
 
         private var settings: EnrollmentSettings? = null
@@ -43,8 +46,9 @@ class SettingsActivity : AppCompatActivity() {
 
             userIdentificationPreference = findPreference(getString(R.string.identify_user))!!
             targetUserPreference = findPreference(getString(R.string.current_user))!!
-            batteryOptimizationDialogPreference =
-                findPreference(getString(R.string.disable_battery_optimization_dialog))!!
+//            batteryOptimizationDialogPreference =
+//                findPreference(getString(R.string.disable_battery_optimization_dialog))!!
+            notificationAccessPreference = findPreference(getString(R.string.enable_notification_access))!!
 
             settings?.let {
                 targetUserPreference.setDefaultValue(it.getCurrentUser())
@@ -75,12 +79,42 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             // optionally show battery optimization setting
-            batteryOptimizationDialogPreference.parent?.isVisible =
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+//            batteryOptimizationDialogPreference.parent?.isVisible =
+//                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+//
+//            batteryOptimizationDialogPreference.setOnPreferenceChangeListener { _, newValue ->
+//                settings?.toggleBatteryOptimizationDialog(newValue as Boolean)
+//                true
+//            }
 
-            batteryOptimizationDialogPreference.setOnPreferenceChangeListener { _, newValue ->
-                settings?.toggleBatteryOptimizationDialog(newValue as Boolean)
+            val enabledPackages = NotificationManagerCompat.getEnabledListenerPackages(requireContext())
+            val accessCurrentlyEnabled = enabledPackages.contains(context?.packageName)
+            notificationAccessPreference.isChecked = accessCurrentlyEnabled
+
+            notificationAccessPreference.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                if (notificationAccessPreference.isChecked.xor(enabled)) {
+                    val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+                    startActivityForResult(intent, 1)
+                }
                 true
+            }
+        }
+
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            super.onActivityResult(requestCode, resultCode, data)
+            if (requestCode == 1) {
+                val enabledPackages = NotificationManagerCompat.getEnabledListenerPackages(requireContext())
+                val enabled = enabledPackages.contains(context?.packageName)
+                notificationAccessPreference.isChecked = enabled
+            }
+        }
+
+        override fun onResume() {
+            super.onResume()
+            val userIdentificationEnabled = userIdentificationPreference.isEnabled
+            if (userIdentificationEnabled) {
+                targetUserPreference.value = settings?.getCurrentUser()
             }
         }
     }

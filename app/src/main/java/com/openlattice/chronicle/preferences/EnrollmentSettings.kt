@@ -25,26 +25,20 @@ const val PARTICIPATION_STATUS = "participationStatus"
 const val PROPERTY_TYPE_IDS = "com.openlattice.PropertyTypeIds"
 
 val INVALID_STUDY_ID = UUID(0, 0)
-val INVALID_ORG_ID = INVALID_STUDY_ID;
 
 class EnrollmentSettings(private val context: Context) {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
 
     private var participantId: String
     private var studyId: UUID
-    private var organizationId: UUID
 
     init {
-        val orgIdStr = settings.getString(ORGANIZATION_ID, "") ?: ""
         val studyIdString = settings.getString(STUDY_ID, "") ?: ""
         participantId = settings.getString(PARTICIPANT_ID, "") ?: ""
-
         studyId = if (Utils.isValidUUID(studyIdString)) UUID.fromString(studyIdString) else INVALID_STUDY_ID
-        organizationId = if (Utils.isValidUUID(orgIdStr)) UUID.fromString(orgIdStr) else INVALID_ORG_ID
 
         if (isEnrolled()) {
-            setCrashlyticsUser(participantId)
-            setCrashlyticsState(organizationId, studyId, getDeviceId(context))
+            setCrashlyticsUser(studyId, participantId, getDeviceId(context))
         }
     }
 
@@ -64,17 +58,6 @@ class EnrollmentSettings(private val context: Context) {
         participantId = _participantId
         settings.edit()
                 .putString(PARTICIPANT_ID, _participantId)
-                .apply()
-    }
-
-    fun getOrganizationId(): UUID {
-        return organizationId
-    }
-
-    fun setOrganizationId(orgId: UUID) {
-        organizationId = orgId;
-        settings.edit()
-                .putString(ORGANIZATION_ID, orgId.toString())
                 .apply()
     }
 
@@ -174,17 +157,10 @@ fun getDevice(deviceId: String): AndroidDevice {
     return AndroidDevice(deviceId, Build.MODEL, Build.VERSION.CODENAME, Build.BRAND, Build.DISPLAY, Build.VERSION.SDK_INT.toString(), Build.PRODUCT, deviceId, Optional.absent())
 }
 
-fun setCrashlyticsUser(participantId: String) {
+fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {
     val crashlytics = FirebaseCrashlytics.getInstance()
 
     crashlytics.setUserId(participantId)
-}
-fun setCrashlyticsState(orgId: UUID, studyId: UUID, deviceId: String) {
-    val crashlytics = FirebaseCrashlytics.getInstance()
-
     crashlytics.setCustomKey(DEVICE_ID, deviceId)
     crashlytics.setCustomKey(STUDY_ID, studyId.toString())
-    if (orgId != INVALID_ORG_ID) {
-        crashlytics.setCustomKey(ORGANIZATION_ID, orgId.toString())
-    }
 }

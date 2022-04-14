@@ -53,6 +53,18 @@
                     android:pathPattern="/chronicle/login"
                     android:scheme="https" />
             </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="app.getmethodic.com"
+                    android:pathPattern="/enroll"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".PermissionActivity"
@@ -78,6 +90,15 @@
             </intent-filter>
         </receiver>
         <service android:name=".services.notifications.DeviceUnlockMonitoringService" />
+        <service
+            android:name=".services.notifications.NotificationListener"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

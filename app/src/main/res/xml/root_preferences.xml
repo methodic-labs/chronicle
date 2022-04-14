@@ -13,11 +13,11 @@
             app:useSimpleSummaryProvider="true" />?
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/battery_optimization_header" >
+    <PreferenceCategory app:title="@string/notification_access">
         <SwitchPreferenceCompat
-            app:key="@string/disable_battery_optimization_dialog"
-            app:title="Battery optimization dialog"
-            app:summary="Display dialog to disable battery optimization"
+            app:key="@string/enable_notification_access"
+            app:title="Enable notification access"
+            app:summary="Allow app to read posted notifications"
             app:defaultValue="false" />
     </PreferenceCategory>
 </PreferenceScreen>
