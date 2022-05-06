@@ -24,6 +24,7 @@ import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
+import com.openlattice.chronicle.storage.UserStorageQueue
 import com.openlattice.chronicle.utils.Utils
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
@@ -45,6 +46,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
     private lateinit var propertyTypeIds: Map<FullQualifiedName, UUID>
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
+    private lateinit var userStorageQueue: UserStorageQueue
     private lateinit var sensors: Set<ChronicleSensor>
     private lateinit var settings: EnrollmentSettings
 
@@ -56,6 +58,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
                 Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle")
                     .build()
             storageQueue = chronicleDb.queueEntryData()
+            userStorageQueue = chronicleDb.userQueueEntryData()
             sensors = mutableSetOf(
                 UsageEventsChronicleSensor(applicationContext)
             )
@@ -110,7 +113,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         )
 
         val w = Stopwatch.createStarted()
-        val queueEntry = sensors.flatMap { it.poll(propertyTypeIds) }
+        val queueEntry = sensors.flatMap { it.poll(propertyTypeIds, userStorageQueue) }
         if (queueEntry.isEmpty()) {
             Log.i(TAG, "No sensors reported any data since last poll.")
             return

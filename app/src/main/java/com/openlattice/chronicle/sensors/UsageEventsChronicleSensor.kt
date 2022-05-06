@@ -14,6 +14,7 @@ import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.models.ExtractedUsageEvent
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.storage.UserStorageQueue
 import com.openlattice.chronicle.utils.Utils.getAppFullName
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import org.dmfs.rfc5545.DateTime
@@ -35,11 +36,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val appContext = context
 
     @Synchronized
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): ChronicleData {
-        if (propertyTypeIds.isEmpty()) {
-            Log.w(UsageEventsChronicleSensor::class.java.name, "Property type ids is empty!")
-            return ChronicleData(ImmutableList.of())
-        }
+    override fun poll(userStorageQueue: UserStorageQueue): ChronicleData {
 
         // get current user
         val enrollmentSettings = EnrollmentSettings(appContext)
