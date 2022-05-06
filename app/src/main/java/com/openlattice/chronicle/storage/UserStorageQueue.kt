@@ -13,7 +13,7 @@ import androidx.room.Query
 @Dao
 interface UserStorageQueue {
     @Query("SELECT * FROM userQueue ORDER BY writeTimestamp DESC")
-    fun getUserTimestamps(limitTimestamp: Long) : List<UserQueueEntry>
+    fun getUserTimestamps() : List<UserQueueEntry>
 
     @Insert
     fun insertEntry( entry: UserQueueEntry)
