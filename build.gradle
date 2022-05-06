@@ -26,7 +26,7 @@ allprojects {
             url 'https://maven.pkg.github.com/methodic-labs/methodic'
             credentials {
                 username = 'curator-bot'
-                password = '&#103;hp_3Cszdgxs8uQru5cyIPebYkoUy4jTxh4CMFiA'.replace("&#103;","g")
+                password = '&#103;hp_AUBLGB0XgvNugmkkSgpWEKqI6FXaFU01gHKi'.replace("&#103;","g")
             }
         }
     }
