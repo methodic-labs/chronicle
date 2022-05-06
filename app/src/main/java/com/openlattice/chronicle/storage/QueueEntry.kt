@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import java.util.*
 
-@Entity(tableName = "userQueue",
+@Entity(tableName = "dataQueue",
         primaryKeys = ["writeTimestamp", "id"],
         indices = [Index("writeTimestamp"), Index(value = ["writeTimestamp", "id"], unique = true)])
 class QueueEntry(
