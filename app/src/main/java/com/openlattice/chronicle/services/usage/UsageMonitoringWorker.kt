@@ -113,7 +113,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         )
 
         val w = Stopwatch.createStarted()
-        val queueEntry = sensors.flatMap { it.poll(propertyTypeIds, userStorageQueue) }
+        val queueEntry = sensors.flatMap { it.poll(userStorageQueue) }
         if (queueEntry.isEmpty()) {
             Log.i(TAG, "No sensors reported any data since last poll.")
             return
