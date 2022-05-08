@@ -15,7 +15,7 @@ class ActivityManagerChronicleSensor(val context: Context) : ChronicleSensor {
     private val activityManager =
         context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
-    override fun poll(userStorageQueue: UserStorageQueue): ChronicleData {
+    override fun poll(currentPollTimestamp:Long, users:NavigableMap<Long,String>): ChronicleData {
         return ChronicleData(activityManager.runningAppProcesses.map {
             ExtractedActivities(it.processName, mapImportance(it.importance))
         })

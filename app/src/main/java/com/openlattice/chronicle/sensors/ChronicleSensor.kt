@@ -44,5 +44,5 @@ val PROPERTY_TYPES = setOf(
 )
 
 interface ChronicleSensor {
-    fun poll(userStorageQueue: UserStorageQueue): ChronicleData
+    fun poll(currentPollTimestamp: Long, users: NavigableMap<Long, String>): ChronicleData
 }

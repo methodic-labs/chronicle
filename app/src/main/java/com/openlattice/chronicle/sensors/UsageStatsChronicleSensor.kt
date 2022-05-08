@@ -24,7 +24,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     @Synchronized
-    override fun poll(userStorageQueue: UserStorageQueue): ChronicleData {
+    override fun poll(currentPollTimestamp:Long, users:NavigableMap<Long,String>): ChronicleData {
         val usageStats = usageStatsManager.queryUsageStats(INTERVAL_BEST, DateMidnight.now().millis, System.currentTimeMillis())
 
         Log.i(javaClass.name, "Collected ${usageStats.size} stats.")

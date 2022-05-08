@@ -113,7 +113,14 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         )
 
         val w = Stopwatch.createStarted()
-        val queueEntry = sensors.flatMap { it.poll(userStorageQueue) }
+        val currentPollTimestamp = System.currentTimeMillis()
+        val userTimestamps = userStorageQueue.getUserTimestamps()
+        val users = userTimestamps.associateTo(TreeMap<Long, String>()) {
+            it.writeTimestamp to it.user
+        }
+        val queueEntry = sensors.flatMap { it.poll(currentPollTimestamp, users) }
+        users.clear() //Release references for GC
+
         if (queueEntry.isEmpty()) {
             Log.i(TAG, "No sensors reported any data since last poll.")
             return
@@ -135,6 +142,9 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
                 putInt("size", chunk.size)
             })
         }
+
+        //Now that we have inserted entries into storage queue, we can clear our older user data
+        userStorageQueue.deleteEntries(userTimestamps)
     }
 
     private fun getPropertyTypeIds(): Map<FullQualifiedName, UUID> {
