@@ -20,6 +20,8 @@ import com.openlattice.chronicle.storage.UserStorageQueue
 import com.openlattice.chronicle.utils.Utils
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 const val PARTICIPANT_ID = "participantId"
 const val AWARENESS_NOTIFICATIONS_ENABLED = "notificationsEnabled"
@@ -39,6 +41,7 @@ class EnrollmentSettings(private val context: Context) {
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
     private lateinit var userStorageQueue: UserStorageQueue
+    private var executor: Executor
 
     init {
         val studyIdString = settings.getString(STUDY_ID, "") ?: ""
@@ -54,7 +57,7 @@ class EnrollmentSettings(private val context: Context) {
             context.applicationContext,
             ChronicleDb::class.java, "chronicle"
         ).build()
-
+        executor = Executors.newFixedThreadPool(4)
         userStorageQueue = chronicleDb.userQueueEntryData()
     }
 
@@ -122,11 +125,13 @@ class EnrollmentSettings(private val context: Context) {
 
 
     fun setTargetUser(user: String) {
-        userStorageQueue.insertEntry(UserQueueEntry(user = user))
-        settings
-            .edit()
-            .putString(context.getString(R.string.current_user), user)
-            .apply()
+        executor.execute {
+            userStorageQueue.insertEntry(UserQueueEntry(user = user))
+            settings
+                .edit()
+                .putString(context.getString(R.string.current_user), user)
+                .apply()
+        }
     }
 
     fun getCurrentUser(): String? {
