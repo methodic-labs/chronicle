@@ -18,6 +18,7 @@ import com.openlattice.chronicle.storage.StorageQueue
 import com.openlattice.chronicle.storage.UserQueueEntry
 import com.openlattice.chronicle.storage.UserStorageQueue
 import com.openlattice.chronicle.utils.Utils
+import kotlinx.coroutines.runBlocking
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
 import java.util.concurrent.Executor
@@ -125,13 +126,15 @@ class EnrollmentSettings(private val context: Context) {
 
 
     fun setTargetUser(user: String) {
-        executor.execute {
+//        executor.execute {
+        runBlocking {
             userStorageQueue.insertEntry(UserQueueEntry(user = user))
             settings
                 .edit()
                 .putString(context.getString(R.string.current_user), user)
                 .apply()
         }
+//        }
     }
 
     fun getCurrentUser(): String? {

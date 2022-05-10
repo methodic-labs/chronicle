@@ -16,7 +16,7 @@ interface UserStorageQueue {
     fun getUserTimestamps() : List<UserQueueEntry>
 
     @Insert
-    fun insertEntry( entry: UserQueueEntry)
+    suspend fun insertEntry( entry: UserQueueEntry)
 
     @Insert
     fun insertEntries( entries: List<UserQueueEntry> )
