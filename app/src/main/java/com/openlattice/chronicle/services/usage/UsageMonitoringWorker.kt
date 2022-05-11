@@ -143,8 +143,13 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
             })
         }
 
-        //Now that we have inserted entries into storage queue, we can clear our older user data
-        userStorageQueue.deleteEntries(userTimestamps)
+        // currentPollTimestamp will be the begjnTime of UsageStatsManager.queryEvents() call in the next sensor poll
+        // We can therefore delete entries whose timestamp is less than the largest timestamp greater than currentPollTimestamp
+        // Therefore we can clear out user entries that have a lower timestamp
+        val lowestTimestamp = users.lowerEntry(currentPollTimestamp)?.key
+        lowestTimestamp?.let {
+            userStorageQueue.deleteEntriesWithLowerTimestamp(currentPollTimestamp)
+        }
     }
 
     private fun getPropertyTypeIds(): Map<FullQualifiedName, UUID> {

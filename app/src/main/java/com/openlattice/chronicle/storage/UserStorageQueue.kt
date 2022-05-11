@@ -26,4 +26,7 @@ interface UserStorageQueue {
 
     @Delete
     fun deleteEntries( entries : List<UserQueueEntry> )
+
+    @Query("DELETE FROM userQueue WHERE writeTimestamp < :timestamp")
+    fun deleteEntriesWithLowerTimestamp(timestamp: Long)
 }
