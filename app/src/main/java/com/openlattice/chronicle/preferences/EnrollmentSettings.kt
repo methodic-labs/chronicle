@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.preference.PreferenceManager
 import android.provider.Settings
+import androidx.room.Room
 import com.google.common.base.Optional
 import com.google.common.collect.ImmutableMap
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -12,9 +13,17 @@ import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropertyTypeIds
 import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds
 import com.openlattice.chronicle.sources.AndroidDevice
+import com.openlattice.chronicle.storage.ChronicleDb
+import com.openlattice.chronicle.storage.StorageQueue
+import com.openlattice.chronicle.storage.UserQueueEntry
+import com.openlattice.chronicle.storage.UserStorageQueue
 import com.openlattice.chronicle.utils.Utils
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 const val PARTICIPANT_ID = "participantId"
 const val AWARENESS_NOTIFICATIONS_ENABLED = "notificationsEnabled"
@@ -28,22 +37,34 @@ val INVALID_STUDY_ID = UUID(0, 0)
 
 class EnrollmentSettings(private val context: Context) {
     private val settings = PreferenceManager.getDefaultSharedPreferences(context)
-
     private var participantId: String
     private var studyId: UUID
+
+    private lateinit var chronicleDb: ChronicleDb
+    private lateinit var storageQueue: StorageQueue
+    private lateinit var userStorageQueue: UserStorageQueue
+    private var executor: Executor
 
     init {
         val studyIdString = settings.getString(STUDY_ID, "") ?: ""
         participantId = settings.getString(PARTICIPANT_ID, "") ?: ""
-        studyId = if (Utils.isValidUUID(studyIdString)) UUID.fromString(studyIdString) else INVALID_STUDY_ID
+        studyId =
+            if (Utils.isValidUUID(studyIdString)) UUID.fromString(studyIdString) else INVALID_STUDY_ID
 
         if (isEnrolled()) {
             setCrashlyticsUser(studyId, participantId, getDeviceId(context))
         }
+
+        chronicleDb = Room.databaseBuilder(
+            context.applicationContext,
+            ChronicleDb::class.java, "chronicle"
+        ).build()
+        executor = Executors.newFixedThreadPool(4)
+        userStorageQueue = chronicleDb.userQueueEntryData()
     }
 
     fun isEnrolled(): Boolean {
-        return !( studyId.equals(INVALID_STUDY_ID) || participantId.isBlank())
+        return !(studyId.equals(INVALID_STUDY_ID) || participantId.isBlank())
     }
 
     fun getParticipantId(): String {
@@ -57,21 +78,21 @@ class EnrollmentSettings(private val context: Context) {
     fun setParticipantId(_participantId: String) {
         participantId = _participantId
         settings.edit()
-                .putString(PARTICIPANT_ID, _participantId)
-                .apply()
+            .putString(PARTICIPANT_ID, _participantId)
+            .apply()
     }
 
     fun setStudyId(_studyId: UUID) {
         studyId = _studyId
         settings.edit()
-                .putString(STUDY_ID, _studyId.toString())
-                .apply()
+            .putString(STUDY_ID, _studyId.toString())
+            .apply()
     }
 
     fun setAwarenessNotificationsEnabled(notificationsEnabled: Boolean) {
         settings.edit()
-                .putBoolean(AWARENESS_NOTIFICATIONS_ENABLED, notificationsEnabled)
-                .apply()
+            .putBoolean(AWARENESS_NOTIFICATIONS_ENABLED, notificationsEnabled)
+            .apply()
     }
 
     fun getAwarenessNotificationsEnabled(): Boolean {
@@ -80,56 +101,50 @@ class EnrollmentSettings(private val context: Context) {
 
     fun setPropertyTypeIds(propertyTypeIds: Map<FullQualifiedName, UUID>) {
         settings
-                .edit()
-                .putString(PROPERTY_TYPE_IDS, serializePropertyTypeIds(propertyTypeIds))
-                .apply()
+            .edit()
+            .putString(PROPERTY_TYPE_IDS, serializePropertyTypeIds(propertyTypeIds))
+            .apply()
     }
 
     fun getPropertyTypeIds(): Map<FullQualifiedName, UUID> {
         return deserializePropertyTypeIds(settings.getString(PROPERTY_TYPE_IDS, ""))
-                ?: ImmutableMap.of()
+            ?: ImmutableMap.of()
     }
 
     fun setParticipationStatus(participationStatus: ParticipationStatus) {
         settings
-                .edit()
-                .putString(PARTICIPATION_STATUS, participationStatus.toString())
-                .apply()
+            .edit()
+            .putString(PARTICIPATION_STATUS, participationStatus.toString())
+            .apply()
     }
 
     fun getParticipationStatus(): ParticipationStatus {
-        val status = settings.getString(PARTICIPATION_STATUS, ParticipationStatus.UNKNOWN.name) ?:ParticipationStatus.UNKNOWN.name
+        val status = settings.getString(PARTICIPATION_STATUS, ParticipationStatus.UNKNOWN.name)
+            ?: ParticipationStatus.UNKNOWN.name
 
         return ParticipationStatus.valueOf(status)
     }
 
 
     fun setTargetUser(user: String) {
-        val previousUser = getCurrentUser()
-        settings
-            .edit()
-            .putString(context.getString(R.string.previous_user), previousUser)
-            .apply()
-        settings
-            .edit()
-            .putLong(context.getString(R.string.current_user_timestamp), System.currentTimeMillis())
-            .apply()
-        settings
-            .edit()
-            .putString(context.getString(R.string.current_user), user)
-            .apply()
+//        executor.execute {
+        runBlocking {
+            launch {
+                userStorageQueue.insertEntry(UserQueueEntry(user = user))
+            }
+            settings
+                .edit()
+                .putString(context.getString(R.string.current_user), user)
+                .apply()
+        }
+//        }
     }
 
     fun getCurrentUser(): String? {
-        return settings.getString(context.getString(R.string.current_user), context.getString(R.string.user_unassigned))
-    }
-
-    fun getCurrentUserTimestamp(): Long {
-        return settings.getLong(context.getString(R.string.current_user_timestamp), 0)
-    }
-
-    fun getPreviousUser(): String? {
-        return settings.getString(context.getString(R.string.previous_user), context.getString(R.string.user_unassigned))
+        return settings.getString(
+            context.getString(R.string.current_user),
+            context.getString(R.string.user_unassigned)
+        )
     }
 
     fun isUserIdentificationEnabled(): Boolean {
@@ -144,7 +159,16 @@ class EnrollmentSettings(private val context: Context) {
     }
 
     fun isBatteryOptimizationDialogEnabled(): Boolean {
-        return settings.getBoolean(context.getString(R.string.disable_battery_optimization_dialog), false)
+        return settings.getBoolean(
+            context.getString(R.string.disable_battery_optimization_dialog),
+            false
+        )
+    }
+
+    fun closeDb() {
+        if (this::chronicleDb.isInitialized && chronicleDb.isOpen) {
+            chronicleDb.close()
+        }
     }
 
 }
@@ -154,7 +178,17 @@ fun getDeviceId(context: Context): String {
 }
 
 fun getDevice(deviceId: String): AndroidDevice {
-    return AndroidDevice(deviceId, Build.MODEL, Build.VERSION.CODENAME, Build.BRAND, Build.DISPLAY, Build.VERSION.SDK_INT.toString(), Build.PRODUCT, deviceId, Optional.absent())
+    return AndroidDevice(
+        deviceId,
+        Build.MODEL,
+        Build.VERSION.CODENAME,
+        Build.BRAND,
+        Build.DISPLAY,
+        Build.VERSION.SDK_INT.toString(),
+        Build.PRODUCT,
+        deviceId,
+        Optional.absent()
+    )
 }
 
 fun setCrashlyticsUser(studyId: UUID, participantId: String, deviceId: String) {

@@ -24,6 +24,7 @@ import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.QueueEntry
 import com.openlattice.chronicle.storage.StorageQueue
+import com.openlattice.chronicle.storage.UserStorageQueue
 import com.openlattice.chronicle.utils.Utils
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.util.*
@@ -45,6 +46,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
     private lateinit var propertyTypeIds: Map<FullQualifiedName, UUID>
     private lateinit var chronicleDb: ChronicleDb
     private lateinit var storageQueue: StorageQueue
+    private lateinit var userStorageQueue: UserStorageQueue
     private lateinit var sensors: Set<ChronicleSensor>
     private lateinit var settings: EnrollmentSettings
 
@@ -56,6 +58,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
                 Room.databaseBuilder(applicationContext, ChronicleDb::class.java, "chronicle")
                     .build()
             storageQueue = chronicleDb.queueEntryData()
+            userStorageQueue = chronicleDb.userQueueEntryData()
             sensors = mutableSetOf(
                 UsageEventsChronicleSensor(applicationContext)
             )
@@ -110,7 +113,14 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         )
 
         val w = Stopwatch.createStarted()
-        val queueEntry = sensors.flatMap { it.poll(propertyTypeIds) }
+        val currentPollTimestamp = System.currentTimeMillis()
+        val userTimestamps = userStorageQueue.getUserTimestamps()
+        val users = userTimestamps.associateTo(TreeMap<Long, String>()) {
+            it.writeTimestamp to it.user
+        }
+        val queueEntry = sensors.flatMap { it.poll(currentPollTimestamp, users) }
+        users.clear() //Release references for GC
+
         if (queueEntry.isEmpty()) {
             Log.i(TAG, "No sensors reported any data since last poll.")
             return
@@ -131,6 +141,14 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
             analytics.logEvent(FirebaseAnalyticsEvents.USAGE_SUCCESS, Bundle().apply {
                 putInt("size", chunk.size)
             })
+        }
+
+        // currentPollTimestamp will be the begjnTime of UsageStatsManager.queryEvents() call in the next sensor poll
+        // We can therefore delete entries whose timestamp is less than the largest timestamp greater than currentPollTimestamp
+        // Therefore we can clear out user entries that have a lower timestamp
+        val lowestTimestamp = users.lowerEntry(currentPollTimestamp)?.key
+        lowestTimestamp?.let {
+            userStorageQueue.deleteEntriesWithLowerTimestamp(currentPollTimestamp)
         }
     }
 

@@ -5,18 +5,9 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.preference.PreferenceManager
 import android.util.Log
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableSetMultimap
-import com.google.common.collect.SetMultimap
-import com.openlattice.chronicle.R
 import com.openlattice.chronicle.android.ChronicleData
-import com.openlattice.chronicle.android.ChronicleSample
-import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.models.ExtractedUsageEvent
-import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.utils.Utils.getAppFullName
-import org.apache.olingo.commons.api.edm.FullQualifiedName
-import org.dmfs.rfc5545.DateTime
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -35,25 +26,16 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
     private val appContext = context
 
     @Synchronized
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): ChronicleData {
-        if (propertyTypeIds.isEmpty()) {
-            Log.w(UsageEventsChronicleSensor::class.java.name, "Property type ids is empty!")
-            return ChronicleData(ImmutableList.of())
-        }
-
-        // get current user
-        val enrollmentSettings = EnrollmentSettings(appContext)
-        val currentUser = enrollmentSettings.getCurrentUser()
-        val previousUser = enrollmentSettings.getPreviousUser()
-        val currentUserTimestamp = enrollmentSettings.getCurrentUserTimestamp()
-
+    override fun poll(
+        currentPollTimestamp: Long,
+        users: NavigableMap<Long, String>
+    ): ChronicleData {
         val usageEventsList: MutableList<UsageEvents.Event> = ArrayList()
 
         val previousPollTimestamp = settings.getLong(
             LAST_USAGE_QUERY_TIMESTAMP,
             System.currentTimeMillis() - USAGE_EVENTS_POLL_INTERVAL
         )
-        val currentPollTimestamp = System.currentTimeMillis()
 
         val usageEvents = usageStatsManager.queryEvents(previousPollTimestamp, currentPollTimestamp)
         settings.edit().putLong(LAST_USAGE_QUERY_TIMESTAMP, currentPollTimestamp).apply()
@@ -76,25 +58,20 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
                 ),
                 timezone = timezone,
                 applicationLabel = getAppFullName(appContext, it.packageName),
-                user = getTargetUser(currentUser, previousUser, it.timeStamp, currentUserTimestamp),
+                user = getTargetUser(it.timeStamp, users),
             )
         })
     }
 
-    // returns device user corresponding to usage event
-    // if the event occurred before the current user was saved, we return previously saved user
     private fun getTargetUser(
-        currentUser: String?,
-        previousUser: String?,
         eventTimestamp: Long,
-        currentUserTimestamp: Long
+        users: NavigableMap<Long, String>
     ): String {
-        var user = if (eventTimestamp >= currentUserTimestamp) currentUser else previousUser
-        if (user == null || user == appContext.getString(R.string.user_unassigned)) {
-            user = ""
-        }
-
-        return user
+        //If users is empty, you'll get a null and return ""
+        val user = users.lowerEntry(eventTimestamp)?.value
+        return if (user == null || user == "Not set") {
+            ""
+        } else user
     }
 
     private fun mapImportance(importance: Int): String {

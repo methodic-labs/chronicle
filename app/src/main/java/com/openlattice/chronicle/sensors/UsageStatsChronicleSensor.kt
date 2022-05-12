@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList
 import com.openlattice.chronicle.android.ChronicleData
 import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.models.ExtractUsageStat
+import com.openlattice.chronicle.storage.UserStorageQueue
 import com.openlattice.chronicle.utils.Utils.getAppFullName
 import com.openlattice.chronicle.utils.Utils.offsetDateTimeFromEpochMillis
 import org.apache.olingo.commons.api.edm.FullQualifiedName
@@ -23,11 +24,7 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     @Synchronized
-    override fun poll(propertyTypeIds: Map<FullQualifiedName, UUID>): ChronicleData {
-        if (propertyTypeIds.isEmpty()) {
-            return ChronicleData(emptyList())
-        }
-
+    override fun poll(currentPollTimestamp:Long, users:NavigableMap<Long,String>): ChronicleData {
         val usageStats = usageStatsManager.queryUsageStats(INTERVAL_BEST, DateMidnight.now().millis, System.currentTimeMillis())
 
         Log.i(javaClass.name, "Collected ${usageStats.size} stats.")
