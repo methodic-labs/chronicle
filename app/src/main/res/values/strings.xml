@@ -73,8 +73,8 @@
     <!--    Preference keys -->
     <string name="current_user"> current_user </string>
     <string name="identify_user"> identify_user </string>
-    <string name="previous_user"> previous_user</string>
-    <string name="current_user_timestamp">current_user_timestamp</string>
+<!--    <string name="previous_user"> previous_user</string>-->
+<!--    <string name="current_user_timestamp">current_user_timestamp</string>-->
     <string name="disable_battery_optimization_dialog">disable_battery_optimization_dialog</string>
     <string name="enable_notification_access">enable_notification_access</string>
 

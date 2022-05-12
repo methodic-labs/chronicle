@@ -1,0 +1,103 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "d0287f77fd8ec4d948519e6a4a9227b9",
+    "entities": [
+      {
+        "tableName": "dataQueue",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`writeTimestamp` INTEGER NOT NULL, `id` INTEGER NOT NULL, `data` BLOB NOT NULL, PRIMARY KEY(`writeTimestamp`, `id`))",
+        "fields": [
+          {
+            "fieldPath": "writeTimestamp",
+            "columnName": "writeTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data",
+            "columnName": "data",
+            "affinity": "BLOB",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "writeTimestamp",
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_dataQueue_writeTimestamp",
+            "unique": false,
+            "columnNames": [
+              "writeTimestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dataQueue_writeTimestamp` ON `${TABLE_NAME}` (`writeTimestamp`)"
+          },
+          {
+            "name": "index_dataQueue_writeTimestamp_id",
+            "unique": true,
+            "columnNames": [
+              "writeTimestamp",
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_dataQueue_writeTimestamp_id` ON `${TABLE_NAME}` (`writeTimestamp`, `id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "userQueue",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`writeTimestamp` INTEGER NOT NULL, `user` TEXT NOT NULL, PRIMARY KEY(`writeTimestamp`))",
+        "fields": [
+          {
+            "fieldPath": "writeTimestamp",
+            "columnName": "writeTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "user",
+            "columnName": "user",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "writeTimestamp"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_userQueue_writeTimestamp",
+            "unique": true,
+            "columnNames": [
+              "writeTimestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_userQueue_writeTimestamp` ON `${TABLE_NAME}` (`writeTimestamp`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd0287f77fd8ec4d948519e6a4a9227b9')"
+    ]
+  }
+}

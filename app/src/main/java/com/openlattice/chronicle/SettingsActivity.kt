@@ -117,5 +117,12 @@ class SettingsActivity : AppCompatActivity() {
                 targetUserPreference.value = settings?.getCurrentUser()
             }
         }
+
+        override fun onStop() {
+            settings?.closeDb()
+            super.onStop()
+        }
+
+
     }
 }
