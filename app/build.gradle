@@ -29,8 +29,8 @@ android {
         applicationId "com.openlattice.chronicle"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 22
-        versionName "2022-05-11"
+        versionCode 23
+        versionName "2022-05-18"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
