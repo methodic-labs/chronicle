@@ -56,6 +56,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
                     Instant.ofEpochMilli(it.timeStamp),
                     ZoneOffset.UTC
                 ),
+                eventType = it.eventType,
                 timezone = timezone,
                 applicationLabel = getAppFullName(appContext, it.packageName),
                 user = getTargetUser(it.timeStamp, users),
@@ -78,6 +79,8 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
         return when (importance) {
             UsageEvents.Event.MOVE_TO_BACKGROUND -> "Move to Background"
             UsageEvents.Event.MOVE_TO_FOREGROUND -> "Move to Foreground"
+            UsageEvents.Event.ACTIVITY_PAUSED -> "Activity Paused"
+            UsageEvents.Event.ACTIVITY_RESUMED -> "Activity Resumed"
             UsageEvents.Event.CONFIGURATION_CHANGE -> "Configuration Change"
             UsageEvents.Event.SHORTCUT_INVOCATION -> "Shortcut Invocation"
             UsageEvents.Event.USER_INTERACTION -> "User Interaction"

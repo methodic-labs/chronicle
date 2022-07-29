@@ -1,5 +1,6 @@
 package com.openlattice.chronicle.services.upload
 
+import android.app.usage.UsageEvents
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -160,6 +161,22 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         }
     }
 
+
+        private fun fromInteractionType(interactionType:String ) :Int  {
+            return when( interactionType ) {
+                "Move to Background" -> UsageEvents.Event.MOVE_TO_BACKGROUND
+                "Move to Foreground" -> UsageEvents.Event.MOVE_TO_FOREGROUND
+                "Configuration Change" -> UsageEvents.Event.CONFIGURATION_CHANGE
+                "Shortcut Invocation" -> UsageEvents.Event.SHORTCUT_INVOCATION
+                "User Interaction" -> UsageEvents.Event.USER_INTERACTION
+                "None" -> UsageEvents.Event.NONE
+                "Usage Stat" -> -1
+                else -> {
+                    interactionType.substringAfter("Unknown importance: ").toInt()
+                }
+            }
+        }
+
     private fun mapLegacyQueueEntry(data: List<SetMultimap<UUID, Any>>): List<ChronicleSample> {
         return data.mapNotNull { datum ->
             val appPackageName = getFirstValueOrNull(datum, GENERAL_NAME)
@@ -173,6 +190,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                 ExtractedUsageEvent(
                     appPackageName,
                     interactionType,
+                    fromInteractionType(interactionType),
                     OffsetDateTime.parse(timestamp),
                     timezone,
                     user,
@@ -193,7 +211,8 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                     timezone = datum.timezone,
                     timestamp = datum.timestamp,
                     user = datum.user,
-                    interactionType = datum.interactionType
+                    interactionType = datum.interactionType,
+                    eventType = datum.eventType
                 )
                 else -> null
             }
