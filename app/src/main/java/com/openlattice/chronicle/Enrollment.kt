@@ -66,6 +66,7 @@ class Enrollment : AppCompatActivity() {
         }
 
         submitBtn.setOnClickListener {
+            throw RuntimeException("Test Crash");
             doEnrollment()
         }
 
