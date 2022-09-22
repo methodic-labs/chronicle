@@ -216,7 +216,7 @@ class Enrollment : AppCompatActivity() {
             statusMessageText.visibility = View.VISIBLE
             submitBtn.visibility = View.VISIBLE
             doneBtn.visibility = View.INVISIBLE
-            FirebaseCrashlytics.getInstance().recordException(e)
+            crashlytics.recordException(e)
             Log.e(javaClass.canonicalName, "unable to enroll", e)
         }
     }

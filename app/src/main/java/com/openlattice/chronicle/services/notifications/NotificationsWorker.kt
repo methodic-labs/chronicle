@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import androidx.work.*
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -73,7 +74,10 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
         } catch (e: Exception) {
             Log.i(javaClass.name, "Exception happened! ", e)
             crashlytics.recordException(e)
-            firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.NOTIFICATIONS_FAILURE, null)
+            firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.NOTIFICATIONS_FAILURE, Bundle().apply {
+                putString(PARTICIPANT_ID, participantId)
+                putString(STUDY_ID, studyId.toString())
+            })
             return Result.failure()
         }
         return Result.success()
