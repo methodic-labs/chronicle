@@ -30,8 +30,8 @@ android {
         applicationId "com.methodic.chronicle"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 23
-        versionName "2022-05-18"
+        versionCode 25
+        versionName "2022-09-21"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
