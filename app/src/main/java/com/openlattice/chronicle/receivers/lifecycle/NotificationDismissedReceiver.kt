@@ -3,7 +3,7 @@ package com.openlattice.chronicle.receivers.lifecycle
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.methodic.chronicle.R
+import com.openlattice.chronicle.R
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
 

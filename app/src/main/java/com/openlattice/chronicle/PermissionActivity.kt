@@ -14,7 +14,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import com.methodic.chronicle.R
 
 class PermissionActivity : AppCompatActivity() {
 
