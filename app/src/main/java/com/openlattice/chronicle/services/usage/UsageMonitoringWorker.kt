@@ -16,6 +16,8 @@ import com.openlattice.chronicle.api.ChronicleApi
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.PARTICIPANT_ID
+import com.openlattice.chronicle.preferences.STUDY_ID
 import com.openlattice.chronicle.sensors.ChronicleSensor
 import com.openlattice.chronicle.sensors.PROPERTY_TYPES
 import com.openlattice.chronicle.sensors.UsageEventsChronicleSensor
@@ -70,9 +72,13 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
 
         } catch (e: Exception) {
             crashlytics.recordException(e)
-
+            val participantId = settings.getParticipantId()
+            val studyId = settings.getStudyId()
             Log.i(TAG, "usage monitoring worker failed with an exception", e)
-            analytics.logEvent(FirebaseAnalyticsEvents.USAGE_FAILURE, null)
+            analytics.logEvent(FirebaseAnalyticsEvents.USAGE_FAILURE, Bundle().apply {
+                putString(PARTICIPANT_ID, participantId)
+                putString(STUDY_ID, studyId.toString())
+            })
             closeDb()
             return Result.failure()
         }
@@ -93,7 +99,10 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
     private fun monitorUsage() {
 
         Log.i(TAG, "usage monitoring worker initialized")
-        analytics.logEvent(FirebaseAnalyticsEvents.USAGE_START, null)
+        analytics.logEvent(FirebaseAnalyticsEvents.USAGE_START, Bundle().apply {
+            putString(PARTICIPANT_ID, settings.getParticipantId())
+            putString(STUDY_ID, settings.getStudyId().toString())
+        })
 
         // only stop monitoring if data collection has been explicitly turned off
         if (settings.getParticipationStatus() == ParticipationStatus.NOT_ENROLLED) {
@@ -107,7 +116,7 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
 
         Log.d(
             javaClass.name,
-            "Collecting Usage Information. Service ${serviceId} has been running for ${
+            "Collecting Usage Information. Service $serviceId has been running for ${
                 sw.elapsed(TimeUnit.SECONDS)
             } seconds."
         )
@@ -139,6 +148,10 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
                 "Persisting ${chunk.size} usage information elements took ${w.elapsed(TimeUnit.MILLISECONDS)} millis."
             )
             analytics.logEvent(FirebaseAnalyticsEvents.USAGE_SUCCESS, Bundle().apply {
+                Bundle().apply {
+                    putString(PARTICIPANT_ID, settings.getParticipantId())
+                    putString(STUDY_ID, settings.getStudyId().toString())
+                }
                 putInt("size", chunk.size)
             })
         }

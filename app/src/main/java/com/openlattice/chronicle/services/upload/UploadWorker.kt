@@ -16,9 +16,7 @@ import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.models.ExtractedUsageEvent
-import com.openlattice.chronicle.preferences.EnrollmentSettings
-import com.openlattice.chronicle.preferences.getDevice
-import com.openlattice.chronicle.preferences.getDeviceId
+import com.openlattice.chronicle.preferences.*
 import com.openlattice.chronicle.sensors.*
 import com.openlattice.chronicle.serialization.JsonSerializer
 import com.openlattice.chronicle.services.sinks.BrokerDataSink
@@ -86,7 +84,10 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         } catch (e: Exception) {
             closeDb()
             crashlytics.recordException(e)
-            firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_FAILURE, null)
+            firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_FAILURE, Bundle().apply {
+                putString(PARTICIPANT_ID, participantId)
+                putString(STUDY_ID, studyId.toString())
+            })
             Log.i(TAG, "usage upload failed")
             return Result.failure()
         }
@@ -108,7 +109,10 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
     private fun uploadData() {
 
         Log.i(TAG, "usage upload worker started")
-        firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_START, null)
+        firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_START, Bundle().apply {
+            putString(PARTICIPANT_ID, participantId)
+            putString(STUDY_ID, studyId.toString())
+        })
 
         // If studyApi.enroll(...) fails
         val chronicleId: UUID =
@@ -151,6 +155,8 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                 notEmptied = nextEntries.size == BATCH_SIZE
 
                 firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_SUCCESS, Bundle().apply {
+                    putString(PARTICIPANT_ID, participantId)
+                    putString(STUDY_ID, studyId.toString())
                     putInt("size", data.size)
                 })
 
