@@ -9,7 +9,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.openlattice.chronicle.R
+import com.methodic.chronicle.R
 import com.openlattice.chronicle.SettingsActivity
 import com.openlattice.chronicle.receivers.lifecycle.NotificationDismissedReceiver
 import com.openlattice.chronicle.receivers.lifecycle.UnlockDeviceReceiver
