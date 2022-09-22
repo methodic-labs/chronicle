@@ -12,7 +12,7 @@ import android.os.Build
 import android.preference.PreferenceManager
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.methodic.chronicle.R
+import com.openlattice.chronicle.R
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 import com.openlattice.chronicle.services.notifications.NotificationDetails

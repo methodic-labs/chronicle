@@ -8,7 +8,7 @@ import androidx.room.Room
 import com.google.common.base.Optional
 import com.google.common.collect.ImmutableMap
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.methodic.chronicle.R
+import com.openlattice.chronicle.R
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.serialization.JsonSerializer.deserializePropertyTypeIds
 import com.openlattice.chronicle.serialization.JsonSerializer.serializePropertyTypeIds

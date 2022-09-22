@@ -8,7 +8,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import com.methodic.chronicle.R
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.DeviceUnlockMonitoringService
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork

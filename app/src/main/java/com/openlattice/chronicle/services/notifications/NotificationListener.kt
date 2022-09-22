@@ -3,7 +3,7 @@ package com.openlattice.chronicle.services.notifications
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import com.methodic.chronicle.R
+import com.openlattice.chronicle.R
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 
 class NotificationListener : NotificationListenerService() {
