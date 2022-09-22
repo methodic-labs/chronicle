@@ -9,7 +9,7 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.openlattice.chronicle.R
+import com.methodic.chronicle.R
 import com.openlattice.chronicle.UserIdentificationActivity
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID

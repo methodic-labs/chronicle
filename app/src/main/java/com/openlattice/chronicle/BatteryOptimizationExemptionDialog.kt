@@ -8,6 +8,7 @@ import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import com.methodic.chronicle.R
 
 class BatteryOptimizationExemptionDialog : DialogFragment() {
     @RequiresApi(Build.VERSION_CODES.M)
@@ -17,7 +18,8 @@ class BatteryOptimizationExemptionDialog : DialogFragment() {
             val builder = AlertDialog.Builder(it)
             builder.setTitle("Battery Optimization")
                     .setMessage(R.string.battery_optimization_exemption)
-                    .setPositiveButton(R.string.settings
+                    .setPositiveButton(
+                        R.string.settings
                     ) { dialog, _ ->
                         dialog.cancel()
                         val intent = Intent().apply {
