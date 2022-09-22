@@ -62,12 +62,7 @@ class MainActivity : AppCompatActivity() {
         uploadProgressView = findViewById(R.id.uploadProgressView)
 
         uploadProgressView.visibility = View.GONE
-
-        // disable crashlytics in debug
-        if (BuildConfig.DEBUG) {
-            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false)
-        }
-
+        
         if (!hasUsageSettingPermission(this)) {
             startActivity(Intent(this, PermissionActivity::class.java))
             finish()
