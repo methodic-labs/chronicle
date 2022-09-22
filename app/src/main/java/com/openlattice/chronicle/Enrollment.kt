@@ -66,14 +66,6 @@ class Enrollment : AppCompatActivity() {
         }
 
         submitBtn.setOnClickListener {
-            crashlytics.setCrashlyticsCollectionEnabled(true)
-            try {
-                throw RuntimeException("Test Crash")
-            } catch (ex: Exception ) {
-                crashlytics.recordException(ex)
-                throw ex
-            }
-
             doEnrollment()
         }
 
