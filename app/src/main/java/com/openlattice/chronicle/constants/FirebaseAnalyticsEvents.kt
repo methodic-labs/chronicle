@@ -7,6 +7,7 @@ class FirebaseAnalyticsEvents {
         const val UPLOAD_START = "upload_start"
         const val UPLOAD_SUCCESS = "upload_success"
         const val UPLOAD_FAILURE = "upload_failure"
+        const val SUBMIT_FAILURE = "submit_failure"
         const val USAGE_START = "usage_sensor_start"
         const val USAGE_SUCCESS = "usage_sensor_success"
         const val USAGE_FAILURE = "usage_sensor_failure"
