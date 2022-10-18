@@ -74,7 +74,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
 
             dataSink = BrokerDataSink(
                 mutableSetOf(
-                    MethodicSink(studyId, participantId, deviceId, studyApi),
+                    MethodicSink(studyId, participantId, deviceId, studyApi, crashlytics, firebaseAnalytics),
                     ConsoleSink()
                 )
             )

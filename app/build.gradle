@@ -27,7 +27,7 @@ android {
         viewBinding true
     }
     defaultConfig {
-        applicationId "com.methodic.chronicle"
+        applicationId "com.openlattice.chronicle"
         minSdkVersion 21
         targetSdkVersion 32
         versionCode 27
