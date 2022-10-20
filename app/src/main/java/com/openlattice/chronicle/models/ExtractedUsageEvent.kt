@@ -7,6 +7,7 @@ import java.util.*
 data class ExtractedUsageEvent(
     val appPackageName: String,
     val interactionType: String,
+    val eventType: Int,
     val timestamp: OffsetDateTime,
     val timezone: String,
     val user: String,
