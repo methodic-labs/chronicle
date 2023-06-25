@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.20'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.8.20'
     id 'com.google.firebase.crashlytics'
 }
 
@@ -32,7 +32,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 32
         versionCode 28
-        versionName "2022-10-31"
+        versionName "2023-06-25"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -64,8 +64,8 @@ android {
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
-        targetCompatibility 11
-        sourceCompatibility 11
+        targetCompatibility 17
+        sourceCompatibility 17
     }
     packagingOptions {
         resources {
@@ -75,7 +75,7 @@ android {
 
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     lint {
         abortOnError false
