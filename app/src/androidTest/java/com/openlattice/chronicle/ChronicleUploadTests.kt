@@ -14,7 +14,10 @@ import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.sources.AndroidDevice
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.StorageQueue
-import com.openlattice.chronicle.util.RetrofitBuilders.*
+import com.openlattice.chronicle.util.RetrofitBuilders.createBaseChronicleRetrofitBuilder
+import com.openlattice.chronicle.util.RetrofitBuilders.decorateWithRhizomeFactories
+import com.openlattice.chronicle.util.RetrofitBuilders.mapper
+import com.openlattice.chronicle.util.RetrofitBuilders.okHttpClient
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -1,4 +1,4 @@
-package com.openlattice.chronicle.constants
+package com.methodic.chronicle.constants
 
 enum class Jobs (val id: Int) {
     UPLOAD_JOB_ID(0),

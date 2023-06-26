@@ -1,4 +1,4 @@
-package com.openlattice.chronicle.constants
+package com.methodic.chronicle.constants
 
 class FirebaseAnalyticsEvents {
     companion object {

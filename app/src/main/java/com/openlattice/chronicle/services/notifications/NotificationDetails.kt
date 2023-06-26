@@ -1,6 +1,6 @@
 package com.openlattice.chronicle.services.notifications
 
-import com.openlattice.chronicle.constants.NotificationType
+import com.methodic.chronicle.constants.NotificationType
 
 data class NotificationDetails(
     val id: String,

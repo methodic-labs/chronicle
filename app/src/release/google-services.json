@@ -1,35 +1,153 @@
 {
   "project_info": {
-    "project_number": "02",
-    "firebase_url": "foo",
-    "project_id": "foo",
-    "storage_bucket": "foo"
+    "project_number": "926359735766",
+    "project_id": "chronicle-82ee2",
+    "storage_bucket": "chronicle-82ee2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "foo",
+        "mobilesdk_app_id": "1:926359735766:android:92965741f82896d914a877",
         "android_client_info": {
-          "package_name": "com.openlattice.chronicle"
+          "package_name": "com.methodic.chronicle"
         }
       },
       "oauth_client": [
         {
-          "client_id": "foo",
-          "client_type": 223
+          "client_id": "926359735766-g75bqbh7mqko0i0n7dls5u8fn7776057.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "foo"
+          "current_key": "AIzaSyBtyxTm749h10R_xnIaORQhQSp2pInbJfE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "foo",
-              "client_type": 3223
+              "client_id": "926359735766-g75bqbh7mqko0i0n7dls5u8fn7776057.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "926359735766-fftm8ur2ko9d7hqiovdsp1l45hfk168d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.methodic.chronicle",
+                "app_store_id": "1618305704"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926359735766:android:5a87d6813675305514a877",
+        "android_client_info": {
+          "package_name": "com.methodic.chronicle.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "926359735766-g75bqbh7mqko0i0n7dls5u8fn7776057.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtyxTm749h10R_xnIaORQhQSp2pInbJfE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "926359735766-g75bqbh7mqko0i0n7dls5u8fn7776057.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "926359735766-fftm8ur2ko9d7hqiovdsp1l45hfk168d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.methodic.chronicle",
+                "app_store_id": "1618305704"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926359735766:android:662472cdfce8026414a877",
+        "android_client_info": {
+          "package_name": "com.openlattice.chronicle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "926359735766-g75bqbh7mqko0i0n7dls5u8fn7776057.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtyxTm749h10R_xnIaORQhQSp2pInbJfE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "926359735766-g75bqbh7mqko0i0n7dls5u8fn7776057.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "926359735766-fftm8ur2ko9d7hqiovdsp1l45hfk168d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.methodic.chronicle",
+                "app_store_id": "1618305704"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926359735766:android:d4fb77f016841fd614a877",
+        "android_client_info": {
+          "package_name": "com.openlattice.chronicle.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "926359735766-g75bqbh7mqko0i0n7dls5u8fn7776057.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtyxTm749h10R_xnIaORQhQSp2pInbJfE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "926359735766-g75bqbh7mqko0i0n7dls5u8fn7776057.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "926359735766-fftm8ur2ko9d7hqiovdsp1l45hfk168d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.methodic.chronicle",
+                "app_store_id": "1618305704"
+              }
             }
           ]
         }

@@ -15,8 +15,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.api.ChronicleApi
-import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
-import com.openlattice.chronicle.constants.NotificationType
+import com.methodic.chronicle.constants.FirebaseAnalyticsEvents
+import com.methodic.chronicle.constants.NotificationType
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.preferences.PARTICIPANT_ID

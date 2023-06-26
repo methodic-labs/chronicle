@@ -2,6 +2,8 @@ package com.openlattice.chronicle
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,7 +12,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -18,7 +22,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
-import com.openlattice.chronicle.constants.FirebaseAnalyticsEvents
+import com.methodic.chronicle.constants.FirebaseAnalyticsEvents
 import com.openlattice.chronicle.preferences.*
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.study.StudyApi
@@ -26,6 +30,7 @@ import com.openlattice.chronicle.utils.Utils
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import java.util.*
 import java.util.concurrent.Executors
+import android.Manifest
 
 class Enrollment : AppCompatActivity() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -44,6 +49,16 @@ class Enrollment : AppCompatActivity() {
     private lateinit var studyIdTextLayout: TextInputLayout
     private lateinit var participantIdTextLayout: TextInputLayout
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.i(Enrollment::class.java.name, "Notifications enabled!")
+        } else {
+            // Inform researchers that user blocked notifications for their study
+            Log.e(Enrollment::class.java.name,"Unable to send notifications!" )
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enrollment)
@@ -132,8 +147,29 @@ class Enrollment : AppCompatActivity() {
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
+    private fun askNotificationPermission() {
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // FCM SDK (and your app) can post notifications.
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                // TODO: display an educational UI explaining to the user the features that will be enabled
+                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
+                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
+                //       If the user selects "No thanks," allow the user to continue without notifications.
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
 
     private fun doEnrollment() {
+        // Declare the launcher at the top of your Activity/Fragment:
 
         val studyIdStr: String = studyIdText.text.toString().trim()
         val participantId: String = participantIdText.text.toString().trim()
@@ -195,6 +231,7 @@ class Enrollment : AppCompatActivity() {
                         statusMessageText.visibility = View.VISIBLE
                         doneBtn.visibility = View.VISIBLE
                     }
+                    askNotificationPermission()
                 } else {
                     crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_FAILURE, Bundle().apply {
