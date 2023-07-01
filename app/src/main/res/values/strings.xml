@@ -29,6 +29,8 @@
     <string name="invalid_org_id_format">Invalid organization id format.</string>
 
     <string name="manual_usage_settings_permission">Your model phone requires manually granting of Usage Settings permissions. Please go to settings and grant this application usage settings.</string>
+    <string name="manual_notification_settings_permission">Your model phone requires manually granting of Notification permissions. Please go to settings and grant this application permission to receive notifications.</string>
+    <string name="notification_permissions_required">Your study requires notifications to be enabled to complete enrollment.</string>
     <string name="participant_id_header">Participant Id:</string>
     <string name="study_id_header">Study Id:</string>
     <string name="last_upload_header">Last Upload:</string>
