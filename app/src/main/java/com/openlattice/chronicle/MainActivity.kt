@@ -17,6 +17,8 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
+import com.methodic.chronicle.services.notifications.NotificationPermissionActivity
+import com.methodic.chronicle.services.notifications.hasNotificationPermission
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.models.UploadStatusModel
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -66,6 +68,10 @@ class MainActivity : AppCompatActivity() {
         // Always enable crashlytics. Debug crashes will go to separate app on firebase
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
 
+        if(!hasNotificationPermission(this)) {
+            startActivity(Intent(this, NotificationPermissionActivity::class.java))
+            finish()
+        }
 
         if (!hasUsageSettingPermission(this)) {
             startActivity(Intent(this, PermissionActivity::class.java))

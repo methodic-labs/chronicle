@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:allowBackup="false"
@@ -70,7 +71,16 @@
         <activity
             android:name=".PermissionActivity"
             android:parentActivityName=".MainActivity" />
-
+        <activity
+            android:name="com.methodic.chronicle.services.notifications.NotificationPermissionActivity"
+            android:parentActivityName=".MainActivity" />
+        <receiver android:name="com.methodic.chronicle.services.notifications.NotificationPermissionListener"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.app.action.APP_BLOCK_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".receivers.lifecycle.StartOnBoot"
             android:exported="true"

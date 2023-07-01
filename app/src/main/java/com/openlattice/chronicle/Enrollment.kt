@@ -31,6 +31,7 @@ import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
 import java.util.*
 import java.util.concurrent.Executors
 import android.Manifest
+import com.methodic.chronicle.services.notifications.NotificationPermissionActivity
 
 class Enrollment : AppCompatActivity() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -148,6 +149,8 @@ class Enrollment : AppCompatActivity() {
         }
     }
     private fun askNotificationPermission() {
+        startActivity(Intent(this, NotificationPermissionActivity::class.java))
+        finish()
         requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         // This is only necessary for API level >= 33 (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
