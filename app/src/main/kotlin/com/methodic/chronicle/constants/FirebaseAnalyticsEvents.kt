@@ -5,6 +5,7 @@ class FirebaseAnalyticsEvents {
         const val ENROLLMENT_SUCCESS = "enrollment_success"
         const val ENROLLMENT_FAILURE = "enrollment_fail"
         const val UPLOAD_START = "upload_start"
+        const val UPLOAD_BATCH_SUCCESS = "upload_batch_success"
         const val UPLOAD_SUCCESS = "upload_success"
         const val UPLOAD_FAILURE = "upload_failure"
         const val SUBMIT_FAILURE = "submit_failure"

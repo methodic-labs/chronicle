@@ -1,5 +1,6 @@
 package com.openlattice.chronicle
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -23,15 +24,19 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.methodic.chronicle.constants.FirebaseAnalyticsEvents
-import com.openlattice.chronicle.preferences.*
+import com.methodic.chronicle.services.notifications.NotificationPermissionActivity
+import com.methodic.chronicle.services.notifications.getFirebaseRegistrationToken
+import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.preferences.PARTICIPANT_ID
+import com.openlattice.chronicle.preferences.STUDY_ID
+import com.openlattice.chronicle.preferences.getDevice
+import com.openlattice.chronicle.preferences.getDeviceId
 import com.openlattice.chronicle.services.upload.PRODUCTION
 import com.openlattice.chronicle.study.StudyApi
 import com.openlattice.chronicle.utils.Utils
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.Executors
-import android.Manifest
-import com.methodic.chronicle.services.notifications.NotificationPermissionActivity
 
 class Enrollment : AppCompatActivity() {
     private val executor = Executors.newSingleThreadExecutor()
@@ -185,7 +190,7 @@ class Enrollment : AppCompatActivity() {
         try {
             val studyId = UUID.fromString(studyIdStr)
             val deviceId = getDeviceId(applicationContext)
-
+            val fcmRegistrationToken = getFirebaseRegistrationToken()
             statusMessageText.visibility = View.INVISIBLE
             submitBtn.visibility = View.INVISIBLE
             progressBar.visibility = View.VISIBLE
@@ -200,7 +205,7 @@ class Enrollment : AppCompatActivity() {
                         studyId,
                         participantId,
                         deviceId,
-                        getDevice(deviceId)
+                        getDevice(deviceId,fcmRegistrationToken)
                     )
 
                 } catch (e: Exception) {

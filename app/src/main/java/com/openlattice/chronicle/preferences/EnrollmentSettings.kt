@@ -177,7 +177,7 @@ fun getDeviceId(context: Context): String {
     return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 }
 
-fun getDevice(deviceId: String): AndroidDevice {
+fun getDevice(deviceId: String, fcmRegistrationToken: String): AndroidDevice {
     return AndroidDevice(
         deviceId,
         Build.MODEL,
@@ -187,7 +187,8 @@ fun getDevice(deviceId: String): AndroidDevice {
         Build.VERSION.SDK_INT.toString(),
         Build.PRODUCT,
         deviceId,
-        Optional.absent()
+        mapOf(),
+        fcmRegistrationToken
     )
 }
 

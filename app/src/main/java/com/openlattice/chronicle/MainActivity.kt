@@ -68,8 +68,6 @@ class MainActivity : AppCompatActivity() {
         // Always enable crashlytics. Debug crashes will go to separate app on firebase
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
 
-
-
         if (!hasUsageSettingPermission(this)) {
             startActivity(Intent(this, PermissionActivity::class.java))
             finish()
@@ -95,7 +93,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             //We'll have to check whether study requires notification to be enabled.
-            if(true ) {
+            if (true) {
                 if (!hasNotificationPermission(this)) {
                     startActivity(Intent(this, NotificationPermissionActivity::class.java))
                     finish()
@@ -186,6 +184,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

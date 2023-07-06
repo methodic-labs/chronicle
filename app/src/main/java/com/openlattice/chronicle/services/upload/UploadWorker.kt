@@ -14,6 +14,7 @@ import com.google.firebase.ktx.Firebase
 import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.android.ChronicleUsageEvent
 import com.methodic.chronicle.constants.FirebaseAnalyticsEvents
+import com.methodic.chronicle.services.notifications.getFirebaseRegistrationToken
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.models.ExtractedUsageEvent
 import com.openlattice.chronicle.preferences.*
@@ -74,12 +75,32 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
 
             dataSink = BrokerDataSink(
                 mutableSetOf(
-                    MethodicSink(studyId, participantId, deviceId, studyApi, crashlytics, firebaseAnalytics),
+                    MethodicSink(
+                        studyId,
+                        participantId,
+                        deviceId,
+                        studyApi,
+                        crashlytics,
+                        firebaseAnalytics
+                    ),
                     ConsoleSink()
                 )
             )
 
-            uploadData()
+            Log.i(TAG, "usage upload worker started")
+            firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_START, Bundle().apply {
+                putString(PARTICIPANT_ID, participantId)
+                putString(STUDY_ID, studyId.toString())
+            })
+
+            val size = uploadData()
+
+            firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_SUCCESS, Bundle().apply {
+                putString(PARTICIPANT_ID, participantId)
+                putString(STUDY_ID, studyId.toString())
+                putInt("size", size)
+            })
+
             closeDb()
         } catch (e: Exception) {
             closeDb()
@@ -106,23 +127,27 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         }
     }
 
-    private fun uploadData() {
+    private fun uploadData(): Int {
 
-        Log.i(TAG, "usage upload worker started")
-        firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_START, Bundle().apply {
-            putString(PARTICIPANT_ID, participantId)
-            putString(STUDY_ID, studyId.toString())
-        })
-
-        // If studyApi.enroll(...) fails
-        val chronicleId: UUID =
-            studyApi.enroll(studyId, participantId, deviceId, getDevice(deviceId))
+        /**
+         * We always pull the latest firebase registration token when uploading.
+         *
+         * If enrollment call fails we will NPE, it will be handled cleanly.
+         *
+         */
+        val chronicleId: UUID = studyApi.enroll(
+            studyId,
+            participantId,
+            deviceId,
+            getDevice(deviceId, getFirebaseRegistrationToken())
+        )
         Log.i(TAG, "deviceId: $chronicleId")
 
         //Only run the upload job if the device is already enrolled or we are able to properly enroll.
         val queue = chronicleDb.queueEntryData()
         var nextEntries = queue.getNextEntries(BATCH_SIZE)
         var notEmptied = nextEntries.isNotEmpty()
+        var total = 0
         while (notEmptied) {
             limiter.acquire()
             val w = Stopwatch.createStarted()
@@ -154,16 +179,19 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                 nextEntries = queue.getNextEntries(BATCH_SIZE)
                 notEmptied = nextEntries.size == BATCH_SIZE
 
-                firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_SUCCESS, Bundle().apply {
-                    putString(PARTICIPANT_ID, participantId)
-                    putString(STUDY_ID, studyId.toString())
-                    putInt("size", data.size)
-                })
-
+                firebaseAnalytics.logEvent(
+                    FirebaseAnalyticsEvents.UPLOAD_BATCH_SUCCESS,
+                    Bundle().apply {
+                        putString(PARTICIPANT_ID, participantId)
+                        putString(STUDY_ID, studyId.toString())
+                        putInt("size", data.size)
+                    })
+                total += data.size
             } else {
-                throw Exception("exception when uploading usage data")
+                throw Exception("Something went wrong when uploading data.")
             }
         }
+        return total
     }
 
     private fun mapLegacyQueueEntry(data: List<SetMultimap<UUID, Any>>): List<ChronicleSample> {
@@ -201,6 +229,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                     user = datum.user,
                     interactionType = datum.interactionType
                 )
+
                 else -> null
             }
         }
