@@ -239,7 +239,7 @@ class Enrollment : AppCompatActivity() {
                         statusMessageText.visibility = View.VISIBLE
                         doneBtn.visibility = View.VISIBLE
                     }
-                    askNotificationPermission()
+//                    askNotificationPermission()
                 } else {
                     crashlytics.log("unable to enroll device - studyId: \"$studyId\" ; participantId: \"$participantId\"")
                     analytics.logEvent(FirebaseAnalyticsEvents.ENROLLMENT_FAILURE, Bundle().apply {

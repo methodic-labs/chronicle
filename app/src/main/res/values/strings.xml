@@ -31,6 +31,7 @@
     <string name="manual_usage_settings_permission">Your model phone requires manually granting of Usage Settings permissions. Please go to settings and grant this application usage settings.</string>
     <string name="manual_notification_settings_permission">Your model phone requires manually granting of Notification permissions. Please go to settings and grant this application permission to receive notifications.</string>
     <string name="notification_permissions_required">Your study requires notifications to be enabled to complete enrollment.</string>
+    <string name="default_notification_channel_id">com.methodic.chronicle</string>
     <string name="participant_id_header">Participant Id:</string>
     <string name="study_id_header">Study Id:</string>
     <string name="last_upload_header">Last Upload:</string>
@@ -39,8 +40,8 @@
     <string name="org_id_header">Organization Id:</string>
 
     <!--  notifications channels -->
-    <string name="channel_description"> Channel for chronicle survey daily notifications</string>
-    <string name="channel_name"> Chronicle </string>
+    <string name="channel_description">Channel for chronicle survey daily notifications</string>
+    <string name="channel_name">Chronicle</string>
     <string name="notification_text">Tap to complete survey</string>
     <string name="usage_settings_permission">This application requires usage settings permission in order to function.</string>
     <string name="notification_permission">The study you have enrolled your device in requires notification permissions in order to participate.</string>
