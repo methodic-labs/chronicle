@@ -52,7 +52,7 @@ class ChronicleUploadTests {
     fun testchronicleReadWriteSingleQueueEntry() {
         val deviceId = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        val device = AndroidDevice(deviceId, Build.MODEL, Build.VERSION.CODENAME, Build.BRAND, Build.DISPLAY, Build.VERSION.SDK_INT.toString(), Build.PRODUCT, deviceId, Optional.absent())
+        val device = AndroidDevice(deviceId, Build.MODEL, Build.VERSION.CODENAME, Build.BRAND, Build.DISPLAY, Build.VERSION.SDK_INT.toString(), Build.PRODUCT, deviceId, mapOf())
         val studyId = UUID.fromString("28d661b8-a45a-41b6-aec4-ed9988fa28dc")
         val participantId = "participant1"
 

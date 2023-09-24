@@ -34,7 +34,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val LAST_UPLOADED_PLACEHOLDER = "Never"
-const val PRODUCTION = "http://192.168.50.86:8080"
+const val PRODUCTION = "https://api.getmethodic.com"
 const val BATCH_SIZE = 10
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
 const val UPLOAD_INTERVAL_MIN = 15L
