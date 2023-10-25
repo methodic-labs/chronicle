@@ -190,13 +190,14 @@ class Enrollment : AppCompatActivity() {
         try {
             val studyId = UUID.fromString(studyIdStr)
             val deviceId = getDeviceId(applicationContext)
-            val fcmRegistrationToken = getFirebaseRegistrationToken()
+
             statusMessageText.visibility = View.INVISIBLE
             submitBtn.visibility = View.INVISIBLE
             progressBar.visibility = View.VISIBLE
             closeKeyBoard()
 
             executor.execute {
+                val fcmRegistrationToken = getFirebaseRegistrationToken()
                 val studyApi = createRetrofitAdapter(PRODUCTION).create(StudyApi::class.java)
 
                 var chronicleId: UUID? = null
