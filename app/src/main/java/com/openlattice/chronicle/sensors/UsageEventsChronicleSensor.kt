@@ -76,6 +76,19 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
 
     private fun mapImportance(importance: Int): String {
         return when (importance) {
+            UsageEvents.Event.ACTIVITY_PAUSED -> "Activity Paused"
+            UsageEvents.Event.ACTIVITY_RESUMED -> "Activity Resumed"
+            UsageEvents.Event.ACTIVITY_STOPPED -> "Activity Stopped"
+            UsageEvents.Event.KEYGUARD_SHOWN -> "Keyguard Shown"
+            UsageEvents.Event.KEYGUARD_HIDDEN -> "Keyguard Hidden"
+            UsageEvents.Event.FOREGROUND_SERVICE_START -> "Foreground Service Start"
+            UsageEvents.Event.FOREGROUND_SERVICE_STOP -> "Foreground Service Stop"
+            UsageEvents.Event.USER_INTERACTION -> "User Interaction"
+            UsageEvents.Event.SCREEN_INTERACTIVE -> "Screen Interactive"
+            UsageEvents.Event.SCREEN_NON_INTERACTIVE -> "Screen Non-interactive"
+            UsageEvents.Event.SHORTCUT_INVOCATION -> "Shortcut Invocation"
+            UsageEvents.Event.DEVICE_SHUTDOWN -> "Device Shutdown"
+            UsageEvents.Event.DEVICE_STARTUP -> "Device Startup"
             UsageEvents.Event.MOVE_TO_BACKGROUND -> "Move to Background"
             UsageEvents.Event.MOVE_TO_FOREGROUND -> "Move to Foreground"
             UsageEvents.Event.CONFIGURATION_CHANGE -> "Configuration Change"
