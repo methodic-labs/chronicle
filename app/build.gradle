@@ -1,7 +1,7 @@
 plugins {
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.9.22'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.20'
     id 'com.google.firebase.crashlytics'
-    id 'com.google.devtools.ksp' version '1.9.22-1.0.17' apply true
+    id 'com.google.devtools.ksp' version '2.1.20-2.0.0' apply true
 }
 
 apply plugin: 'com.android.application'
@@ -31,7 +31,7 @@ android {
         applicationId "com.openlattice.chronicle"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 33
+        versionCode 34
         versionName "2025-04-11"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
