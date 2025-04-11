@@ -7,14 +7,16 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.util.Log
 import androidx.test.InstrumentationRegistry.getContext
-import androidx.test.InstrumentationRegistry.getTargetContext
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.google.common.base.Optional
 import com.google.common.base.Stopwatch
 import com.openlattice.chronicle.sources.AndroidDevice
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.storage.StorageQueue
-import com.openlattice.chronicle.util.RetrofitBuilders.*
+import com.openlattice.chronicle.util.RetrofitBuilders.createBaseChronicleRetrofitBuilder
+import com.openlattice.chronicle.util.RetrofitBuilders.decorateWithRhizomeFactories
+import com.openlattice.chronicle.util.RetrofitBuilders.mapper
+import com.openlattice.chronicle.util.RetrofitBuilders.okHttpClient
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,7 +66,7 @@ class ChronicleUploadTests {
         Log.i(javaClass.canonicalName, "Elapsed serialization time: $millis")
         w.reset()
         w.start()
-        Log.i(javaClass.canonicalName, TypeRefs.map(mapper, deviceJson, TypeRefs.optDS()).get().toString())
+//        Log.i(javaClass.canonicalName, TypeRefs.map(mapper, deviceJson, TypeRefs.optDS()).get().toString())
         millis = w.elapsed(TimeUnit.MILLISECONDS)
         Log.i(javaClass.canonicalName, "Elapsed serialization time: $millis")
 
