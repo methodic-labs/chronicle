@@ -17,6 +17,12 @@ import com.openlattice.chronicle.utils.Utils.getPendingIntentMutabilityFlag
 
 // A "forever running" service to monitor device unlock. A workaround for devices running version >= 8.0
 // since we can no longer register ACTION_USER_PRESENT intent in manifest
+
+/**
+ * This is required to be a foreground service, because ACTION_USER_PRESENT must be dynamically
+ * registered for in the manifest. So in order to constantly be registered across multiple lock
+ * and unlock cycles, we have to have a foreground service present.
+ */
 class DeviceUnlockMonitoringService : Service() {
 
     private var unlockDeviceReceiver = UnlockDeviceReceiver()
