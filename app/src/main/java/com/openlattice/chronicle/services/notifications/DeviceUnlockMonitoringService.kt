@@ -1,10 +1,12 @@
 package com.openlattice.chronicle.services.notifications
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -17,6 +19,12 @@ import com.openlattice.chronicle.utils.Utils.getPendingIntentMutabilityFlag
 
 // A "forever running" service to monitor device unlock. A workaround for devices running version >= 8.0
 // since we can no longer register ACTION_USER_PRESENT intent in manifest
+
+/**
+ * This is required to be a foreground service, because ACTION_USER_PRESENT must be dynamically
+ * registered for in the manifest. So in order to constantly be registered across multiple lock
+ * and unlock cycles, we have to have a foreground service present.
+ */
 class DeviceUnlockMonitoringService : Service() {
 
     private var unlockDeviceReceiver = UnlockDeviceReceiver()
@@ -100,6 +108,7 @@ class DeviceUnlockMonitoringService : Service() {
         }
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun registerReceivers() {
 
         var intentFilter =
@@ -108,11 +117,23 @@ class DeviceUnlockMonitoringService : Service() {
                     applicationContext
                 )
             )
-        applicationContext.registerReceiver(unlockDeviceReceiver, intentFilter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            applicationContext.registerReceiver(unlockDeviceReceiver, intentFilter, RECEIVER_EXPORTED)
+        } else {
+            applicationContext.registerReceiver(unlockDeviceReceiver, intentFilter)
+        }
         Log.i(javaClass.name, "${UnlockDeviceReceiver::class.java.canonicalName} is registered")
 
         intentFilter = createReceiverIntentFilter(setOf(NOTIFICATION_DELETED_ACTION))
-        applicationContext.registerReceiver(notificationDismissedReceiver, intentFilter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            applicationContext.registerReceiver(
+                notificationDismissedReceiver,
+                intentFilter,
+                RECEIVER_EXPORTED
+            )
+        } else {
+            applicationContext.registerReceiver(notificationDismissedReceiver, intentFilter)
+        }
         Log.i(
             javaClass.name,
             "${NotificationDismissedReceiver::class.java.canonicalName} is registered"
