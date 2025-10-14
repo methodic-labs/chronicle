@@ -1,8 +1,11 @@
 package com.openlattice.chronicle
 
+import android.app.AlarmManager
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -13,10 +16,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.work.WorkInfo
+import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.models.UploadStatusModel
 import com.openlattice.chronicle.preferences.EnrollmentSettings
@@ -27,6 +30,7 @@ import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
 import com.openlattice.chronicle.utils.Utils.getLastUpload
 import kotlinx.coroutines.*
 import java.util.*
+import androidx.activity.OnBackPressedCallback
 
 const val LAST_UPLOAD_REFRESH_INTERVAL = 5000L
 
@@ -50,6 +54,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Replaces on back pressed override
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val intent = Intent(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_HOME)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(intent)
+            }
+        })
+
         lastUploadText = findViewById(R.id.lastUploadValue)
         firebaseAnalytics = Firebase.analytics
         enrollmentSettings = EnrollmentSettings(this)
@@ -70,6 +85,14 @@ class MainActivity : AppCompatActivity() {
         if (!hasUsageSettingPermission(this)) {
             startActivity(Intent(this, PermissionActivity::class.java))
             finish()
+        }
+        val alarmManager: AlarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // Check permission for Android 12+
+        if ( !alarmManager.canScheduleExactAlarms()) {
+            Log.e(javaClass.name, "Exact alarm permission not granted")
+            requestExactAlarmPermission()
         }
 
         // observer
@@ -142,13 +165,13 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
-    override fun onBackPressed() {
-        val intent = Intent(Intent.ACTION_MAIN).apply {
-            addCategory(Intent.CATEGORY_HOME)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    private fun requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            applicationContext.startActivity(intent)
         }
-        startActivity(intent)
     }
 
     // check that devices with android 6.0 (api 23) are exempt from Doze and App Standby optimizations

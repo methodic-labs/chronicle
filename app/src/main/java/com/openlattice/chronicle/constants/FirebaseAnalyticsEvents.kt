@@ -13,5 +13,6 @@ class FirebaseAnalyticsEvents {
         const val USAGE_FAILURE = "usage_sensor_failure"
         const val NOTIFICATIONS_START = "notifications_start"
         const val NOTIFICATIONS_FAILURE = "notification_failure"
+        const val EXACT_ALARM_PERMISSION_DENIED = "exact_alarm_permission_denied"
     }
 }
