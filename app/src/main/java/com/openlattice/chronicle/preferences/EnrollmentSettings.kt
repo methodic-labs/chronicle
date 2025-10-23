@@ -187,7 +187,7 @@ fun getDevice(deviceId: String): AndroidDevice {
         Build.VERSION.SDK_INT.toString(),
         Build.PRODUCT,
         deviceId,
-        Optional.absent()
+        mapOf()
     )
 }
 

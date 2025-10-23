@@ -96,7 +96,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation platform('com.google.firebase:firebase-bom:34.4.0')
-    implementation "org.apache.olingo:odata-commons-api:5.0.0"
+    implementation("org.apache.olingo:odata-commons-api:5.0.0")
 
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-crashlytics'
@@ -112,8 +112,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'com.squareup.retrofit2:retrofit:3.0.0'
-    implementation('com.methodic:chronicle-api:0.1.6') {
+    implementation('com.methodic:chronicle-api:0.1.6-SNAPSHOT') {
         exclude module: 'guava'
+        exclude group: 'org.apache.olingo'
         exclude module: 'slf4j-api'
     }
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
