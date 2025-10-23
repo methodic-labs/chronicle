@@ -8,10 +8,10 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.work.*
+import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.openlattice.chronicle.ChronicleStudyApi
 import com.openlattice.chronicle.api.ChronicleApi
@@ -168,20 +168,33 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             val alarmManager: AlarmManager =
                 applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
+
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Log.e(javaClass.name, "Exact alarm permission not granted... falling back to in exact ")
+                firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.EXACT_ALARM_PERMISSION_DENIED, Bundle().apply {
+                    putString(PARTICIPANT_ID, participantId)
+                    putString(STUDY_ID, studyId.toString())
+                })
+
+                alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     calendar.timeInMillis,
                     pendingIntent
                 )
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+                return
             }
+
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
 
         } catch (e: Exception) {
             Log.i(javaClass.name, "caught exception", e)
         }
     }
+
 
     private fun cancelScheduledNotification(notification: NotificationDetails) {
         Log.i(javaClass.name, "Notification to cancel: $notification")
