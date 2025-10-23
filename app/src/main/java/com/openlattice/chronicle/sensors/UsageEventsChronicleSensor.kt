@@ -12,6 +12,7 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
+import androidx.core.content.edit
 
 const val USAGE_EVENTS_POLL_INTERVAL = 15 * 60 * 1000L
 const val LAST_USAGE_QUERY_TIMESTAMP = "com.openlattice.sensors.LastUsageQueryTimestamp"
@@ -38,7 +39,7 @@ class UsageEventsChronicleSensor(context: Context) : ChronicleSensor {
         )
 
         val usageEvents = usageStatsManager.queryEvents(previousPollTimestamp, currentPollTimestamp)
-        settings.edit().putLong(LAST_USAGE_QUERY_TIMESTAMP, currentPollTimestamp).apply()
+        settings.edit {putLong(LAST_USAGE_QUERY_TIMESTAMP, currentPollTimestamp) }
 
         while (usageEvents.hasNextEvent()) {
             val event: UsageEvents.Event = UsageEvents.Event()
