@@ -117,7 +117,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         // If studyApi.enroll(...) fails
         val chronicleId: UUID =
             studyApi.enroll(studyId, participantId, deviceId, getDevice(deviceId))
-        Log.i(TAG, "deviceId: $chronicleId")
+                    Log.i(TAG, "deviceId: $chronicleId")
 
         //Only run the upload job if the device is already enrolled or we are able to properly enroll.
         val queue = chronicleDb.queueEntryData()
@@ -133,6 +133,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                     try {
                         JsonSerializer.deserializeQueueEntry(qe)
                     } catch (ex: IOException) {
+                        Log.w(TAG, "Error deserializing. Attempting to use legacy deserializer!")
                         mapLegacyQueueEntry(JsonSerializer.deserializeLegacyQueueEntry(qe))
                     }
                 }

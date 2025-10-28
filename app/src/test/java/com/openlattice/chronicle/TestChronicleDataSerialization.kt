@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.openlattice.chronicle.models.ExtractedUsageEvent
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.Test
@@ -46,5 +47,8 @@ class TestChronicleDataSerialization {
         val json = mapper.writeValueAsString( ChronicleData(usageEvents) )
         println("Json: $json")
         Assert.assertTrue( json.contains ("@class") )
+
+        val deserializedUsageEvents = mapper.readValue<ChronicleData>(json)
+        Assert.assertEquals("Deserialized usage events must match." , usageEvents, deserializedUsageEvents )
     }
 }

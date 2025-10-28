@@ -31,8 +31,8 @@ android {
         applicationId "com.openlattice.chronicle"
         minSdkVersion 34
         targetSdkVersion 36
-        versionCode 37
-        versionName "2025-10-14"
+        versionCode 38
+        versionName "2025-10-23"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -87,16 +87,16 @@ ksp {
     arg('room.schemaLocation', "$projectDir/schemas")
 }
 
-ext.jackson_version = '2.19.0'
+ext.jackson_version = '2.20.0'
 ext.activity_version = '1.6.0'
-ext.odata_version='4.5.0'
+
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation platform('com.google.firebase:firebase-bom:34.4.0')
-    implementation "org.apache.olingo:odata-commons-api:${odata_version}"
+    implementation("org.apache.olingo:odata-commons-api:5.0.0")
 
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-crashlytics'
@@ -106,14 +106,15 @@ dependencies {
     implementation "androidx.activity:activity-ktx:1.11.0"
 
     // WorkManager
-    implementation "androidx.work:work-runtime-ktx:2.10.5"
-    implementation "org.apache.commons:commons-lang3:3.17.0"
-    implementation 'com.google.code.gson:gson:2.12.1'
+    implementation "androidx.work:work-runtime-ktx:2.11.0"
+    implementation "org.apache.commons:commons-lang3:3.19.0"
+    implementation 'com.google.code.gson:gson:2.13.2'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.13.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
-    implementation('com.methodic:chronicle-api:0.1.2') {
+    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
+    implementation('com.methodic:chronicle-api:0.1.6-SNAPSHOT') {
         exclude module: 'guava'
+        exclude group: 'org.apache.olingo'
         exclude module: 'slf4j-api'
     }
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -122,25 +123,25 @@ dependencies {
     }
 
     implementation "com.fasterxml.jackson.core:jackson-core:${jackson_version}"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.19.0"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.20.0"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson_version}"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson_version}"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jackson_version}"
 
-    implementation 'joda-time:joda-time:2.12.7'
+    implementation 'joda-time:joda-time:2.14.0'
 
     implementation 'org.slf4j:slf4j-android:1.7.36'
     implementation 'org.slf4j:slf4j-android:1.7.36'
-    implementation 'com.google.guava:guava:31.1-android'
-    implementation 'org.dmfs:lib-recur:0.11.6'
+    implementation 'com.google.guava:guava:33.5.0-android'
+    implementation 'org.dmfs:lib-recur:0.17.1'
 
-    implementation 'androidx.room:room-runtime:2.8.2'
-    implementation 'androidx.room:room-ktx:2.8.2'
+    implementation 'androidx.room:room-runtime:2.8.3'
+    implementation 'androidx.room:room-ktx:2.8.3'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.preference:preference-ktx:1.2.1'
-    ksp 'androidx.room:room-compiler:2.8.2'
-    annotationProcessor 'androidx.room:room-compiler:2.8.2'
-    implementation 'androidx.room:room-runtime:2.8.2'
+    ksp 'androidx.room:room-compiler:2.8.3'
+    annotationProcessor 'androidx.room:room-compiler:2.8.3'
+    implementation 'androidx.room:room-runtime:2.8.3'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.3.0'
