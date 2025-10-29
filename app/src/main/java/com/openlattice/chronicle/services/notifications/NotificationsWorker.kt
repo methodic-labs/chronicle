@@ -169,12 +169,19 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
                 applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
 
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Log.e(javaClass.name, "Exact alarm permission not granted... falling back to in exact ")
-                firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.EXACT_ALARM_PERMISSION_DENIED, Bundle().apply {
-                    putString(PARTICIPANT_ID, participantId)
-                    putString(STUDY_ID, studyId.toString())
-                })
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || !alarmManager.canScheduleExactAlarms()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    Log.e(
+                        javaClass.name,
+                        "Exact alarm permission not granted... falling back to in exact "
+                    )
+                    firebaseAnalytics.logEvent(
+                        FirebaseAnalyticsEvents.EXACT_ALARM_PERMISSION_DENIED,
+                        Bundle().apply {
+                            putString(PARTICIPANT_ID, participantId)
+                            putString(STUDY_ID, studyId.toString())
+                        })
+                }
 
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
