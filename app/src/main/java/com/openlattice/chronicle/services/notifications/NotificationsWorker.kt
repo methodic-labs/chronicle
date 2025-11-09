@@ -168,8 +168,13 @@ class NotificationsWorker(context: Context, workerParameters: WorkerParameters) 
             val alarmManager: AlarmManager =
                 applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
+            val canScheduleExactAlarms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                alarmManager.canScheduleExactAlarms()
+            } else {
+                false
+            }
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || !alarmManager.canScheduleExactAlarms()) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || !canScheduleExactAlarms) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     Log.e(
                         javaClass.name,

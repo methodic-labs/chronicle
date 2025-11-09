@@ -90,9 +90,11 @@ class MainActivity : AppCompatActivity() {
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         // Check permission for Android 12+
-        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            Log.e(javaClass.name, "Exact alarm permission not granted")
-            requestExactAlarmPermission()
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ) {
+            if(!alarmManager.canScheduleExactAlarms()) {
+                Log.e(javaClass.name, "Exact alarm permission not granted")
+                requestExactAlarmPermission()
+            }
         }
 
         // observer
