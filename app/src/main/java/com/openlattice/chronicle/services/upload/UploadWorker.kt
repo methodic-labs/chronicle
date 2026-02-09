@@ -125,9 +125,9 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         //Only run the upload job if the device is already enrolled or we are able to properly enroll.
         val queue = chronicleDb.queueEntryData()
         var nextEntries = queue.getNextEntries(BATCH_SIZE)
-        var notEmptied = nextEntries.isNotEmpty()
+
         var latestTimestampUploadedOverall: OffsetDateTime? = null
-        while (notEmptied) {
+        while (nextEntries.isNotEmpty()) {
             limiter.acquire()
             val w = Stopwatch.createStarted()
             val data = nextEntries
@@ -168,7 +168,6 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
                 queue.deleteEntries(nextEntries)
                 updateUploadQueueSize(applicationContext, queue.getSize())
                 nextEntries = queue.getNextEntries(BATCH_SIZE)
-                notEmptied = nextEntries.size == BATCH_SIZE
 
                 firebaseAnalytics.logEvent(FirebaseAnalyticsEvents.UPLOAD_SUCCESS, Bundle().apply {
                     putString(PARTICIPANT_ID, participantId)
