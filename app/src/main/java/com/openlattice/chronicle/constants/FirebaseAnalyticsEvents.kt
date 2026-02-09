@@ -4,6 +4,8 @@ class FirebaseAnalyticsEvents {
     companion object {
         const val ENROLLMENT_SUCCESS = "enrollment_success"
         const val ENROLLMENT_FAILURE = "enrollment_fail"
+        const val ENROLLMENT_MONITOR_SUCCESS = "enrollment_monitor_success"
+        const val ENROLLMENT_MONITOR_FAILURE = "enrollment_monitor_failure"
         const val UPLOAD_START = "upload_start"
         const val UPLOAD_SUCCESS = "upload_success"
         const val UPLOAD_FAILURE = "upload_failure"

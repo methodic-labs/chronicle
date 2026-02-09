@@ -7,6 +7,7 @@ import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.util.Log
 import com.openlattice.chronicle.data.ParticipationStatus
 import com.openlattice.chronicle.preferences.EnrollmentSettings
+import com.openlattice.chronicle.services.enrollment.scheduleEnrollmentMonitoringWork
 import com.openlattice.chronicle.services.notifications.DeviceUnlockMonitoringService
 import com.openlattice.chronicle.services.notifications.scheduleNotificationsWorker
 import com.openlattice.chronicle.services.upload.scheduleUploadWork
@@ -19,6 +20,13 @@ class StartOnBoot : BroadcastReceiver() {
         if (context != null && intent != null) {
             if (intent.action.equals(ACTION_BOOT_COMPLETED)) {
                 val settings = EnrollmentSettings(context)
+                if (settings.isEnrolled()) {
+                    // Always refresh enrollment status at boot when IDs exist.
+                    // Other workers can decide whether to collect based on cached participation status.
+                    scheduleEnrollmentMonitoringWork(context)
+                    Log.i(TAG, "started enrollment monitoring worker at boot")
+                }
+
                 if (settings.getParticipationStatus() == ParticipationStatus.ENROLLED) {
 
                     // start workers

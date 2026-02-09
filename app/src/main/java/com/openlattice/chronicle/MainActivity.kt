@@ -25,6 +25,7 @@ import com.openlattice.chronicle.models.UploadStatusModel
 import com.openlattice.chronicle.preferences.EnrollmentSettings
 import com.openlattice.chronicle.services.notifications.DeviceUnlockMonitoringService
 import com.openlattice.chronicle.services.notifications.scheduleNotificationsWorker
+import com.openlattice.chronicle.services.enrollment.scheduleEnrollmentMonitoringWork
 import com.openlattice.chronicle.services.upload.scheduleUploadWork
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
 import com.openlattice.chronicle.utils.Utils.getLastUpload
@@ -126,6 +127,7 @@ class MainActivity : AppCompatActivity() {
             scheduleUploadWork(this)
             scheduleUsageMonitoringWork(this)
             scheduleNotificationsWorker(this)
+            scheduleEnrollmentMonitoringWork(this)
 
         } else {
 
