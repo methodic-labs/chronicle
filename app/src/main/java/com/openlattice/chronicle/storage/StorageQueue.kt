@@ -15,6 +15,9 @@ interface StorageQueue {
     @Query("SELECT * FROM dataQueue ORDER BY writeTimestamp ASC LIMIT :size")
     fun getNextEntries( size : Int ) : List<QueueEntry>
 
+    @Query("SELECT count(*) FROM dataQueue")
+    fun getSize(): Int
+    
     @Insert
     fun insertEntry( entry: QueueEntry)
 

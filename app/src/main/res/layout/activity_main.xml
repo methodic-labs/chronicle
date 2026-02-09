@@ -79,6 +79,48 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lastUploadHeader" />
 
+    <TextView
+        android:id="@+id/latestTimestampUploadedHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/latest_timestamp_uploaded_header"
+        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lastUploadValue" />
+
+    <TextView
+        android:id="@+id/latestTimestampUploadedValue"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/latestTimestampUploadedHeader" />
+
+    <TextView
+        android:id="@+id/itemsRemainingToUploadHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/items_remaining_to_upload_header"
+        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/latestTimestampUploadedValue" />
+
+    <TextView
+        android:id="@+id/itemsRemainingToUploadValue"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemsRemainingToUploadHeader" />
+
     <LinearLayout
         android:id="@+id/uploadProgressView"
         android:layout_width="match_parent"
@@ -87,7 +129,7 @@
         android:padding="8dp"
         android:orientation="horizontal"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/lastUploadValue">
+        app:layout_constraintTop_toBottomOf="@id/itemsRemainingToUploadValue">
 
         <ProgressBar
             android:layout_width="30sp"

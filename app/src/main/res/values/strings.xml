@@ -32,6 +32,8 @@
     <string name="participant_id_header">Participant Id:</string>
     <string name="study_id_header">Study Id:</string>
     <string name="last_upload_header">Last Upload:</string>
+    <string name="latest_timestamp_uploaded_header">Latest Timestamp Uploaded:</string>
+    <string name="items_remaining_to_upload_header">Items remaining to upload:</string>
     <string name="notification_title">Chronicle Survey</string>
     <string name="prompt_org_id">Enter your Organization ID</string>
     <string name="org_id_header">Organization Id:</string>

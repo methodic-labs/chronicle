@@ -25,7 +25,8 @@ import com.openlattice.chronicle.services.sinks.MethodicSink
 import com.openlattice.chronicle.storage.ChronicleDb
 import com.openlattice.chronicle.study.StudyApi
 import com.openlattice.chronicle.utils.Utils.createRetrofitAdapter
-import com.openlattice.chronicle.utils.Utils.setLastUpload
+import com.openlattice.chronicle.utils.Utils.updateUploadInfo
+import com.openlattice.chronicle.utils.Utils.updateUploadQueueSize
 import org.apache.olingo.commons.api.edm.FullQualifiedName
 import java.io.IOException
 import java.time.OffsetDateTime
@@ -36,6 +37,8 @@ const val LAST_UPLOADED_PLACEHOLDER = "Never"
 const val PRODUCTION = "https://api.getmethodic.com"
 const val BATCH_SIZE = 10
 const val LAST_UPDATED_SETTING = "com.openlattice.chronicle.upload.LastUpdated"
+const val LATEST_TIMESTAMP_UPLOADED_SETTING = "com.openlattice.chronicle.upload.LatestTimestampUploaded"
+const val UPLOAD_QUEUE_SIZE_SETTING = "upload_queue_size"
 const val UPLOAD_INTERVAL_MIN = 15L
 
 val TAG = UploadWorker::class.java.simpleName
@@ -123,6 +126,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
         val queue = chronicleDb.queueEntryData()
         var nextEntries = queue.getNextEntries(BATCH_SIZE)
         var notEmptied = nextEntries.isNotEmpty()
+        var latestTimestampUploadedOverall: OffsetDateTime? = null
         while (notEmptied) {
             limiter.acquire()
             val w = Stopwatch.createStarted()
@@ -146,12 +150,23 @@ class UploadWorker(context: Context, params: WorkerParameters) : Worker(context,
             w.reset()
             w.start()
             if (dataSink.submit(data)[MethodicSink::class.java.name] == true) {
-                setLastUpload(applicationContext)
+                val latestTimestampUploadedBatch: OffsetDateTime? =
+                    data.filterIsInstance<ChronicleUsageEvent>()
+                        .map { it.timestamp }
+                        .maxOrNull()
+
+                latestTimestampUploadedOverall = listOfNotNull(
+                    latestTimestampUploadedOverall,
+                    latestTimestampUploadedBatch
+                ).maxOrNull()
+
+                updateUploadInfo(applicationContext, latestTimestampUploadedOverall)
                 Log.i(
                     TAG,
                     "Successfully uploaded ${data.size} items in ${w.elapsed(TimeUnit.MILLISECONDS)} millis "
                 )
                 queue.deleteEntries(nextEntries)
+                updateUploadQueueSize(applicationContext, queue.getSize())
                 nextEntries = queue.getNextEntries(BATCH_SIZE)
                 notEmptied = nextEntries.size == BATCH_SIZE
 

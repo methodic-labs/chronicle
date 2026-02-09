@@ -28,6 +28,8 @@ import com.openlattice.chronicle.services.notifications.scheduleNotificationsWor
 import com.openlattice.chronicle.services.upload.scheduleUploadWork
 import com.openlattice.chronicle.services.usage.scheduleUsageMonitoringWork
 import com.openlattice.chronicle.utils.Utils.getLastUpload
+import com.openlattice.chronicle.utils.Utils.getLatestTimestampUploaded
+import com.openlattice.chronicle.utils.Utils.getUploadQueueSize
 import kotlinx.coroutines.*
 import java.util.*
 import androidx.activity.OnBackPressedCallback
@@ -43,6 +45,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     private lateinit var lastUploadText: TextView
+    private lateinit var latestTimestampUploadedText: TextView
+    private lateinit var itemsRemainingToUploadText: TextView
     private lateinit var studyIdText: TextView
     private lateinit var participantIdText: TextView
     private lateinit var uploadProgressView: LinearLayout
@@ -66,6 +70,8 @@ class MainActivity : AppCompatActivity() {
         })
 
         lastUploadText = findViewById(R.id.lastUploadValue)
+        latestTimestampUploadedText = findViewById(R.id.latestTimestampUploadedValue)
+        itemsRemainingToUploadText = findViewById(R.id.itemsRemainingToUploadValue)
         firebaseAnalytics = Firebase.analytics
         enrollmentSettings = EnrollmentSettings(this)
         studyId = enrollmentSettings.getStudyId()
@@ -157,9 +163,13 @@ class MainActivity : AppCompatActivity() {
             while (true) {
 
                 val lastUpload = getLastUpload(applicationContext)
+                val latestTimestampUploaded = getLatestTimestampUploaded(applicationContext)
+                val itemsRemainingToUpload = getUploadQueueSize(applicationContext)
 
                 launch(Dispatchers.Main) {
                     lastUploadText.text = lastUpload
+                    latestTimestampUploadedText.text = latestTimestampUploaded
+                    itemsRemainingToUploadText.text = itemsRemainingToUpload
                 }
 
                 delay(LAST_UPLOAD_REFRESH_INTERVAL)

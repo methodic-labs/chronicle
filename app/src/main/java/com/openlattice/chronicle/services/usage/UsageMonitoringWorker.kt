@@ -156,6 +156,9 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
             })
         }
 
+        // Update "items remaining" only after successfully persisting collected data.
+        Utils.updateUploadQueueSize(applicationContext, storageQueue.getSize())
+
         // currentPollTimestamp will be the begjnTime of UsageStatsManager.queryEvents() call in the next sensor poll
         // We can therefore delete entries whose timestamp is less than the largest timestamp greater than currentPollTimestamp
         // Therefore we can clear out user entries that have a lower timestamp

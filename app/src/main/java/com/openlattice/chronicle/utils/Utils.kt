@@ -18,6 +18,8 @@ import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 import com.openlattice.chronicle.services.notifications.NotificationDetails
 import com.openlattice.chronicle.services.upload.LAST_UPDATED_SETTING
 import com.openlattice.chronicle.services.upload.LAST_UPLOADED_PLACEHOLDER
+import com.openlattice.chronicle.services.upload.LATEST_TIMESTAMP_UPLOADED_SETTING
+import com.openlattice.chronicle.services.upload.UPLOAD_QUEUE_SIZE_SETTING
 import com.openlattice.chronicle.util.RetrofitBuilders
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -98,10 +100,13 @@ object Utils {
     }
 
 
-    fun setLastUpload(context: Context) {
+    fun updateUploadInfo(context: Context, latestTimestampUploaded: OffsetDateTime?) {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
         with(settings.edit()) {
             putString(LAST_UPDATED_SETTING, DateTime.now().toString())
+            if (latestTimestampUploaded != null) {
+                putString(LATEST_TIMESTAMP_UPLOADED_SETTING, latestTimestampUploaded.toString())
+            }
             apply()
         }
     }
@@ -116,6 +121,31 @@ object Utils {
         }
 
         return lastUpdated
+    }
+
+    fun getLatestTimestampUploaded(context: Context): String {
+        val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        val latestTimestampUploaded =
+            settings.getString(LATEST_TIMESTAMP_UPLOADED_SETTING, LAST_UPLOADED_PLACEHOLDER)
+
+        if (latestTimestampUploaded != LAST_UPLOADED_PLACEHOLDER) {
+            return DateTime.parse(latestTimestampUploaded).toString(DateTimeFormat.mediumDateTime())
+        }
+
+        return latestTimestampUploaded
+    }
+
+    fun updateUploadQueueSize(context: Context, queueSize: Int) {
+        val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        with(settings.edit()) {
+            putString(UPLOAD_QUEUE_SIZE_SETTING, queueSize.toString())
+            apply()
+        }
+    }
+
+    fun getUploadQueueSize(context: Context): String {
+        val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        return settings.getString(UPLOAD_QUEUE_SIZE_SETTING, "0") ?: "0"
     }
 
     fun createRetrofitAdapter(baseUrl: String): Retrofit {
