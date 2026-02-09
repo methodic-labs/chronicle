@@ -21,17 +21,30 @@ import com.openlattice.chronicle.services.upload.LAST_UPLOADED_PLACEHOLDER
 import com.openlattice.chronicle.services.upload.LATEST_TIMESTAMP_UPLOADED_SETTING
 import com.openlattice.chronicle.services.upload.UPLOAD_QUEUE_SIZE_SETTING
 import com.openlattice.chronicle.util.RetrofitBuilders
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import retrofit2.Retrofit
 import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
-import java.util.*
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.UUID
 
 object Utils {
     fun offsetDateTimeFromEpochMillis( epochMillis: Long ) : OffsetDateTime {
         return OffsetDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneOffset.UTC)
+    }
+
+    private fun formatAsMediumDateTime(isoDateTime: String): String {
+        val parsed = runCatching { OffsetDateTime.parse(isoDateTime) }.getOrElse { e ->
+            // Backward/defensive: if parsing fails, return original string
+            FirebaseCrashlytics.getInstance().recordException(e)
+            return isoDateTime
+        }
+
+        // Match Joda's mediumDateTime() intent using device locale + timezone.
+        val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+        return parsed.atZoneSameInstant(ZoneId.systemDefault()).format(formatter)
     }
 
     fun isValidUUID(possibleUUID: String): Boolean {
@@ -103,7 +116,7 @@ object Utils {
     fun updateUploadInfo(context: Context, latestTimestampUploaded: OffsetDateTime?) {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
         with(settings.edit()) {
-            putString(LAST_UPDATED_SETTING, DateTime.now().toString())
+            putString(LAST_UPDATED_SETTING, OffsetDateTime.now(ZoneOffset.UTC).toString())
             if (latestTimestampUploaded != null) {
                 putString(LATEST_TIMESTAMP_UPLOADED_SETTING, latestTimestampUploaded.toString())
             }
@@ -114,10 +127,12 @@ object Utils {
     fun getLastUpload(context: Context): String {
 
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
-        val lastUpdated = settings.getString(LAST_UPDATED_SETTING, LAST_UPLOADED_PLACEHOLDER)
+        val lastUpdated =
+            settings.getString(LAST_UPDATED_SETTING, LAST_UPLOADED_PLACEHOLDER)
+                ?: LAST_UPLOADED_PLACEHOLDER
 
         if (lastUpdated != LAST_UPLOADED_PLACEHOLDER) {
-            return DateTime.parse(lastUpdated).toString(DateTimeFormat.mediumDateTime())
+            return formatAsMediumDateTime(lastUpdated)
         }
 
         return lastUpdated
@@ -127,9 +142,10 @@ object Utils {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
         val latestTimestampUploaded =
             settings.getString(LATEST_TIMESTAMP_UPLOADED_SETTING, LAST_UPLOADED_PLACEHOLDER)
+                ?: LAST_UPLOADED_PLACEHOLDER
 
         if (latestTimestampUploaded != LAST_UPLOADED_PLACEHOLDER) {
-            return DateTime.parse(latestTimestampUploaded).toString(DateTimeFormat.mediumDateTime())
+            return formatAsMediumDateTime(latestTimestampUploaded)
         }
 
         return latestTimestampUploaded

@@ -105,8 +105,9 @@ class UsageMonitoringWorker(context: Context, workerParameters: WorkerParameters
         })
 
         // only stop monitoring if data collection has been explicitly turned off
-        if (settings.getParticipationStatus() == ParticipationStatus.NOT_ENROLLED) {
-            Log.i(TAG, "participant not enrolled. exiting usage monitoring")
+        val participationStatus = settings.getParticipationStatus()
+        if (participationStatus != ParticipationStatus.ENROLLED) {
+            Log.i(TAG, "Participant is not enrolled in active data collection (status = $participationStatus)")
             return
         }
 

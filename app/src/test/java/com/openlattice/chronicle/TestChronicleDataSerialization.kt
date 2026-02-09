@@ -5,7 +5,6 @@ import android.util.Log.INFO
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.guava.GuavaModule
-import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.openlattice.chronicle.models.ExtractedUsageEvent
@@ -24,7 +23,6 @@ class TestChronicleDataSerialization {
         val logger = LoggerFactory.getLogger(TestChronicleDataSerialization::class.java)
         init {
             mapper.registerModule(GuavaModule())
-            mapper.registerModule(JodaModule())
             mapper.registerModule(JavaTimeModule())
             mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         }
