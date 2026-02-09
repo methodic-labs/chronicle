@@ -138,14 +138,14 @@ object Utils {
     fun updateUploadQueueSize(context: Context, queueSize: Int) {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
         with(settings.edit()) {
-            putString(UPLOAD_QUEUE_SIZE_SETTING, queueSize.toString())
+            putInt(UPLOAD_QUEUE_SIZE_SETTING, queueSize)
             apply()
         }
     }
 
-    fun getUploadQueueSize(context: Context): String {
+    fun getUploadQueueSize(context: Context): Int {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
-        return settings.getString(UPLOAD_QUEUE_SIZE_SETTING, "0") ?: "0"
+        return settings.getInt(UPLOAD_QUEUE_SIZE_SETTING, 0)
     }
 
     fun createRetrofitAdapter(baseUrl: String): Retrofit {

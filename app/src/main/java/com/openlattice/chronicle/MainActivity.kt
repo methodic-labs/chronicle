@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                 launch(Dispatchers.Main) {
                     lastUploadText.text = lastUpload
                     latestTimestampUploadedText.text = latestTimestampUploaded
-                    itemsRemainingToUploadText.text = itemsRemainingToUpload
+                    itemsRemainingToUploadText.text = itemsRemainingToUpload.toString()
                 }
 
                 delay(LAST_UPLOAD_REFRESH_INTERVAL)
