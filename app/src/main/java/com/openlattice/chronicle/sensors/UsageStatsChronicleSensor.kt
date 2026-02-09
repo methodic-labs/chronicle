@@ -6,16 +6,13 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.google.common.collect.ImmutableList
 import com.openlattice.chronicle.android.ChronicleData
-import com.openlattice.chronicle.android.ChronicleSample
 import com.openlattice.chronicle.models.ExtractUsageStat
-import com.openlattice.chronicle.storage.UserStorageQueue
 import com.openlattice.chronicle.utils.Utils.getAppFullName
 import com.openlattice.chronicle.utils.Utils.offsetDateTimeFromEpochMillis
-import org.apache.olingo.commons.api.edm.FullQualifiedName
-import org.joda.time.DateMidnight
-import java.util.*
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.NavigableMap
 
 
 class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
@@ -25,11 +22,20 @@ class UsageStatsChronicleSensor(val context: Context) : ChronicleSensor {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     @Synchronized
     override fun poll(currentPollTimestamp:Long, users:NavigableMap<Long,String>): ChronicleData {
-        val usageStats = usageStatsManager.queryUsageStats(INTERVAL_BEST, DateMidnight.now().millis, System.currentTimeMillis())
+        val startOfTodayMillis = LocalDate
+            .now(ZoneId.systemDefault())
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        val usageStats = usageStatsManager.queryUsageStats(
+            INTERVAL_BEST,
+            startOfTodayMillis,
+            System.currentTimeMillis()
+        )
 
         Log.i(javaClass.name, "Collected ${usageStats.size} stats.")
 
-        val timezone = TimeZone.getDefault().id
         //If we start seeing serialization oddities revert to doing DateTime.toString() here
         return ChronicleData(usageStats
                 .map {
