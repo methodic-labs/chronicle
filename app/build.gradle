@@ -32,8 +32,8 @@ android {
         applicationId "com.openlattice.chronicle"
         minSdk = 26
         targetSdk = 36
-        versionCode 44
-        versionName "2026-02-10"
+        versionCode 45
+        versionName "2026-02-11"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -115,7 +115,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'com.squareup.retrofit2:retrofit:3.0.0'
-    implementation('com.methodic:chronicle-api:0.1.6-SNAPSHOT') {
+    implementation('com.methodic:chronicle-api:0.1.7-SNAPSHOT') {
         exclude module: 'guava'
         exclude group: 'org.apache.olingo'
         exclude module: 'slf4j-api'
