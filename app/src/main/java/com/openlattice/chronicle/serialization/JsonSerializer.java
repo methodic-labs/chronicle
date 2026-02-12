@@ -25,6 +25,7 @@ public class JsonSerializer {
     public static final ObjectMapper mapper = RetrofitBuilders.mapper;
     static {
         mapper.registerModule(new KotlinModule.Builder().build() );
+        JacksonPolymorphism.configure(mapper);
     }
 
     public static final byte[] serializeQueueEntry(List<ChronicleSample> queueData) {

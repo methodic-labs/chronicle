@@ -8,6 +8,18 @@
 -dontwarn org.joda.convert.FromString
 -dontwarn org.joda.convert.ToString
 
+# Preserve Jackson polymorphic metadata in release builds.
+-keepattributes Signature,*Annotation*,InnerClasses,EnclosingMethod
+
+# Keep interface type metadata used for polymorphic serialization.
+-keep interface com.openlattice.chronicle.android.ChronicleSample
+-keep interface com.openlattice.chronicle.sources.SourceDevice
+
+# Keep concrete polymorphic types that are serialized/deserialized by the app.
+-keep class com.openlattice.chronicle.android.ChronicleUsageEvent { *; }
+-keep class com.openlattice.chronicle.sources.AndroidDevice { *; }
+-keep class com.openlattice.chronicle.models.ExtractedUsageEvent { *; }
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
