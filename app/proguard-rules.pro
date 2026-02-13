@@ -42,6 +42,14 @@
 -keep class com.fasterxml.jackson.** { *; }
 -dontwarn com.fasterxml.jackson.**
 
+# Jackson TypeReference uses reflection to read its own generic Signature at
+# construction.  R8 merges/inlines anonymous subclasses and strips generic
+# info, causing "TypeReference constructed without actual type information".
+-keep class * extends com.fasterxml.jackson.core.type.TypeReference { *; }
+-keepclassmembers class * extends com.fasterxml.jackson.core.type.TypeReference {
+    <init>(...);
+}
+
 # ── chronicle-api dependency ─────────────────────────────────────────────────
 # Prevent R8 from stripping/renaming classes in the API dependency that are
 # used via reflection or Jackson polymorphism.
