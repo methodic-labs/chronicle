@@ -8,6 +8,55 @@
 -dontwarn org.joda.convert.FromString
 -dontwarn org.joda.convert.ToString
 
+# ── Kotlin runtime & metadata ────────────────────────────────────────────────
+# R8 in AGP 9 aggressively strips Kotlin internals.  Intrinsics contains
+# null-check helpers (checkNotNullParameter, etc.) that the compiler injects
+# at every non-null parameter boundary.  Stripping them causes
+# NoSuchMethodError at the very start of any Kotlin function.
+-keep class kotlin.jvm.internal.Intrinsics { *; }
+-keep class kotlin.Metadata { *; }
+-keep class kotlin.** { *; }
+-dontwarn kotlin.**
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations
+-keepattributes Signature,*Annotation*,InnerClasses,EnclosingMethod
+
+# ── WorkManager Workers ─────────────────────────────────────────────────────
+# WorkManager instantiates workers via reflection.  AGP 9's R8 may reorder
+# field init, inline doWork(), or merge classes — keep the full class graph.
+-keep class * extends androidx.work.Worker { *; }
+-keep class * extends androidx.work.ListenableWorker { *; }
+
+# ── Jackson polymorphic serialization ────────────────────────────────────────
+# Keep interface type metadata used for polymorphic serialization.
+-keep interface com.openlattice.chronicle.android.ChronicleSample
+-keep interface com.openlattice.chronicle.sources.SourceDevice
+
+# Keep concrete polymorphic types that are serialized/deserialized by the app.
+-keep class com.openlattice.chronicle.android.ChronicleUsageEvent { *; }
+-keep class com.openlattice.chronicle.sources.AndroidDevice { *; }
+-keep class com.openlattice.chronicle.models.ExtractedUsageEvent { *; }
+-keep class com.openlattice.chronicle.models.ExtractedActivities { *; }
+-keep class com.openlattice.chronicle.models.ExtractUsageStat { *; }
+
+# Keep Jackson core & module classes from being merged / renamed.
+-keep class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.**
+
+# Jackson TypeReference uses reflection to read its own generic Signature at
+# construction.  R8 merges/inlines anonymous subclasses and strips generic
+# info, causing "TypeReference constructed without actual type information".
+-keep class * extends com.fasterxml.jackson.core.type.TypeReference { *; }
+-keepclassmembers class * extends com.fasterxml.jackson.core.type.TypeReference {
+    <init>(...);
+}
+
+# ── chronicle-api dependency ─────────────────────────────────────────────────
+# Prevent R8 from stripping/renaming classes in the API dependency that are
+# used via reflection or Jackson polymorphism.
+-keep class com.openlattice.chronicle.android.** { *; }
+-keep class com.openlattice.chronicle.sources.** { *; }
+-keep class com.openlattice.chronicle.data.** { *; }
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:

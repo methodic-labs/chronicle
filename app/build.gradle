@@ -32,8 +32,8 @@ android {
         applicationId "com.openlattice.chronicle"
         minSdk = 26
         targetSdk = 36
-        versionCode 43
-        versionName "2026-02-09"
+        versionCode 46
+        versionName "2026-02-12"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -60,6 +60,14 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.chronicle
+        }
+        debugMinified {
+            initWith debug
+            applicationIdSuffix ".debug"
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable true
             signingConfig signingConfigs.chronicle
         }
     }
@@ -115,7 +123,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'com.squareup.retrofit2:retrofit:3.0.0'
-    implementation('com.methodic:chronicle-api:0.1.6-SNAPSHOT') {
+    implementation('com.methodic:chronicle-api:0.1.7-SNAPSHOT') {
         exclude module: 'guava'
         exclude group: 'org.apache.olingo'
         exclude module: 'slf4j-api'
@@ -126,7 +134,7 @@ dependencies {
     }
 
     implementation "com.fasterxml.jackson.core:jackson-core:${jackson_version}"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.20.0"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.21.0"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson_version}"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jackson_version}"
 

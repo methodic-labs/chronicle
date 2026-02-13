@@ -16,6 +16,7 @@ import com.openlattice.chronicle.R
 import com.openlattice.chronicle.constants.NotificationType
 import com.openlattice.chronicle.services.notifications.CHANNEL_ID
 import com.openlattice.chronicle.services.notifications.NotificationDetails
+import com.openlattice.chronicle.serialization.JacksonPolymorphism
 import com.openlattice.chronicle.services.upload.LAST_UPDATED_SETTING
 import com.openlattice.chronicle.services.upload.LAST_UPLOADED_PLACEHOLDER
 import com.openlattice.chronicle.services.upload.LATEST_TIMESTAMP_UPLOADED_SETTING
@@ -166,6 +167,7 @@ object Utils {
 
     fun createRetrofitAdapter(baseUrl: String): Retrofit {
         RetrofitBuilders.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        JacksonPolymorphism.configure(RetrofitBuilders.mapper)
         val httpClient = RetrofitBuilders.okHttpClient().build()
         return RetrofitBuilders.decorateWithRhizomeFactories(
             RetrofitBuilders.createBaseChronicleRetrofitBuilder(
