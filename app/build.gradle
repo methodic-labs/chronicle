@@ -32,8 +32,8 @@ android {
         applicationId "com.openlattice.chronicle"
         minSdk = 26
         targetSdk = 36
-        versionCode 45
-        versionName "2026-02-11"
+        versionCode 46
+        versionName "2026-02-12"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -60,6 +60,14 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.chronicle
+        }
+        debugMinified {
+            initWith debug
+            applicationIdSuffix ".debugMinified"
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable true
             signingConfig signingConfigs.chronicle
         }
     }

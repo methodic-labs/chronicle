@@ -8,9 +8,20 @@
 -dontwarn org.joda.convert.FromString
 -dontwarn org.joda.convert.ToString
 
-# Preserve Jackson polymorphic metadata in release builds.
+# ── Kotlin metadata ─────────────────────────────────────────────────────────
+# R8 in AGP 9 aggressively strips Kotlin metadata; keep it so that lateinit,
+# data-class copy/componentN, and reflection-based features work correctly.
+-keep class kotlin.Metadata { *; }
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations
 -keepattributes Signature,*Annotation*,InnerClasses,EnclosingMethod
 
+# ── WorkManager Workers ─────────────────────────────────────────────────────
+# WorkManager instantiates workers via reflection.  AGP 9's R8 may reorder
+# field init, inline doWork(), or merge classes — keep the full class graph.
+-keep class * extends androidx.work.Worker { *; }
+-keep class * extends androidx.work.ListenableWorker { *; }
+
+# ── Jackson polymorphic serialization ────────────────────────────────────────
 # Keep interface type metadata used for polymorphic serialization.
 -keep interface com.openlattice.chronicle.android.ChronicleSample
 -keep interface com.openlattice.chronicle.sources.SourceDevice
@@ -19,6 +30,19 @@
 -keep class com.openlattice.chronicle.android.ChronicleUsageEvent { *; }
 -keep class com.openlattice.chronicle.sources.AndroidDevice { *; }
 -keep class com.openlattice.chronicle.models.ExtractedUsageEvent { *; }
+-keep class com.openlattice.chronicle.models.ExtractedActivities { *; }
+-keep class com.openlattice.chronicle.models.ExtractUsageStat { *; }
+
+# Keep Jackson core & module classes from being merged / renamed.
+-keep class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.**
+
+# ── chronicle-api dependency ─────────────────────────────────────────────────
+# Prevent R8 from stripping/renaming classes in the API dependency that are
+# used via reflection or Jackson polymorphism.
+-keep class com.openlattice.chronicle.android.** { *; }
+-keep class com.openlattice.chronicle.sources.** { *; }
+-keep class com.openlattice.chronicle.data.** { *; }
 
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
