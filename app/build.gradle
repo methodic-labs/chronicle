@@ -70,6 +70,10 @@ android {
             debuggable true
             signingConfig signingConfigs.chronicle
         }
+        releaseMinified {
+            initWith release
+            signingConfig signingConfigs.chronicle
+        }
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
