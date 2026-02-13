@@ -8,10 +8,15 @@
 -dontwarn org.joda.convert.FromString
 -dontwarn org.joda.convert.ToString
 
-# ── Kotlin metadata ─────────────────────────────────────────────────────────
-# R8 in AGP 9 aggressively strips Kotlin metadata; keep it so that lateinit,
-# data-class copy/componentN, and reflection-based features work correctly.
+# ── Kotlin runtime & metadata ────────────────────────────────────────────────
+# R8 in AGP 9 aggressively strips Kotlin internals.  Intrinsics contains
+# null-check helpers (checkNotNullParameter, etc.) that the compiler injects
+# at every non-null parameter boundary.  Stripping them causes
+# NoSuchMethodError at the very start of any Kotlin function.
+-keep class kotlin.jvm.internal.Intrinsics { *; }
 -keep class kotlin.Metadata { *; }
+-keep class kotlin.** { *; }
+-dontwarn kotlin.**
 -keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations
 -keepattributes Signature,*Annotation*,InnerClasses,EnclosingMethod
 
