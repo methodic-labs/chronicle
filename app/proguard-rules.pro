@@ -50,6 +50,14 @@
     <init>(...);
 }
 
+# ── Apache Olingo ────────────────────────────────────────────────────────────
+# FullQualifiedName is serialized via Jackson/Retrofit as both a map key and
+# request body.  R8 release optimizations rename its fields, causing the
+# backend to receive nulls.  (Not caught by debugMinified because debuggable
+# disables the aggressive optimization passes.)
+-keep class org.apache.olingo.** { *; }
+-dontwarn org.apache.olingo.**
+
 # ── chronicle-api dependency ─────────────────────────────────────────────────
 # Prevent R8 from stripping/renaming classes in the API dependency that are
 # used via reflection or Jackson polymorphism.
